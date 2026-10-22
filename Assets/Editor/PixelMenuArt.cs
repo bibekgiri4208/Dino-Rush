@@ -76,8 +76,8 @@ namespace DinoRush.Editor
         {
             if (!AssetDatabase.IsValidFolder(Directory)) AssetDatabase.CreateFolder("Assets/UI", "ForestMenu");
             Save("DinoRushLogo", Logo());
-            Save("ButtonPlay", Frame(180, 38, true));
-            Save("ButtonForest", Frame(180, 34, false));
+            Save("ButtonPlay", ButtonFrame(true));
+            Save("ButtonForest", ButtonFrame(false));
             Save("SoundFrame", Frame(38, 38, false, false));
             Save("DialogFrame", Frame(260, 188, false));
             Save("ForestFrame", ForestFrame());
@@ -87,10 +87,18 @@ namespace DinoRush.Editor
 
         internal static Sprite Load(string name) => AssetDatabase.LoadAssetAtPath<Sprite>($"{Directory}/{name}.png");
 
-        private static void Save(string name, Pixels pixels)
+        internal static void RebuildButtonFrames()
+        {
+            // This explicit repair replaces only the two requested button textures.
+            // Normal menu generation continues to preserve existing artwork.
+            Save("ButtonPlay", ButtonFrame(true), true);
+            Save("ButtonForest", ButtonFrame(false), true);
+        }
+
+        private static void Save(string name, Pixels pixels, bool replace = false)
         {
             string path = $"{Directory}/{name}.png";
-            if (File.Exists(path)) return; // Never replace hand-edited menu art.
+            if (File.Exists(path) && !replace) return; // Never replace hand-edited menu art during normal generation.
             var image = new Texture2D(pixels.width, pixels.height, TextureFormat.RGBA32, false);
             image.SetPixels32(pixels.data);
             image.Apply();
@@ -105,7 +113,44 @@ namespace DinoRush.Editor
             importer.mipmapEnabled = false;
             importer.textureCompression = TextureImporterCompression.Uncompressed;
             importer.alphaIsTransparency = true;
+            if (name == "ButtonPlay" || name == "ButtonForest")
+                importer.spriteBorder = new Vector4(24, 10, 24, 10);
             importer.SaveAndReimport();
+        }
+
+        private static Pixels ButtonFrame(bool primary)
+        {
+            const int w = 180, h = 34;
+            var art = new Pixels(w, h);
+            // Concentric, equally inset rectangles with identical pixel-cut corners.
+            art.Rect(2, 0, w - 4, h, Ink);
+            art.Rect(0, 2, w, h - 4, Ink);
+            art.Rect(1, 1, w - 2, h - 2, Ink);
+            art.Rect(3, 2, w - 6, h - 4, Hex(0x82a66a));
+            art.Rect(2, 3, w - 4, h - 6, Hex(0x82a66a));
+            art.Rect(4, 3, w - 8, h - 6, Hex(0x3c6044));
+            art.Rect(3, 4, w - 6, h - 8, Hex(0x3c6044));
+            for (int y = 5; y < h - 5; y++)
+            for (int x = 5; x < w - 5; x++)
+            {
+                float t = (y - 5f) / (h - 11);
+                Color color = primary ? Color.Lerp(Hex(0x567f36), Hex(0x315c2e), t)
+                    : Color.Lerp(Hex(0x1c3d35), Hex(0x102d2d), t);
+                if (Noise(Mathf.Min(x, w - 1 - x), y) % 200 < 7) color *= 0.9f;
+                color.a = 1f;
+                art.Set(x, y, color);
+            }
+            art.Rect(6, 4, w - 12, 1, primary ? Hex(0xd1df8e) : Hex(0x688d56));
+            art.Rect(6, h - 5, w - 12, 1, Hex(0x416c4d));
+            for (int i = 0; i < 16; i++)
+                art.Rect(5 + Noise(i, 4) % 17, 2 + Noise(i, 9) % 7, 2, 2, Greens[2 + Noise(i, 10) % 3]);
+            art.Rect(6, 8, 2, 4, Greens[2]);
+            Rock(art, 10, h - 5, 5);
+            // Mirror the corner decorations too; neither edge has a heavier silhouette.
+            for (int y = 0; y < h; y++)
+            for (int x = 0; x < 24; x++)
+                art.Set(w - 1 - x, y, art.data[(h - 1 - y) * w + x]);
+            return art;
         }
 
         private static Pixels Frame(int w, int h, bool primary, bool moss = true)

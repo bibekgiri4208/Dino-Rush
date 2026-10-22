@@ -59,6 +59,23 @@ namespace DinoRush.Tests
                     Assert.That(EditorUtility.IsPersistent(reference), Is.False, "UI binding must point into the scene, not a prefab asset.");
                 }
                 Assert.That(((GameObject)hud.FindPropertyRelative("pausePanel").objectReferenceValue).activeSelf, Is.False);
+                SerializedProperty dirtArt = serialized.FindProperty("dirtSprites");
+                Assert.That(dirtArt.arraySize, Is.EqualTo(3));
+                for (int i = 0; i < dirtArt.arraySize; i++)
+                {
+                    var sprite = dirtArt.GetArrayElementAtIndex(i).objectReferenceValue as Sprite;
+                    Assert.That(sprite, Is.Not.Null);
+                    Assert.That(EditorUtility.IsPersistent(sprite), Is.True);
+                    Assert.That(sprite.texture.filterMode, Is.EqualTo(FilterMode.Point));
+                }
+                SerializedProperty dirtPool = serialized.FindProperty("dust");
+                Assert.That(dirtPool.arraySize, Is.EqualTo(36));
+                for (int i = 0; i < dirtPool.arraySize; i++)
+                {
+                    var renderer = (SpriteRenderer)dirtPool.GetArrayElementAtIndex(i).FindPropertyRelative("renderer").objectReferenceValue;
+                    Assert.That(renderer.gameObject.activeSelf, Is.False, "Dirt must not run over the title-screen preview.");
+                    Assert.That(renderer.sprite.name, Does.StartWith("Dirt "));
+                }
                 Font menuFont = AssetDatabase.LoadAssetAtPath<Font>("Assets/UI/Fonts/PressStart2P-Regular.ttf");
                 Assert.That(menuFont.fontNames, Does.Contain("Press Start 2P"));
             }

@@ -48,7 +48,14 @@ namespace DinoRush
             public Vector2 velocity;
             public float life;
             public float duration;
+            public Color startColor;
+            public float size;
+            public float spin;
+            public float gravity;
+            public bool puff;
         }
+
+        private enum DirtEmission { Running, Takeoff, Landing, Crash }
 
         private readonly List<Sprite> generatedSprites = new List<Sprite>();
         private readonly List<Texture2D> generatedTextures = new List<Texture2D>();
@@ -63,6 +70,11 @@ namespace DinoRush
         [SerializeField] private List<SpriteRenderer> motes = new List<SpriteRenderer>();
         [SerializeField] private List<Sprite> obstacleSprites = new List<Sprite>();
         [SerializeField] private RunnerHud hud;
+        [Header("Pixel dirt effects")]
+        [SerializeField] private Sprite[] dirtSprites;
+        [SerializeField, Range(0.04f, 0.25f)] private float runningDirtInterval = 0.10f;
+        [SerializeField, Range(1, 6)] private int runningDirtCount = 3;
+        [SerializeField, Range(8, 24)] private int landingDirtCount = 18;
         private RunnerPlayer player;
         private RunnerAudio audioCues;
         private Sprite pixel;
@@ -86,6 +98,12 @@ namespace DinoRush
         private int screenWidth;
         private int screenHeight;
         private bool initialized;
+        private int nextDirtParticle;
+        private static readonly Color[] DirtColors =
+        {
+            new Color32(100, 76, 48, 255), new Color32(137, 105, 64, 255),
+            new Color32(173, 142, 91, 255), new Color32(192, 163, 111, 255)
+        };
 
         public RunState State { get; private set; }
         public int Score => Mathf.FloorToInt(distance);
@@ -125,6 +143,11 @@ namespace DinoRush
             {
                 obstacle.active = false;
                 obstacle.renderer.gameObject.SetActive(false);
+            }
+            foreach (Dust particle in dust)
+            {
+                particle.life = 0f;
+                particle.renderer.gameObject.SetActive(false);
             }
             audioCues = new RunnerAudio(gameObject);
             hud.Initialize(PrimaryAction, TogglePause, Jump, ToggleMute, RestartRun, ReturnToMenu);
@@ -297,9 +320,16 @@ namespace DinoRush
                 obstacles.Add(new Obstacle { renderer = obstacle });
             }
 
+            var dirtAssets = new List<Object>();
+            dirtSprites = RunnerDirtArt.CreateSprites(dirtAssets);
+            foreach (Object asset in dirtAssets)
+            {
+                if (asset is Sprite sprite) generatedSprites.Add(sprite);
+                else if (asset is Texture2D texture) generatedTextures.Add(texture);
+            }
             for (int i = 0; i < 36; i++)
             {
-                SpriteRenderer particle = Renderer("Trail dust " + i, pixel, 25, dustGroup);
+                SpriteRenderer particle = Renderer("Trail dust " + i, dirtSprites[i % dirtSprites.Length], 25, dustGroup);
                 particle.gameObject.SetActive(false);
                 dust.Add(new Dust { renderer = particle });
             }
@@ -400,9 +430,13 @@ namespace DinoRush
             if (jumped)
             {
                 audioCues.Jump();
-                Burst(player.Feet, 5);
+                EmitDirt(player.Feet, 5, DirtEmission.Takeoff);
             }
-            if (landed) Burst(player.Feet, 8);
+            if (landed)
+            {
+                EmitDirt(player.Feet, landingDirtCount, DirtEmission.Landing);
+                dustTimer = runningDirtInterval * 1.5f;
+            }
             Scroll(travel);
 
             spawnTimer -= dt;
@@ -439,8 +473,8 @@ namespace DinoRush
             dustTimer -= dt;
             if (player.Grounded && dustTimer <= 0f)
             {
-                Burst(player.Feet, 1);
-                dustTimer = 0.09f;
+                EmitDirt(player.Feet, runningDirtCount, DirtEmission.Running);
+                dustTimer = runningDirtInterval / Mathf.Sqrt(speed / RunnerRules.Speed(0));
             }
 
             int nextMilestone = Score / 100;
@@ -492,18 +526,46 @@ namespace DinoRush
             }
         }
 
-        private void Burst(Vector3 position, int count)
+        private void EmitDirt(Vector3 position, int count, DirtEmission emission)
         {
-            foreach (Dust particle in dust)
+            if (dust.Count == 0) return;
+            bool impact = emission == DirtEmission.Landing || emission == DirtEmission.Crash;
+            float drift = RunnerRules.Speed(elapsed) * (impact ? 0.22f : 0.4f);
+            for (int i = 0; i < count; i++)
             {
-                if (particle.life > 0f) continue;
-                particle.duration = particle.life = Random.Range(0.22f, 0.48f);
-                particle.velocity = new Vector2(Random.Range(-2.5f, -0.6f), Random.Range(0.4f, 1.5f));
-                particle.renderer.transform.position = position + new Vector3(-0.3f, 0.03f, 0);
-                particle.renderer.transform.localScale = Vector3.one * Random.Range(0.045f, 0.09f);
-                particle.renderer.color = new Color32(191, 202, 133, 180);
+                Dust particle = null;
+                for (int j = 0; j < dust.Count; j++)
+                {
+                    int index = (nextDirtParticle + j) % dust.Count;
+                    if (dust[index].life > 0f) continue;
+                    particle = dust[index];
+                    nextDirtParticle = (index + 1) % dust.Count;
+                    break;
+                }
+                // Landing gets priority over older trail particles if the pool is busy.
+                if (particle == null)
+                {
+                    if (!impact) break;
+                    particle = dust[nextDirtParticle];
+                    nextDirtParticle = (nextDirtParticle + 1) % dust.Count;
+                }
+                particle.puff = i % 3 == 0;
+                particle.duration = particle.life = impact ? Random.Range(0.42f, 0.65f) : Random.Range(0.30f, 0.48f);
+                particle.velocity = new Vector2((impact ? Random.Range(-3.8f, 3.8f) : Random.Range(-1.8f, -0.6f)) - drift,
+                    particle.puff ? Random.Range(0.5f, 1.1f) : Random.Range(impact ? 1.3f : 0.7f, impact ? 3.2f : 1.8f));
+                particle.gravity = particle.puff ? 2.2f : 10f;
+                particle.spin = particle.puff ? 0f : Random.Range(-180f, 180f);
+                particle.size = particle.puff ? Random.Range(impact ? 0.32f : 0.22f, impact ? 0.46f : 0.34f)
+                    : Random.Range(impact ? 0.12f : 0.085f, impact ? 0.20f : 0.15f);
+                particle.startColor = DirtColors[Random.Range(particle.puff ? 2 : 0, DirtColors.Length)];
+                particle.startColor.a = particle.puff ? 0.65f : 1f;
+                if (dirtSprites != null && dirtSprites.Length >= 3)
+                    particle.renderer.sprite = dirtSprites[particle.puff ? 1 : (i % 2 == 0 ? 0 : 2)];
+                particle.renderer.transform.position = position + new Vector3(impact ? Random.Range(-0.38f, 0.38f) : Random.Range(-0.48f, -0.16f), 0.05f, 0);
+                particle.renderer.transform.rotation = Quaternion.Euler(0, 0, particle.puff ? 0 : Random.Range(0, 4) * 90);
+                particle.renderer.transform.localScale = Vector3.one * particle.size;
+                particle.renderer.color = particle.startColor;
                 particle.renderer.gameObject.SetActive(true);
-                if (--count <= 0) break;
             }
         }
 
@@ -513,12 +575,29 @@ namespace DinoRush
             {
                 if (particle.life <= 0f) continue;
                 particle.life -= dt;
-                particle.velocity += Vector2.down * (dt * 3f);
+                if (particle.life <= 0f)
+                {
+                    particle.life = 0f;
+                    particle.renderer.gameObject.SetActive(false);
+                    continue;
+                }
+                particle.velocity += Vector2.down * (dt * particle.gravity);
                 particle.renderer.transform.position += (Vector3)particle.velocity * dt;
-                Color color = particle.renderer.color;
-                color.a = Mathf.Max(0f, particle.life / particle.duration) * 0.7f;
+                Vector3 position = particle.renderer.transform.position;
+                if (position.y < RunnerRules.GroundY + 0.025f)
+                {
+                    position.y = RunnerRules.GroundY + 0.025f;
+                    particle.renderer.transform.position = position;
+                    particle.velocity = new Vector2(particle.velocity.x * 0.8f, 0);
+                }
+                float remaining = Mathf.Clamp01(particle.life / particle.duration);
+                float age = 1f - remaining;
+                Color color = particle.startColor;
+                color.a *= Mathf.SmoothStep(0f, 1f, remaining);
                 particle.renderer.color = color;
-                if (particle.life <= 0f) particle.renderer.gameObject.SetActive(false);
+                particle.renderer.transform.localScale = Vector3.one * particle.size *
+                    (particle.puff ? Mathf.Lerp(0.8f, 1.6f, age) : Mathf.Lerp(1f, 0.45f, age * age));
+                particle.renderer.transform.Rotate(0, 0, particle.spin * dt);
             }
             for (int i = 0; i < motes.Count; i++)
             {
@@ -601,6 +680,7 @@ namespace DinoRush
             bestAtRunStart = best;
             spawnTimer = 0.7f;
             lastHudScore = -1;
+            nextDirtParticle = 0;
             foreach (Obstacle obstacle in obstacles)
             {
                 obstacle.active = false;
@@ -667,7 +747,7 @@ namespace DinoRush
             timeSinceCrash = 0f;
             shake = 0.14f;
             audioCues.Crash();
-            Burst(player.Feet, 18);
+            EmitDirt(player.Feet, 18, DirtEmission.Crash);
             SaveBest();
             hud.UpdateScore(Score, best, cleared, RunnerRules.Speed(elapsed));
             hud.ShowGameOver(Score, best, record);

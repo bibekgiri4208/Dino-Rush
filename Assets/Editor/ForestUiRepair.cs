@@ -8,6 +8,21 @@ namespace DinoRush.Editor
     /// <summary>Repairs the existing hierarchy in place; no scene objects or artwork are replaced.</summary>
     public static class ForestUiRepair
     {
+        [MenuItem("Dino Rush/Fix Main Menu Buttons")]
+        public static void RepairButtonsScene()
+        {
+            if (Application.isPlaying) return;
+            if (!Application.isBatchMode && !EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
+            var scene = EditorSceneManager.OpenScene("Assets/Scenes/ForestRun.unity");
+            ForestMainMenu menu = Object.FindAnyObjectByType<ForestMainMenu>();
+            if (menu == null) throw new System.InvalidOperationException("Forest main menu is missing.");
+            PixelMenuArt.RebuildButtonFrames();
+            RepairMainMenuButtons(menu.transform);
+            AssetDatabase.SaveAssets();
+            EditorSceneManager.MarkSceneDirty(scene);
+            EditorSceneManager.SaveScene(scene);
+        }
+
         [MenuItem("Dino Rush/Repair UI Layout")]
         public static void RepairScene()
         {
@@ -31,8 +46,8 @@ namespace DinoRush.Editor
             Canvas canvas = game.GetComponentInChildren<Canvas>(true);
             canvas.pixelPerfect = true;
             EditorUtility.SetDirty(canvas);
-            SetBorder("ButtonPlay", new Vector4(24, 10, 24, 12));
-            SetBorder("ButtonForest", new Vector4(24, 10, 24, 12));
+            SetBorder("ButtonPlay", new Vector4(24, 10, 24, 10));
+            SetBorder("ButtonForest", new Vector4(24, 10, 24, 10));
             SetBorder("SoundFrame", new Vector4(6, 6, 6, 6));
             SetBorder("DialogFrame", new Vector4(14, 14, 14, 14));
 
@@ -42,10 +57,7 @@ namespace DinoRush.Editor
             Rect(root.Find("Dino Rush Logo/Forest subtitle plaque"), 0, 49, 388, 34);
             TextLayout(root.Find("Dino Rush Logo/Forest subtitle plaque/Forest subtitle"), 0, 0, 376, 30, 12);
 
-            RepairButton(root.Find("Main menu buttons/Play"), 0, -12, 360, 76, 32);
-            RepairButton(root.Find("Main menu buttons/Customize"), 0, -90, 360, 68, 24);
-            RepairButton(root.Find("Main menu buttons/Options"), 0, -164, 360, 68, 24);
-            RepairButton(root.Find("Main menu buttons/Quit"), 0, -238, 360, 68, 24);
+            RepairMainMenuButtons(root);
 
             Transform sound = root.Find("SFX toggle");
             Rect(sound, 568, 296, 88, 88);
@@ -104,6 +116,81 @@ namespace DinoRush.Editor
                 EditorUtility.SetDirty(text);
             }
             Canvas.ForceUpdateCanvases();
+        }
+
+        private static void RepairMainMenuButtons(Transform root)
+        {
+            string[] names = { "Play", "Customize", "Options", "Quit" };
+            for (int i = 0; i < names.Length; i++)
+            {
+                Transform button = root.Find("Main menu buttons/" + names[i]);
+                RepairButton(button, 0, -12 - i * 78, 360, 68, 24);
+                Transform label = button.Find("Label");
+                TextLayout(label, 32, 0, 240, 52, 24);
+                Text text = label.GetComponent<Text>();
+                text.resizeTextForBestFit = false;
+                text.supportRichText = false;
+                text.horizontalOverflow = HorizontalWrapMode.Wrap;
+                text.verticalOverflow = VerticalWrapMode.Truncate;
+                ButtonLetterSpacing tracking = label.GetComponent<ButtonLetterSpacing>();
+                if (tracking == null) tracking = label.gameObject.AddComponent<ButtonLetterSpacing>();
+                // Center the visible icon and word together, not in independent columns.
+                // Texture padding and the font's trailing advance are not visible gaps.
+                text.rectTransform.sizeDelta = new Vector2(Mathf.Ceil(tracking.PreferredWidth) + 2, 52);
+                Vector2 caption = CaptionBounds(text, tracking.Spacing);
+                Transform icon = button.Find("Icon");
+                Vector2 artwork = IconBounds(icon.GetComponent<Image>());
+                const float gap = 12;
+                float left = -(artwork.y - artwork.x + gap + caption.y - caption.x) * 0.5f;
+                ((RectTransform)icon).anchoredPosition = new Vector2(left - artwork.x, 0);
+                text.rectTransform.anchoredPosition = new Vector2(left + artwork.y - artwork.x + gap - caption.x, 0);
+                EditorUtility.SetDirty(icon);
+                EditorUtility.SetDirty(text.rectTransform);
+                EditorUtility.SetDirty(text);
+            }
+            Canvas.ForceUpdateCanvases();
+        }
+
+        private static Vector2 CaptionBounds(Text text, float spacing)
+        {
+            using (var generator = new TextGenerator())
+            {
+                TextGenerationSettings settings = text.GetGenerationSettings(text.rectTransform.rect.size);
+                settings.scaleFactor = 1;
+                generator.Populate(text.text, settings);
+                var bounds = new Vector2(float.PositiveInfinity, float.NegativeInfinity);
+                var vertices = generator.verts;
+                int count = vertices.Count / 4;
+                for (int i = 0; i < vertices.Count; i++)
+                {
+                    float x = vertices[i].position.x + (i / 4 - (count - 1) * 0.5f) * spacing;
+                    bounds.x = Mathf.Min(bounds.x, x);
+                    bounds.y = Mathf.Max(bounds.y, x);
+                }
+                return bounds;
+            }
+        }
+
+        private static Vector2 IconBounds(Image icon)
+        {
+            var texture = new Texture2D(2, 2);
+            try
+            {
+                texture.LoadImage(System.IO.File.ReadAllBytes(AssetDatabase.GetAssetPath(icon.sprite.texture)));
+                Rect sprite = icon.sprite.rect;
+                int min = (int)sprite.xMax, max = (int)sprite.xMin;
+                for (int y = (int)sprite.yMin; y < sprite.yMax; y++)
+                for (int x = (int)sprite.xMin; x < sprite.xMax; x++)
+                    if (texture.GetPixel(x, y).a > 0)
+                    {
+                        min = Mathf.Min(min, x);
+                        max = Mathf.Max(max, x + 1);
+                    }
+                float width = icon.rectTransform.rect.width;
+                return new Vector2((min - sprite.xMin) / sprite.width * width - width * 0.5f,
+                    (max - sprite.xMin) / sprite.width * width - width * 0.5f);
+            }
+            finally { Object.DestroyImmediate(texture); }
         }
 
         private static void RepairButton(Transform button, float x, float y, float width, float height, int fontSize)

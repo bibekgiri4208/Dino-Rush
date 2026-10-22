@@ -84,6 +84,71 @@ namespace DinoRush.Tests
         }
 
         [UnityTest]
+        public IEnumerator DirtTrailsWhileRunningAndBurstsOnlyOnGroundContact()
+        {
+            Transform pool = game.transform.Find("Forest effects/Trail dust pool");
+            SpriteRenderer[] particles = pool.GetComponentsInChildren<SpriteRenderer>(true);
+            Assert.That(particles.Length, Is.EqualTo(36));
+            Assert.That(CountLiveDirt(particles), Is.Zero);
+            Click("Play");
+            float deadline = Time.realtimeSinceStartup + 5f;
+            while (game.Score < 2 && Time.realtimeSinceStartup < deadline) yield return null;
+            Assert.That(CountLiveDirt(particles), Is.GreaterThanOrEqualTo(3), "Running must kick up a visible dirt trail.");
+            foreach (SpriteRenderer particle in particles)
+            {
+                if (!particle.gameObject.activeSelf) continue;
+                Assert.That(particle.sprite.name, Does.StartWith("Dirt "));
+                Assert.That(particle.color.r, Is.GreaterThan(particle.color.g));
+                Assert.That(particle.color.g, Is.GreaterThan(particle.color.b));
+                Assert.That(particle.transform.position.x, Is.LessThan(RunnerRules.PlayerX), "Running dirt must trail behind the feet.");
+            }
+            yield return Capture("forest-dirt-running");
+            game.Jump();
+            Transform dino = GameObject.Find("Blue dino player").transform;
+            deadline = Time.realtimeSinceStartup + 5f;
+            while (dino.position.y < RunnerRules.GroundY + 1.5f && Time.realtimeSinceStartup < deadline) yield return null;
+            Assert.That(dino.position.y, Is.GreaterThanOrEqualTo(RunnerRules.GroundY + 1.5f));
+            while (dino.position.y > RunnerRules.GroundY + 1.4f && Time.realtimeSinceStartup < deadline) yield return null;
+            Assert.That(dino.position.y, Is.GreaterThan(RunnerRules.GroundY + 0.02f));
+            Assert.That(CountLiveDirt(particles), Is.Zero, "Old dirt must fade away without emitting new dirt in midair.");
+            while (dino.position.y > RunnerRules.GroundY + 0.0001f && Time.realtimeSinceStartup < deadline) yield return null;
+            Assert.That(game.State, Is.EqualTo(ForestRunnerGame.RunState.Running));
+            Assert.That(CountLiveDirt(particles), Is.GreaterThanOrEqualTo(14), "Landing must create a stronger burst than a footstep.");
+            yield return new WaitForSeconds(0.08f);
+            yield return Capture("forest-dirt-landing");
+            game.TogglePause();
+            var positions = new Vector3[particles.Length];
+            var colors = new Color[particles.Length];
+            var sizes = new Vector3[particles.Length];
+            for (int i = 0; i < particles.Length; i++)
+            {
+                positions[i] = particles[i].transform.position;
+                colors[i] = particles[i].color;
+                sizes[i] = particles[i].transform.localScale;
+            }
+            yield return new WaitForSeconds(0.2f);
+            for (int i = 0; i < particles.Length; i++)
+            {
+                Assert.That(particles[i].transform.position, Is.EqualTo(positions[i]));
+                Assert.That(particles[i].color, Is.EqualTo(colors[i]));
+                Assert.That(particles[i].transform.localScale, Is.EqualTo(sizes[i]));
+            }
+            game.RestartRun();
+            Assert.That(CountLiveDirt(particles), Is.Zero);
+            Assert.That(pool.GetComponentsInChildren<SpriteRenderer>(true).Length, Is.EqualTo(36), "Bursts must reuse the pool.");
+            game.ReturnToMenu();
+            yield return new WaitForSeconds(0.2f);
+            Assert.That(CountLiveDirt(particles), Is.Zero, "The title screen must not emit running dirt.");
+        }
+
+        private static int CountLiveDirt(SpriteRenderer[] particles)
+        {
+            int count = 0;
+            foreach (SpriteRenderer particle in particles) if (particle.gameObject.activeInHierarchy) count++;
+            return count;
+        }
+
+        [UnityTest]
         public IEnumerator MainMenuButtonsOpenTheirPanelsAndSoundPersists()
         {
             ForestMainMenu menu = game.GetComponentInChildren<ForestMainMenu>();
