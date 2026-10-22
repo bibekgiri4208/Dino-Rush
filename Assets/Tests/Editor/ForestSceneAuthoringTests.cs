@@ -52,13 +52,16 @@ namespace DinoRush.Tests
                 Assert.That(((GameObject)menuData.FindProperty("quitPage").objectReferenceValue).activeSelf, Is.False);
                 Assert.That(game.GetComponentInChildren<Canvas>(true).pixelPerfect, Is.True);
                 SerializedProperty hud = serialized.FindProperty("hud");
-                foreach (string field in new[] { "pausePanel", "resumeControl", "restartControl", "quitRunControl", "resultsMenuControl", "pausedScore", "soundIcon", "statsFrame" })
+                foreach (string field in new[] { "pausePanel", "resumeControl", "restartControl", "quitRunControl", "resultsMenuControl", "pausedScore", "soundIcon", "statsFrame", "duckButton" })
                 {
                     Object reference = hud.FindPropertyRelative(field).objectReferenceValue;
                     Assert.That(reference, Is.Not.Null, "Missing saved gameplay UI binding: " + field);
                     Assert.That(EditorUtility.IsPersistent(reference), Is.False, "UI binding must point into the scene, not a prefab asset.");
                 }
                 Assert.That(((GameObject)hud.FindPropertyRelative("pausePanel").objectReferenceValue).activeSelf, Is.False);
+                var duck = (GameObject)hud.FindPropertyRelative("duckButton").objectReferenceValue;
+                Assert.That(duck.activeSelf, Is.False, "The title preview must hide gameplay controls.");
+                Assert.That(duck.GetComponent<RunnerDuckControl>(), Is.Not.Null);
                 SerializedProperty dirtArt = serialized.FindProperty("dirtSprites");
                 Assert.That(dirtArt.arraySize, Is.EqualTo(3));
                 for (int i = 0; i < dirtArt.arraySize; i++)

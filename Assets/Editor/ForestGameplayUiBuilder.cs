@@ -13,6 +13,45 @@ namespace DinoRush.Editor
         private static readonly Color Sage = PixelMenuArt.Hex(0xaecb98);
         private static Font font;
 
+        [MenuItem("Dino Rush/Add Duck Controls")]
+        public static void AddDuckControls()
+        {
+            if (Application.isPlaying) return;
+            if (!Application.isBatchMode && !EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
+            var scene = EditorSceneManager.OpenScene("Assets/Scenes/ForestRun.unity");
+            ForestRunnerGame game = Object.FindAnyObjectByType<ForestRunnerGame>();
+            if (game == null || !game.HasAuthoredScene) throw new System.InvalidOperationException("Open the authored forest scene first.");
+            font = AssetDatabase.LoadAssetAtPath<Font>("Assets/UI/Fonts/PressStart2P-Regular.ttf");
+            Transform root = game.transform.Find("Forest runner UI/16 by 9 safe content");
+            ForestMainMenu main = game.GetComponentInChildren<ForestMainMenu>(true);
+            if (font == null || main == null) throw new System.InvalidOperationException("The forest menu or pixel font is missing.");
+            Transform duck = DuckControl(root);
+            KeyboardGuide(root);
+            UpdateControlsHelp(main);
+            SetHud(game, "duckButton", duck.gameObject);
+            var data = new SerializedObject(game);
+            AppendReference(data.FindProperty("hud").FindPropertyRelative("buttons"), duck.GetComponent<Button>());
+            data.ApplyModifiedPropertiesWithoutUndo();
+            var menuData = new SerializedObject(main);
+            AppendReference(menuData.FindProperty("gameplayChrome"), duck.gameObject);
+            menuData.ApplyModifiedPropertiesWithoutUndo();
+            game.AssignMainMenu(main);
+            EditorUtility.SetDirty(game);
+            EditorUtility.SetDirty(main);
+            AssetDatabase.SaveAssets();
+            EditorSceneManager.MarkSceneDirty(scene);
+            EditorSceneManager.SaveScene(scene);
+            Debug.Log("Saved hold-to-duck control, fast-drop hints and keyboard guide without rebuilding the forest or existing UI.");
+        }
+
+        private static void AppendReference(SerializedProperty list, Object value)
+        {
+            for (int i = 0; i < list.arraySize; i++)
+                if (list.GetArrayElementAtIndex(i).objectReferenceValue == value) return;
+            list.arraySize++;
+            list.GetArrayElementAtIndex(list.arraySize - 1).objectReferenceValue = value;
+        }
+
         [MenuItem("Dino Rush/Apply Gameplay UI Theme")]
         public static void Build()
         {
@@ -63,6 +102,8 @@ namespace DinoRush.Editor
             Text jumpCaption = jump.GetComponentInChildren<Text>(true);
             Label(jumpCaption.transform, "JUMP", 28, 0, 136, 48, 28);
             Moss(jump, 248, 88, true);
+            Transform duck = DuckControl(root);
+            UpdateControlsHelp(main);
             Transform statsFrame = Node("Trail stats frame", root, -430, -294, 340, 42);
             HudFrame(statsFrame, "HudPace");
             HudArt("Running dino", statsFrame, "HudDino", -144, 0, 28, 30);
@@ -135,6 +176,7 @@ namespace DinoRush.Editor
             SetHud(game, "soundOff", ForestHudArt.Load("HudMuted"));
             SetHud(game, "controlsGuide", guide.gameObject);
             SetHud(game, "gameplayBackdrop", bottomFade.gameObject);
+            SetHud(game, "duckButton", duck.gameObject);
             var segmentData = new SerializedObject(game);
             SerializedProperty savedSegments = segmentData.FindProperty("hud").FindPropertyRelative("paceSegments");
             savedSegments.arraySize = segments.Length;
@@ -201,27 +243,64 @@ namespace DinoRush.Editor
 
         private static Transform KeyboardGuide(Transform root)
         {
-            Transform guide = Node("Keyboard controls", root, 64, -306, 520, 30);
+            Transform guide = Node("Keyboard controls", root, -40, -298, 376, 66);
             Color hint = PixelMenuArt.Hex(0x91a39f);
-            Key(guide, "Space key", "SPACE", -218, 68);
-            Label(Node("First separator", guide), "/", -174, 0, 12, 26, 12, hint);
-            Transform up = Key(guide, "Up key", "", -150, 24);
+            Key(guide, "Space key", "SPACE", -142, 68, 18);
+            Label(Node("First separator", guide), "/", -98, 18, 12, 26, 12, hint);
+            Transform up = Key(guide, "Up key", "", -74, 24, 18);
             HudArt("Up arrow", up, "HudJumpArrow", 0, 0, 18, 20);
-            Label(Node("Second separator", guide), "/", -126, 0, 12, 26, 12, hint);
-            Key(guide, "W key", "W", -102, 24);
-            Label(Node("Jump hint", guide), ": JUMP", -47, 0, 72, 26, 12, hint);
-            Image divider = Node("Hint divider", guide, 16, 0, 1, 26).GetComponent<Image>();
+            Label(Node("Second separator", guide), "/", -50, 18, 12, 26, 12, hint);
+            Key(guide, "W key", "W", -26, 24, 18);
+            Label(Node("Jump hint", guide), ": JUMP", 29, 18, 72, 26, 12, hint);
+            Transform down = Key(guide, "Down key", "", -164, 24, -18);
+            Image arrow = HudArt("Down arrow", down, "HudJumpArrow", 0, 0, 18, 20);
+            arrow.rectTransform.localRotation = Quaternion.Euler(0, 0, 180);
+            Label(Node("Duck separator", guide), "/", -140, -18, 12, 26, 12, hint);
+            Key(guide, "S key", "S", -116, 24, -18);
+            Label(Node("Duck hint", guide), ": DUCK", -61, -18, 72, 26, 12, hint);
+            Image divider = Node("Hint divider", guide, -10, -18, 1, 26).GetComponent<Image>();
             if (divider == null) divider = guide.Find("Hint divider").gameObject.AddComponent<Image>();
             divider.color = PixelMenuArt.Hex(0x40565a);
             divider.raycastTarget = false;
-            Key(guide, "Escape key", "ESC", 64, 48);
-            Label(Node("Pause hint", guide), ": PAUSE", 134, 0, 94, 26, 12, hint);
+            Key(guide, "Escape key", "ESC", 30, 48, -18);
+            Label(Node("Pause hint", guide), ": PAUSE", 106, -18, 94, 26, 12, hint);
             return guide;
         }
 
-        private static Transform Key(Transform guide, string name, string caption, float x, float width)
+        private static Transform DuckControl(Transform root)
         {
-            Transform key = Node(name, guide, x, 0, width, 26);
+            Transform duck = Node("Duck", root, 244, -276, 176, 88);
+            Button button = duck.GetComponent<Button>();
+            if (button == null) button = duck.gameObject.AddComponent<Button>();
+            HudFrame(duck, "HudJump");
+            button.targetGraphic = duck.GetComponent<Image>();
+            button.navigation = new Navigation { mode = Navigation.Mode.None };
+            ColorBlock colors = button.colors;
+            colors.highlightedColor = new Color(1, 1, 0.83f);
+            colors.pressedColor = new Color(0.74f, 0.84f, 0.7f);
+            colors.fadeDuration = 0.07f;
+            button.colors = colors;
+            if (duck.GetComponent<RunnerDuckControl>() == null) duck.gameObject.AddComponent<RunnerDuckControl>();
+            Image arrow = HudArt("Icon", duck, "HudJumpArrow", -56, 0, 32, 32);
+            arrow.rectTransform.localRotation = Quaternion.Euler(0, 0, 180);
+            Label(Node("Duck label", duck), "DUCK", 24, 0, 104, 48, 24);
+            Label(Node("Drop hint", duck), "FAST DROP", 0, -58, 168, 20, 10, Sage);
+            Moss(duck, 176, 88);
+            int scrimIndex = root.Find("Menu scrim").GetSiblingIndex();
+            if (duck.GetSiblingIndex() < scrimIndex) scrimIndex--;
+            duck.SetSiblingIndex(scrimIndex);
+            return duck;
+        }
+
+        private static void UpdateControlsHelp(ForestMainMenu main)
+        {
+            Transform help = main.transform.Find("Menu dialog/Moss framed dialog/Options page/Controls help");
+            Label(help, "SPACE / UP / W : JUMP\nCLICK OR TAP : JUMP\nDOWN / S : DUCK / FAST DROP\nESC / P : PAUSE     M : SFX", 0, -49, 480, 90, 12, Sage);
+        }
+
+        private static Transform Key(Transform guide, string name, string caption, float x, float width, float y = 0)
+        {
+            Transform key = Node(name, guide, x, y, width, 26);
             HudFrame(key, "HudKey");
             Label(Node("Key caption", key), caption, 0, 0, width - 8, 22, 12, PixelMenuArt.Hex(0xaab6b3));
             return key;

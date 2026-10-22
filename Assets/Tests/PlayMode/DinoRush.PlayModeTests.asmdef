@@ -1,5 +1,5 @@
 {
   "name": "DinoRush.PlayModeTests",
-  "references": ["DinoRush", "UnityEngine.UI"],
+  "references": ["DinoRush", "UnityEngine.UI", "Unity.InputSystem"],
   "optionalUnityReferences": ["TestAssemblies"]
 }

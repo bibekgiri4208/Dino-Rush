@@ -98,6 +98,8 @@ namespace DinoRush
         private int screenWidth;
         private int screenHeight;
         private bool initialized;
+        private bool keyboardDuckHeld;
+        private bool pointerDuckHeld;
         private int nextDirtParticle;
         private static readonly Color[] DirtColors =
         {
@@ -150,7 +152,7 @@ namespace DinoRush
                 particle.renderer.gameObject.SetActive(false);
             }
             audioCues = new RunnerAudio(gameObject);
-            hud.Initialize(PrimaryAction, TogglePause, Jump, ToggleMute, RestartRun, ReturnToMenu);
+            hud.Initialize(PrimaryAction, TogglePause, Jump, ToggleMute, RestartRun, ReturnToMenu, SetDuckHeld);
             hud.SetSound(audioCues.Muted);
             hud.UpdateScore(0, best, 0, RunnerRules.Speed(0));
             hud.ShowReady(best);
@@ -613,6 +615,13 @@ namespace DinoRush
         private void ReadInput()
         {
             Keyboard keyboard = Keyboard.current;
+            bool duckKey = State == RunState.Running && keyboard != null &&
+                (keyboard.downArrowKey.isPressed || keyboard.sKey.isPressed);
+            if (keyboardDuckHeld != duckKey)
+            {
+                keyboardDuckHeld = duckKey;
+                ApplyDuckInput();
+            }
             if (keyboard != null)
             {
                 if (keyboard.escapeKey.wasPressedThisFrame || keyboard.pKey.wasPressedThisFrame)
@@ -675,6 +684,7 @@ namespace DinoRush
 
         private void ResetRun()
         {
+            keyboardDuckHeld = pointerDuckHeld = false;
             elapsed = distance = accumulator = dustTimer = timeSinceCrash = shake = 0f;
             cleared = milestone = 0;
             bestAtRunStart = best;
@@ -718,12 +728,27 @@ namespace DinoRush
             if (State == RunState.Running) player.QueueJump();
         }
 
+        public void SetDuckHeld(bool held)
+        {
+            pointerDuckHeld = held && State == RunState.Running;
+            ApplyDuckInput();
+        }
+
+        private void ApplyDuckInput() => player.SetDucking(keyboardDuckHeld || pointerDuckHeld);
+
+        private void ReleaseDuckInput()
+        {
+            keyboardDuckHeld = pointerDuckHeld = false;
+            ApplyDuckInput();
+        }
+
         public void TogglePause()
         {
             if (!initialized) return;
             if (State == RunState.Running)
             {
                 State = RunState.Paused;
+                ReleaseDuckInput();
                 SaveBest();
                 hud.ShowPaused();
             }
@@ -744,6 +769,7 @@ namespace DinoRush
         {
             bool record = Score > bestAtRunStart;
             State = RunState.GameOver;
+            ReleaseDuckInput();
             timeSinceCrash = 0f;
             shake = 0.14f;
             audioCues.Crash();

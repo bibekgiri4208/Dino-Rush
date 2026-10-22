@@ -11,18 +11,22 @@ Open **Assets/Scenes/ForestRun.unity** (or **Dino Rush → Open Forest Run**) an
 | Start | Play, Space, or Enter |
 | Retry | Space, Enter, click/tap the forest, or Run Again |
 | Jump | Space, Up, W, click/tap the forest, or JUMP |
+| Duck / fast drop | Hold Down, S, or DUCK; tap in midair to drop quickly |
 | Pause / resume | Esc, P, or the pause button |
 | Restart / leave run | Pause menu: Restart or Quit to Menu |
 | Mute sound cues | M or SFX |
 
 Jump over rocks, stumps, and crates. Your distance is your score; speed gradually increases to a cap. There is one jump (no double jump), with a small pre-landing input buffer. Obstacle sizes and spacing allow time to jump and land between obstacles. Switching away from the game automatically pauses it.
 
+Duck uses the dino's crouched running frames and a shorter collision box. In midair it immediately cuts upward momentum and accelerates the descent until landing, even if you release early. Hold to remain crouched on landing; release to stand and jump again. Ducking cancels buffered jumps, so a fast drop never causes an accidental bounce. It does not let you pass through ground obstacles. The on-screen Duck control supports mouse/touch holds and hides with Jump on menus, pause, and results. **Dino Rush → Add Duck Controls** upgrades an older HUD in place.
+
 Your best forest score and sound preference are saved locally with PlayerPrefs. Restarting a run does not erase your best. The game uses a 16:9 viewport with letterboxing for other window shapes.
 
 ## Structure
 
 - `ForestRunnerGame.cs`: scene setup, game states, pooled obstacles/particles, spawning, scoring, input, persistence.
-- `RunnerPlayer.cs`: jump integration, input buffer, sprite animation, landing squash.
+- `RunnerPlayer.cs`: jump/fast-drop integration, crouch hitbox, input buffer, sprite animation, landing squash.
+- `RunnerDuckControl.cs`: mouse/touch hold and release handling for the Duck button.
 - `RunnerRules.cs`: movement constants, hitboxes, capped speed and fair spawn intervals.
 - `RunnerHud.cs`: start/retry/pause cards, score HUD, touch controls.
 - `RunnerAudio.cs`: short generated jump/crash/milestone cues (no external audio required).
@@ -35,7 +39,7 @@ Gameplay obstacles stay hidden in the main-menu preview and activate through the
 
 The gameplay HUD and results screen share the title menu's pixel font, cream/sage colors, mossy frames, and icons. Pause freezes the run and opens **Resume**, **Restart**, and **Quit to Menu** controls. Resume preserves the exact run, Restart resets its score and obstacle pool, and Quit returns to the title screen while saving your best. The saved `Forest Pause Menu` object is under the UI safe-content root; enable it for layout editing after hiding `Forest Main Menu`. **Dino Rush → Apply Gameplay UI Theme** authors/refreshes this styling in place, without recreating the forest or restoring the removed foreground decorations.
 
-The in-game HUD follows the forest reference: a pine/FOREST RUN badge at top left, stacked trophy score and crown best-score cards at top right, icon-only sound/pause buttons, and a large green Jump control. The lower strip has a live ten-segment pace meter, multiplier, and keyboard keycaps over a subtle dark fade. These overlays hide on the title screen; the meter/guide/Jump control also hide while paused or viewing results. HUD-only sprites are editable under `Assets/UI/ForestHud`; `ForestHudArt.cs` generates missing art without overwriting existing sprites.
+The in-game HUD follows the forest reference: a pine/FOREST RUN badge at top left, stacked trophy score and crown best-score cards at top right, icon-only sound/pause buttons, and green Jump/Duck controls. The lower strip has a live ten-segment pace meter, multiplier, and keyboard keycaps over a subtle dark fade. These overlays hide on the title screen; the meter/guide/Jump/Duck controls also hide while paused or viewing results. HUD-only sprites are editable under `Assets/UI/ForestHud`; `ForestHudArt.cs` generates missing art without overwriting existing sprites.
 
 Running kicks up a short brown pixel-dirt trail behind the dino's feet; landing creates a larger outward burst of dirt clods and dust puffs. Emission stops in midair and on menus, pause freezes the particles, and restarting/returning to the title clears them. The effect reuses the saved 36 sprites under `Forest effects/Trail dust pool` without allocating objects for each burst. Tune frequency/counts under **Pixel dirt effects** on `ForestRunnerGame`. The three point-filtered sprites live in `Assets/Generated/ForestDirtSprites.asset`; **Dino Rush → Apply Dirt Effects** assigns them to an older scene without rebuilding the world or overwriting existing dirt art.
 
@@ -52,3 +56,5 @@ The four main-menu buttons share the same size, symmetric pixel-cut frame, mirro
 ## Tests
 
 Open **Window → General → Test Runner**. EditMode tests check pace limits, jump feasibility, obstacle spacing, collision bounds, no double jump, saved scene/UI/dirt references, and frame slicing. PlayMode tests load the actual scene and check start/pause/jump, collision, saved best, retry, and clearing obstacles. They also verify the running dirt trail, no midair emission, larger landing bursts, particle pooling/cleanup, that pause freezes the world, Resume preserves progress, Restart clears the previous run, and both pause/results menus return to the title without losing the best score. UI tests raycast buttons (rather than bypassing them), check fonts, label/icon bounds and multiline spacing, and capture menus at normal, tablet, and wide aspect ratios when `DINO_RUSH_CAPTURE_DIR` is set. Tests restore the prior high score and sound preference when finished.
+
+Duck tests cover the crouch animation/hitbox, fast drops during ascent/apex/descent, ground clamping, jump-buffer cancellation, returning to normal jumps, combined Down/S and multitouch holds, pause/focus/reset cleanup, menu/results visibility, and raycastable touch input without accidental jumps. Optional captures include crouched and midair-drop views.

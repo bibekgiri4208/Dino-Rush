@@ -53,6 +53,14 @@ namespace DinoRush.Tests
             Assert.That(root.Find("Sound").GetComponent<RectTransform>().anchoredPosition.x,
                 Is.EqualTo(root.Find("Pause").GetComponent<RectTransform>().anchoredPosition.x));
             Assert.That(root.Find("Jump").GetComponent<RectTransform>().sizeDelta, Is.EqualTo(new Vector2(248, 88)));
+            Assert.That(root.Find("Duck").gameObject.activeInHierarchy, Is.True);
+            Assert.That(root.Find("Keyboard controls/Down key"), Is.Not.Null);
+            Assert.That(root.Find("Keyboard controls/S key"), Is.Not.Null);
+            Bounds duckBounds = RectTransformUtility.CalculateRelativeRectTransformBounds(root, root.Find("Duck"));
+            Bounds jumpBounds = RectTransformUtility.CalculateRelativeRectTransformBounds(root, root.Find("Jump"));
+            Bounds guideBounds = RectTransformUtility.CalculateRelativeRectTransformBounds(root, root.Find("Keyboard controls"));
+            Assert.That(guideBounds.max.x, Is.LessThan(duckBounds.min.x));
+            Assert.That(duckBounds.max.x, Is.LessThan(jumpBounds.min.x));
             Assert.That(root.Find("Keyboard controls").gameObject.activeInHierarchy, Is.True);
             Assert.That(root.Find("Gameplay bottom fade").gameObject.activeInHierarchy, Is.True);
             Assert.That(root.Find("Controls").gameObject.activeSelf, Is.False, "Do not draw the old text over the keycaps.");
@@ -98,12 +106,14 @@ namespace DinoRush.Tests
             Assert.That(game.transform.Find("Player/Blue dino player").position.y, Is.GreaterThan(ground));
             Click("Pause");
             Assert.That(game.State, Is.EqualTo(ForestRunnerGame.RunState.Paused));
+            Assert.That(root.Find("Duck").gameObject.activeSelf, Is.False);
             Assert.That(root.Find("Keyboard controls").gameObject.activeSelf, Is.False);
             Assert.That(root.Find("Gameplay bottom fade").gameObject.activeSelf, Is.False);
             yield return null; // Allow the newly enabled modal controls to register with the UI raycaster.
             Click("Resume run");
             Assert.That(root.Find("Keyboard controls").gameObject.activeInHierarchy, Is.True);
             game.ReturnToMenu();
+            Assert.That(root.Find("Duck").gameObject.activeSelf, Is.False);
             Assert.That(root.Find("Keyboard controls").gameObject.activeSelf, Is.False);
             Assert.That(root.Find("Gameplay bottom fade").gameObject.activeSelf, Is.False);
         }

@@ -28,6 +28,7 @@ namespace DinoRush
         [SerializeField] private GameObject shade;
         [SerializeField] private GameObject panel;
         [SerializeField] private GameObject jumpButton;
+        [SerializeField] private GameObject duckButton;
         [SerializeField] private GameObject pauseButton;
         [SerializeField] private Text eyebrow;
         [SerializeField] private Text title;
@@ -108,6 +109,8 @@ namespace DinoRush
             footer = Label("Controls", root, "SPACE / UP / W  to jump     •     CLICK OR TAP anywhere",
                 new Vector2(-78, -323), new Vector2(900, 24), 14, Muted);
             jumpButton = Button("Jump", root, new Vector2(517, -275), new Vector2(174, 68), "JUMP  ↑", true).gameObject;
+            duckButton = Button("Duck", root, new Vector2(320, -275), new Vector2(174, 68), "DUCK  ↓", true).gameObject;
+            duckButton.AddComponent<RunnerDuckControl>();
             toast = Label("Milestone toast", root, "", new Vector2(0, 181), new Vector2(800, 44), 22, Cream, bold: true);
             toast.gameObject.AddComponent<Shadow>().effectDistance = new Vector2(2, -2);
 
@@ -127,11 +130,13 @@ namespace DinoRush
             Label("Shortcut", panel.transform, "or press SPACE / tap the forest", new Vector2(0, -155), new Vector2(510, 20), 12, Muted);
         }
 
-        public void Initialize(Action primary, Action pause, Action jump, Action mute, Action restart, Action quitRun)
+        public void Initialize(Action primary, Action pause, Action jump, Action mute, Action restart, Action quitRun,
+            Action<bool> duck)
         {
             Bind(primaryControl, primary);
             Bind(pauseButton.GetComponent<Button>(), pause);
             Bind(jumpButton.GetComponent<Button>(), jump);
+            if (duckButton != null) duckButton.GetComponent<RunnerDuckControl>().Initialize(duck);
             Bind(soundControl, mute);
             if (resumeControl != null) Bind(resumeControl, pause);
             if (restartControl != null) Bind(restartControl, restart);
@@ -194,7 +199,7 @@ namespace DinoRush
         public void ShowRunning()
         {
             Menu(false);
-            footer.text = "SPACE / UP / W : JUMP    CLICK / TAP : JUMP    ESC / P : PAUSE";
+            footer.text = "SPACE / UP / W : JUMP    DOWN / S : DUCK / FAST DROP    ESC / P : PAUSE";
         }
 
         public void ShowPaused()
@@ -232,6 +237,7 @@ namespace DinoRush
             shade.SetActive(visible);
             panel.SetActive(visible);
             jumpButton.SetActive(!visible);
+            if (duckButton != null) duckButton.SetActive(!visible);
             pauseButton.SetActive(!visible);
             stats.gameObject.SetActive(!visible);
             if (statsFrame != null) statsFrame.SetActive(!visible);

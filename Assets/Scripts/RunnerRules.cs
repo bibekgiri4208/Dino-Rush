@@ -9,8 +9,11 @@ namespace DinoRush
         public const float PlayerX = -5.8f;
         public const float JumpSpeed = 11.5f;
         public const float Gravity = 29f;
+        public const float FastFallSpeed = 15f;
+        public const float FastFallGravity = 58f;
         public const float PlayerWidth = 0.86f;
         public const float PlayerHeight = 1.3f;
+        public const float DuckHeight = 0.8f;
         public const float MaximumObstacleWidth = 2.3f;
         public const float MaximumObstacleHeight = 1.2f;
         public const float SimulationStep = 1f / 120f;
@@ -26,10 +29,10 @@ namespace DinoRush
             return 2f * JumpSpeed / Gravity + 0.3f + MaximumObstacleWidth / speed;
         }
 
-        public static Rect PlayerHitbox(float height)
+        public static Rect PlayerHitbox(float height, bool ducking = false)
         {
             return new Rect(PlayerX - PlayerWidth * 0.5f, GroundY + height + 0.1f,
-                PlayerWidth, PlayerHeight);
+                PlayerWidth, ducking ? DuckHeight : PlayerHeight);
         }
 
         public static Rect ObstacleHitbox(float x, float width, float height)
