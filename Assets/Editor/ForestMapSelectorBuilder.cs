@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.IO;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -11,6 +12,36 @@ namespace DinoRush.Editor
         private const string CatalogPath = RunnerMapArt.Directory + "/MapCatalog.asset";
         private static readonly Color Cream = PixelMenuArt.Hex(0xf0f2cf);
         private static readonly Color Sage = PixelMenuArt.Hex(0xaecb98);
+
+        [MenuItem("Dino Rush/Restore Map Background Source Resolution")]
+        public static void RestoreSourceResolution()
+        {
+            if (Application.isPlaying) return;
+            RunnerMapCatalog catalog = AssetDatabase.LoadAssetAtPath<RunnerMapCatalog>(CatalogPath);
+            if (catalog == null) throw new System.InvalidOperationException("Add the map selector first.");
+            for (int i = 1; i < catalog.Count; i++)
+            {
+                RunnerMapCatalog.Map map = catalog[i];
+                foreach (RunnerMapCatalog.MapLayer layer in map.layers)
+                {
+                    string path = AssetDatabase.GetAssetPath(layer.sprite);
+                    // Only regenerate derived scenery, never originals, ground, or user-assigned art.
+                    if (!path.StartsWith(RunnerMapArt.Directory + "/", System.StringComparison.Ordinal)
+                        || path.EndsWith("_ground_loop.png", System.StringComparison.Ordinal)) continue;
+                    string source = AssetDatabase.GetAssetPath(layer.source);
+                    string name = Path.GetFileNameWithoutExtension(path);
+                    if (name.EndsWith("_loop", System.StringComparison.Ordinal))
+                        layer.sprite = RunnerMapArt.Loop(source, name.Substring(0, name.Length - 5), layer.order == -100,
+                            map.id == "jungle" ? FilterMode.Point : FilterMode.Bilinear, true);
+                    else if (name.EndsWith("_moon", System.StringComparison.Ordinal))
+                        layer.sprite = RunnerMapArt.Moon(source, name.Substring(0, name.Length - 5), true);
+                }
+                map.preview = RunnerMapArt.Preview(map, true);
+            }
+            EditorUtility.SetDirty(catalog);
+            AssetDatabase.SaveAssets();
+            Debug.Log("Restored native-resolution map scenery: smooth Desert/Rural, crisp Jungle pixel art. Source art, GUIDs, ground, and map framing preserved.");
+        }
 
         [MenuItem("Dino Rush/Refresh Map Previews")]
         public static void RefreshPreviews()
@@ -191,7 +222,9 @@ namespace DinoRush.Editor
         {
             string path = "Assets/2D Sprites/" + relativePath;
             return new RunnerMapCatalog.MapLayer { source = AssetDatabase.LoadAssetAtPath<Texture2D>(path),
-                sprite = RunnerMapArt.Loop(path, name, sky), speed = speed, order = order };
+                sprite = RunnerMapArt.Loop(path, name, sky,
+                    relativePath.StartsWith("jungle bg/", System.StringComparison.Ordinal) ? FilterMode.Point : FilterMode.Bilinear),
+                speed = speed, order = order };
         }
 
         private static RunnerMapCatalog.MapLayer Moon(string relativePath, string id)

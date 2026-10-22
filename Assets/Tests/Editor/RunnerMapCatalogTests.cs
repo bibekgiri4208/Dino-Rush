@@ -49,7 +49,7 @@ namespace DinoRush.Tests
         }
 
         [Test]
-        public void GeneratedLoopsHaveMatchingEdgesAndPixelPerfectImportSettings()
+        public void GeneratedLoopsHaveMatchingEdgesAndUncompressedImportSettings()
         {
             foreach (string path in System.IO.Directory.GetFiles(Directory, "*_loop.png"))
             {
@@ -61,12 +61,83 @@ namespace DinoRush.Tests
                     for (int y = 0; y < texture.height; y++)
                         Assert.That(pixels[y * texture.width], Is.EqualTo(pixels[(y + 1) * texture.width - 1]), path + " row " + y);
                     var importer = (TextureImporter)AssetImporter.GetAtPath(path.Replace('\\', '/'));
-                    Assert.That(importer.filterMode, Is.EqualTo(FilterMode.Point));
+                    bool smooth = !path.EndsWith("_ground_loop.png")
+                        && (Path.GetFileName(path).StartsWith("desert_") || Path.GetFileName(path).StartsWith("rural_"));
+                    Assert.That(importer.filterMode, Is.EqualTo(smooth ? FilterMode.Bilinear : FilterMode.Point));
                     Assert.That(importer.mipmapEnabled, Is.False);
                     Assert.That(importer.textureCompression, Is.EqualTo(TextureImporterCompression.Uncompressed));
                     Assert.That(importer.spritePixelsPerUnit, Is.EqualTo(texture.height));
                 }
                 finally { Object.DestroyImmediate(texture); }
+            }
+        }
+
+        [TestCase(1)]
+        [TestCase(2)]
+        [TestCase(3)]
+        public void NewSceneryRetainsNativeSourcePixelsAndImportsWithoutDownscaling(int mapIndex)
+        {
+            RunnerMapCatalog catalog = AssetDatabase.LoadAssetAtPath<RunnerMapCatalog>(Directory + "/MapCatalog.asset");
+            RunnerMapCatalog.Map map = catalog[mapIndex];
+            foreach (RunnerMapCatalog.MapLayer layer in map.layers)
+            {
+                if (layer.order >= 0) continue; // The shared pixel-art running surface is intentionally unchanged.
+                string sourcePath = AssetDatabase.GetAssetPath(layer.source);
+                string generatedPath = AssetDatabase.GetAssetPath(layer.sprite);
+                var source = new Texture2D(2, 2);
+                var generated = new Texture2D(2, 2);
+                try
+                {
+                    Assert.That(source.LoadImage(File.ReadAllBytes(sourcePath)), Is.True);
+                    Assert.That(generated.LoadImage(File.ReadAllBytes(generatedPath)), Is.True);
+                    Color32[] original = source.GetPixels32();
+                    Color32[] pixels = generated.GetPixels32();
+                    int minX = 0, minY = 0;
+                    if (layer.stationary)
+                    {
+                        minX = source.width;
+                        minY = source.height;
+                        int maxX = -1, maxY = -1;
+                        for (int y = 0; y < source.height; y++)
+                        for (int x = 0; x < source.width; x++)
+                        {
+                            if (original[y * source.width + x].a == 0) continue;
+                            minX = Mathf.Min(minX, x); maxX = Mathf.Max(maxX, x);
+                            minY = Mathf.Min(minY, y); maxY = Mathf.Max(maxY, y);
+                        }
+                        Assert.That(generated.width, Is.EqualTo(maxX - minX + 5), generatedPath);
+                        Assert.That(generated.height, Is.EqualTo(maxY - minY + 5), generatedPath);
+                        minX -= 2;
+                        minY -= 2;
+                    }
+                    else
+                    {
+                        Assert.That(generated.width, Is.EqualTo(source.width * 2), generatedPath);
+                        Assert.That(generated.height, Is.EqualTo(source.height), generatedPath);
+                    }
+                    // Compare source samples, not imported source textures (which may have their own size caps).
+                    int width = layer.stationary ? generated.width : source.width;
+                    for (int y = 0; y < generated.height; y += Mathf.Max(1, generated.height / 64))
+                    for (int x = 0; x < width; x += Mathf.Max(1, width / 64))
+                    {
+                        int sx = x + minX, sy = y + minY;
+                        if (sx < 0 || sx >= source.width || sy < 0 || sy >= source.height) continue;
+                        Color32 expected = original[sy * source.width + sx];
+                        if (layer.order == -100 && expected.a == 0) continue; // Skies extend below the source horizon.
+                        Assert.That(pixels[y * generated.width + x], Is.EqualTo(expected), generatedPath + " source pixel " + sx + "," + sy);
+                    }
+                    var importer = (TextureImporter)AssetImporter.GetAtPath(generatedPath);
+                    Assert.That(importer.maxTextureSize, Is.GreaterThanOrEqualTo(Mathf.Max(generated.width, generated.height)), generatedPath);
+                    Assert.That(layer.sprite.texture.width, Is.EqualTo(generated.width), generatedPath);
+                    Assert.That(layer.sprite.texture.height, Is.EqualTo(generated.height), generatedPath);
+                    Assert.That(layer.sprite.pixelsPerUnit, Is.EqualTo(generated.height), generatedPath);
+                    Assert.That(importer.filterMode, Is.EqualTo(map.id == "jungle" ? FilterMode.Point : FilterMode.Bilinear));
+                }
+                finally
+                {
+                    Object.DestroyImmediate(source);
+                    Object.DestroyImmediate(generated);
+                }
             }
         }
 

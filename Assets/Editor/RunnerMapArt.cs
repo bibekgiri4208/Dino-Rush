@@ -5,21 +5,22 @@ using UnityEngine;
 
 namespace DinoRush.Editor
 {
-    /// <summary>Non-destructive, point-sampled map variants and real layered preview cards.</summary>
+    /// <summary>Source-resolution map variants and layered previews; original artwork is never overwritten.</summary>
     internal static class RunnerMapArt
     {
         internal const string Directory = "Assets/Generated/RunnerMaps";
 
-        internal static Sprite Loop(string sourcePath, string name, bool sky = false)
+        internal static Sprite Loop(string sourcePath, string name, bool sky = false,
+            FilterMode filter = FilterMode.Bilinear, bool replace = false)
         {
             string path = $"{Directory}/{name}_loop.png";
-            if (!File.Exists(path))
+            if (!File.Exists(path) || replace)
             {
                 Texture2D source = Read(sourcePath);
                 try
                 {
-                    int height = Mathf.Min(256, source.height);
-                    int halfWidth = Mathf.RoundToInt(source.width * (float)height / source.height);
+                    int height = source.height;
+                    int halfWidth = source.width;
                     var pixels = new Color32[halfWidth * 2 * height];
                     Color32[] raw = source.GetPixels32();
                     for (int x = 0; x < halfWidth; x++)
@@ -27,9 +28,7 @@ namespace DinoRush.Editor
                         Color32 below = Color.clear;
                         for (int y = height - 1; y >= 0; y--)
                         {
-                            int sx = Mathf.Min(source.width - 1, (int)((x + 0.5f) * source.width / halfWidth));
-                            int sy = Mathf.Min(source.height - 1, (int)((y + 0.5f) * source.height / height));
-                            Color32 color = raw[sy * source.width + sx];
+                            Color32 color = raw[y * source.width + x];
                             if (sky && color.a == 0) color = below; // Sky fills below its supplied transparent horizon.
                             if (color.a > 0) below = color;
                             pixels[y * halfWidth * 2 + x] = color;
@@ -42,7 +41,7 @@ namespace DinoRush.Editor
                 }
                 finally { Object.DestroyImmediate(source); }
             }
-            return Import(path, true);
+            return Import(path, true, filter);
         }
 
         internal static Sprite Ground(string id, Color dark, Color light)
@@ -69,10 +68,10 @@ namespace DinoRush.Editor
             return Import(path, true);
         }
 
-        internal static Sprite Moon(string sourcePath, string id)
+        internal static Sprite Moon(string sourcePath, string id, bool replace = false)
         {
             string path = $"{Directory}/{id}_moon.png";
-            if (!File.Exists(path))
+            if (!File.Exists(path) || replace)
             {
                 Texture2D source = Read(sourcePath);
                 try
@@ -86,20 +85,21 @@ namespace DinoRush.Editor
                             minX = Mathf.Min(minX, x); maxX = Mathf.Max(maxX, x);
                             minY = Mathf.Min(minY, y); maxY = Mathf.Max(maxY, y);
                         }
-                    int height = 64, width = Mathf.RoundToInt((maxX - minX + 5f) / (maxY - minY + 5f) * height);
+                    int height = maxY - minY + 5, width = maxX - minX + 5;
                     var pixels = new Color32[width * height];
                     for (int y = 0; y < height; y++)
                     for (int x = 0; x < width; x++)
                     {
-                        int sx = Mathf.Clamp(minX - 2 + (int)((x + 0.5f) * (maxX - minX + 5f) / width), 0, source.width - 1);
-                        int sy = Mathf.Clamp(minY - 2 + (int)((y + 0.5f) * (maxY - minY + 5f) / height), 0, source.height - 1);
-                        pixels[y * width + x] = raw[sy * source.width + sx];
+                        int sx = minX - 2 + x;
+                        int sy = minY - 2 + y;
+                        if (sx >= 0 && sx < source.width && sy >= 0 && sy < source.height)
+                            pixels[y * width + x] = raw[sy * source.width + sx];
                     }
                     Write(path, width, height, pixels);
                 }
                 finally { Object.DestroyImmediate(source); }
             }
-            return Import(path, true);
+            return Import(path, true, FilterMode.Bilinear);
         }
 
         internal static Sprite Preview(RunnerMapCatalog.Map map, bool replace = false)
@@ -149,7 +149,7 @@ namespace DinoRush.Editor
                 }
                 finally { foreach (Texture2D texture in textures.Values) Object.DestroyImmediate(texture); }
             }
-            return Import(path, false);
+            return Import(path, false, map.id == "desert" || map.id == "rural" ? FilterMode.Bilinear : FilterMode.Point);
         }
 
         private static Texture2D Read(string path)
@@ -172,12 +172,13 @@ namespace DinoRush.Editor
             AssetDatabase.ImportAsset(path);
         }
 
-        private static Sprite Import(string path, bool bottomPivot)
+        private static Sprite Import(string path, bool bottomPivot, FilterMode filter = FilterMode.Point)
         {
             var importer = (TextureImporter)AssetImporter.GetAtPath(path);
             importer.textureType = TextureImporterType.Sprite;
             importer.spriteImportMode = SpriteImportMode.Single;
             byte[] png = File.ReadAllBytes(path);
+            int width = (png[16] << 24) | (png[17] << 16) | (png[18] << 8) | png[19];
             int height = (png[20] << 24) | (png[21] << 16) | (png[22] << 8) | png[23];
             importer.spritePixelsPerUnit = bottomPivot ? height : 100f;
             var settings = new TextureImporterSettings();
@@ -187,8 +188,10 @@ namespace DinoRush.Editor
             settings.spritePivot = bottomPivot ? new Vector2(0.5f, 0f) : Vector2.one * 0.5f;
             importer.SetTextureSettings(settings);
             importer.npotScale = TextureImporterNPOTScale.None;
-            importer.maxTextureSize = 4096;
-            importer.filterMode = FilterMode.Point;
+            // Reflected 3800px source layers are 7600px wide. A 4096 cap would
+            // silently downsample the supposedly full-resolution PNG on import.
+            importer.maxTextureSize = Mathf.Max(4096, Mathf.NextPowerOfTwo(Mathf.Max(width, height)));
+            importer.filterMode = filter;
             importer.wrapMode = TextureWrapMode.Clamp;
             importer.mipmapEnabled = false;
             importer.textureCompression = TextureImporterCompression.Uncompressed;
