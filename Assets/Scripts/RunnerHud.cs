@@ -57,6 +57,7 @@ namespace DinoRush
 
         public bool IsBuilt => root != null;
         public bool MainMenuDialogOpen => mainMenu != null && mainMenu.DialogOpen;
+        public bool HasMapSelector => mainMenu != null && mainMenu.HasMapSelector;
 
         public void SetMainMenu(ForestMainMenu menu) => mainMenu = menu;
 
@@ -71,6 +72,29 @@ namespace DinoRush
         }
 
         public void FeedbackJump() => jumpButton.GetComponent<RunnerUiButtonFeedback>()?.Pulse();
+
+        public void InitializeMaps(RunnerMapCatalog catalog, int selected, Action<int> select, Action start)
+        {
+            if (mainMenu != null) mainMenu.InitializeMaps(catalog, selected, select, start);
+        }
+
+        public void OpenMapSelector()
+        {
+            if (mainMenu != null) mainMenu.OpenMapSelector();
+        }
+
+        public void SetMapSelection(int selected)
+        {
+            if (mainMenu != null) mainMenu.SetMapSelection(selected);
+        }
+
+        public void SetMapName(string name)
+        {
+            Text brand = root.Find("Top left badge/Brand")?.GetComponent<Text>();
+            if (brand != null) brand.text = name.ToUpperInvariant() + " RUN";
+            Text pauseMap = pausePanel != null ? pausePanel.transform.Find("Pause eyebrow")?.GetComponent<Text>() : null;
+            if (pauseMap != null) pauseMap.text = name.ToUpperInvariant() + " / ENDLESS RUNNER";
+        }
 
         public void FeedbackDuck(bool held)
         {

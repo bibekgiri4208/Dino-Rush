@@ -5,7 +5,7 @@ using UnityEngine.EventSystems;
 
 namespace DinoRush
 {
-    /// <summary>The scene-authored title screen, dino selector, and settings dialogs.</summary>
+    /// <summary>The scene-authored title screen, map/dino selectors, and settings dialogs.</summary>
     public sealed class ForestMainMenu : MonoBehaviour
     {
         [SerializeField] private Button play;
@@ -35,11 +35,63 @@ namespace DinoRush
         [SerializeField] private Text selectedDinoLabel;
         [SerializeField] private Sprite selectedDinoFrame;
         [SerializeField] private Sprite unselectedDinoFrame;
+        [SerializeField] private GameObject mapPage;
+        [SerializeField] private Button[] mapChoices = new Button[0];
+        [SerializeField] private Image[] mapPreviews = new Image[0];
+        [SerializeField] private Text[] mapCaptions = new Text[0];
+        [SerializeField] private Text mapStatus;
+        [SerializeField] private Text customizeMapLabel;
+        [SerializeField] private Button startMap;
+        [SerializeField] private Button mapBack;
+        private RunnerMapCatalog mapCatalog;
+        private bool mapsBound;
         private RunnerDinoRoster dinoRoster;
         private bool dinosBound;
         private bool bound;
 
-        public bool DialogOpen => dialog != null && dialog.activeInHierarchy;
+        public bool DialogOpen => (dialog != null && dialog.activeInHierarchy) || (mapPage != null && mapPage.activeInHierarchy);
+        public bool HasMapSelector => mapPage != null;
+
+        public void OpenMapSelector()
+        {
+            if (mapPage == null) return;
+            choices.SetActive(false);
+            logo.SetActive(false);
+            dialog.SetActive(false);
+            mapPage.SetActive(true);
+        }
+
+        public void InitializeMaps(RunnerMapCatalog catalog, int selected, Action<int> select, Action start)
+        {
+            mapCatalog = catalog;
+            if (catalog == null || catalog.Count == 0 || mapChoices.Length != catalog.Count) return;
+            if (!mapsBound)
+            {
+                mapsBound = true;
+                for (int i = 0; i < mapChoices.Length; i++)
+                {
+                    int index = i;
+                    Bind(mapChoices[i], () => select(index));
+                }
+                Bind(startMap, start);
+                Bind(mapBack, CloseDialog);
+            }
+            SetMapSelection(selected);
+        }
+
+        public void SetMapSelection(int selected)
+        {
+            if (mapCatalog == null || selected < 0 || selected >= mapCatalog.Count || mapChoices.Length != mapCatalog.Count) return;
+            for (int i = 0; i < mapChoices.Length; i++)
+            {
+                mapPreviews[i].sprite = mapCatalog[i].preview;
+                mapCaptions[i].text = mapCatalog[i].displayName.ToUpperInvariant();
+                mapChoices[i].GetComponent<Image>().sprite = i == selected ? selectedDinoFrame : unselectedDinoFrame;
+            }
+            string name = mapCatalog[selected].displayName.ToUpperInvariant();
+            mapStatus.text = name + " SELECTED / READY TO RUN";
+            if (customizeMapLabel != null) customizeMapLabel.text = "MAP: " + name;
+        }
 
         public void Initialize(Action start, Action toggleSound)
         {
@@ -114,6 +166,7 @@ namespace DinoRush
 
         private void OpenDialog(string heading, GameObject page)
         {
+            if (mapPage != null) mapPage.SetActive(false);
             choices.SetActive(false);
             logo.SetActive(false);
             dialog.SetActive(true);
@@ -125,6 +178,7 @@ namespace DinoRush
 
         public void CloseDialog()
         {
+            if (mapPage != null) mapPage.SetActive(false);
             dialog.SetActive(false);
             choices.SetActive(true);
             logo.SetActive(true);

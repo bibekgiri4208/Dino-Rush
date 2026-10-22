@@ -124,6 +124,10 @@ namespace DinoRush.Tests
 
             Button play = Control("Forest Main Menu/Main menu buttons/Play");
             ExecuteEvents.Execute(play.gameObject, Pointer(-1), ExecuteEvents.pointerClickHandler);
+            Assert.That(game.State, Is.EqualTo(ForestRunnerGame.RunState.Ready));
+            yield return null;
+            ExecuteEvents.Execute(Control("Forest Main Menu/Map selector/Map selection panel/Start selected map").gameObject,
+                Pointer(-1), ExecuteEvents.pointerClickHandler);
             Assert.That(game.State, Is.EqualTo(ForestRunnerGame.RunState.Running));
             Assert.That(play.GetComponent<RunnerUiButtonFeedback>().IsPressed, Is.False);
         }

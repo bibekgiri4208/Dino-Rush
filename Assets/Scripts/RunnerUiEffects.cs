@@ -23,6 +23,7 @@ namespace DinoRush
             Reveal(root.Find("Forest Main Menu/Dino Rush Logo"), 0.32f, new Vector2(0, -8), 0.985f, 2f);
             Reveal(root.Find("Forest Main Menu/Main menu buttons"), 0.28f, new Vector2(0, -12));
             Reveal(root.Find("Forest Main Menu/Menu dialog/Moss framed dialog"), 0.22f, new Vector2(0, -14), 0.975f);
+            Reveal(root.Find("Forest Main Menu/Map selector/Map selection panel"), 0.22f, new Vector2(0, -14), 0.975f);
             Reveal(root.Find("Forest Pause Menu"), 0.22f, new Vector2(0, -14), 0.975f);
             Reveal(root.Find("Menu card"), 0.26f, new Vector2(0, -16), 0.975f);
             Reveal(root.Find("Top left badge"), 0.24f, new Vector2(-10, 0));

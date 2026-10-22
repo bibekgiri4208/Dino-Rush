@@ -34,6 +34,7 @@ namespace DinoRush.Editor
             {
                 // Refresh framing without recreating or replacing any authored UI objects.
                 ForestDinoSelectorBuilder.Apply(game, existing);
+                if (game.MapCatalog != null) ForestMapSelectorBuilder.Apply(game);
                 ForestUiRepair.Repair(game);
                 ForestUiMotionBuilder.Apply(game);
                 game.AssignMainMenu(existing);
@@ -109,6 +110,7 @@ namespace DinoRush.Editor
             serialized.ApplyModifiedPropertiesWithoutUndo();
             menu.SetSound(false);
             ForestDinoSelectorBuilder.Apply(game, menu);
+            if (game.MapCatalog != null) ForestMapSelectorBuilder.Apply(game);
             game.AssignMainMenu(menu);
             ForestUiRepair.Repair(game);
             ForestUiMotionBuilder.Apply(game);

@@ -55,7 +55,7 @@ namespace DinoRush.Tests
         public IEnumerator StartPauseJumpCrashAndRetry()
         {
             yield return Capture("forest-ready");
-            Click("Play");
+            yield return StartFromMapSelector();
             Assert.That(game.State, Is.EqualTo(ForestRunnerGame.RunState.Running));
             // A first render can spend a long frame compiling shaders; gameplay deliberately
             // caps catch-up time, so wait for simulated progress rather than wall-clock time.
@@ -90,7 +90,7 @@ namespace DinoRush.Tests
             SpriteRenderer[] particles = pool.GetComponentsInChildren<SpriteRenderer>(true);
             Assert.That(particles.Length, Is.EqualTo(36));
             Assert.That(CountLiveDirt(particles), Is.Zero);
-            Click("Play");
+            yield return StartFromMapSelector();
             float deadline = Time.realtimeSinceStartup + 5f;
             while (game.Score < 2 && Time.realtimeSinceStartup < deadline) yield return null;
             Assert.That(CountLiveDirt(particles), Is.GreaterThanOrEqualTo(3), "Running must kick up a visible dirt trail.");
@@ -181,7 +181,7 @@ namespace DinoRush.Tests
             yield return Capture("menu-quit");
             Click("Back to main menu");
             yield return null;
-            Click("Play");
+            yield return StartFromMapSelector();
             Assert.That(game.State, Is.EqualTo(ForestRunnerGame.RunState.Running));
             Assert.That(menu.gameObject.activeSelf, Is.False);
             yield return null;
@@ -190,7 +190,7 @@ namespace DinoRush.Tests
         [UnityTest]
         public IEnumerator PauseMenuResumesRestartsAndQuitsWithoutLosingBest()
         {
-            Click("Play");
+            yield return StartFromMapSelector();
             float deadline = Time.realtimeSinceStartup + 5f;
             while (game.Score < 6 && Time.realtimeSinceStartup < deadline) yield return null;
             Assert.That(game.Score, Is.GreaterThanOrEqualTo(6));
@@ -234,7 +234,7 @@ namespace DinoRush.Tests
                 Assert.That(renderer.name.StartsWith("Pooled obstacle"), Is.False);
             Assert.That(PlayerPrefs.GetInt(ScoreKey), Is.GreaterThanOrEqualTo(score));
             yield return null;
-            Click("Play");
+            yield return StartFromMapSelector();
             Assert.That(game.State, Is.EqualTo(ForestRunnerGame.RunState.Running));
             Assert.That(game.Score, Is.Zero);
         }
@@ -242,7 +242,7 @@ namespace DinoRush.Tests
         [UnityTest]
         public IEnumerator ResultsMenuButtonReturnsToTitle()
         {
-            Click("Play");
+            yield return StartFromMapSelector();
             float deadline = Time.realtimeSinceStartup + 10f;
             while (game.State == ForestRunnerGame.RunState.Running && Time.realtimeSinceStartup < deadline) yield return null;
             Assert.That(game.State, Is.EqualTo(ForestRunnerGame.RunState.GameOver));
@@ -317,6 +317,15 @@ namespace DinoRush.Tests
             ExecuteEvents.Execute(button.gameObject, pointer, ExecuteEvents.pointerDownHandler);
             ExecuteEvents.Execute(button.gameObject, pointer, ExecuteEvents.pointerUpHandler);
             ExecuteEvents.Execute(button.gameObject, pointer, ExecuteEvents.pointerClickHandler);
+        }
+
+        private IEnumerator StartFromMapSelector()
+        {
+            Click("Play");
+            Assert.That(game.State, Is.EqualTo(ForestRunnerGame.RunState.Ready));
+            Assert.That(game.GetComponentInChildren<ForestMainMenu>().DialogOpen, Is.True);
+            yield return null;
+            Click("Start selected map");
         }
 
         [UnityTest]

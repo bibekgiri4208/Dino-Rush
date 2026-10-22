@@ -10,9 +10,10 @@ namespace DinoRush
         public enum RunState { Ready, Running, Paused, GameOver }
         private const string HighScoreKey = "DinoRush.Forest.HighScore";
 
-        [Header("One player / forest map")]
+        [Header("Player and original forest artwork")]
         [SerializeField] private Texture2D dinoSheet;
         [SerializeField] private RunnerDinoRoster dinoRoster;
+        [SerializeField] private RunnerMapCatalog mapCatalog;
         [SerializeField] private Texture2D sky;
         [SerializeField] private Texture2D mountains;
         [SerializeField] private Texture2D distantForest;
@@ -30,6 +31,7 @@ namespace DinoRush
             public float width; // Repeat stride; render quads overlap by one texture pixel.
             public float speed;
             public float offset;
+            public bool stationary;
         }
 
         [System.Serializable]
@@ -61,6 +63,10 @@ namespace DinoRush
         private readonly List<Sprite> generatedSprites = new List<Sprite>();
         private readonly List<Texture2D> generatedTextures = new List<Texture2D>();
         private readonly Dictionary<int, Sprite[]> dinoFrameCache = new Dictionary<int, Sprite[]>();
+        private readonly Dictionary<int, List<Layer>> mapLayerCache = new Dictionary<int, List<Layer>>();
+        private List<Layer> forestLayers;
+        private int activeMapIndex;
+        private Color mapDustTint = Color.white;
         [Header("Saved scene objects")]
         [SerializeField] private Camera gameCamera;
         [SerializeField] private SpriteRenderer dinoRenderer;
@@ -118,6 +124,10 @@ namespace DinoRush
         public int ObstaclesCleared => cleared;
         public int Level => RunnerRules.Level(elapsed);
         public RunnerDinoRoster DinoRoster => dinoRoster;
+        public RunnerMapCatalog MapCatalog => mapCatalog;
+        public int SelectedMapIndex { get; private set; }
+        public string SelectedMapName => mapCatalog != null && mapCatalog.Count > 0
+            ? mapCatalog[SelectedMapIndex].displayName : "Forest";
         public int SelectedDinoIndex { get; private set; }
         public string SelectedDinoName => dinoRoster != null && dinoRoster.Count > 0
             ? dinoRoster[SelectedDinoIndex].DisplayName : "Blue";
@@ -148,6 +158,9 @@ namespace DinoRush
             best = Mathf.Max(0, PlayerPrefs.GetInt(HighScoreKey, 0));
             // Older, unbaked scenes still work; the saved ForestRun scene takes this path zero times.
             if (!HasAuthoredScene) CreateSceneObjects();
+            forestLayers = layers;
+            if (mapCatalog != null && mapCatalog.Count > 0)
+                SelectedMapIndex = mapCatalog.Find(PlayerPrefs.GetString(RunnerMapCatalog.SelectionKey, "forest"));
             UpdateViewport();
             ApplyPixelFiltering();
             player = new RunnerPlayer(dinoRenderer, dinoFrames, playerShadow);
@@ -169,6 +182,7 @@ namespace DinoRush
             audioCues = new RunnerAudio(gameObject);
             hud.Initialize(PrimaryAction, TogglePause, Jump, ToggleMute, RestartRun, ReturnToMenu, SetDuckHeld);
             hud.InitializeDinos(dinoRoster, SelectedDinoIndex, SelectDino);
+            hud.InitializeMaps(mapCatalog, SelectedMapIndex, SelectMap, StartRun);
             hud.SetSound(audioCues.Muted);
             hud.UpdateScore(0, best, 0, RunnerRules.Speed(0));
             hud.ShowReady(best);
@@ -237,8 +251,62 @@ namespace DinoRush
             return frames;
         }
 
+        public void SelectMap(int index)
+        {
+            if (!initialized || State != RunState.Ready || mapCatalog == null || index < 0 || index >= mapCatalog.Count) return;
+            SelectedMapIndex = index;
+            hud.SetMapSelection(index);
+            PlayerPrefs.SetString(RunnerMapCatalog.SelectionKey, mapCatalog[index].id);
+            PlayerPrefs.Save();
+        }
+
+        private void ApplyMap(int index)
+        {
+            if (mapCatalog == null || mapCatalog.Count == 0) return;
+            foreach (Layer layer in layers)
+                foreach (Transform tile in layer.tiles) tile.gameObject.SetActive(false);
+            if (index == 0) layers = forestLayers;
+            else if (!mapLayerCache.TryGetValue(index, out List<Layer> cached))
+            {
+                layers = new List<Layer>();
+                Transform parent = Group(mapCatalog[index].displayName + " map", transform.Find("Forest environment"));
+                foreach (RunnerMapCatalog.MapLayer spec in mapCatalog[index].layers)
+                {
+                    float width = (spec.sprite.rect.width - 1) / spec.sprite.pixelsPerUnit * spec.height;
+                    var layer = new Layer { tiles = new Transform[spec.stationary ? 1 : 3], width = width,
+                        speed = spec.speed, stationary = spec.stationary, offset = width * 0.25f };
+                    for (int i = 0; i < layer.tiles.Length; i++)
+                    {
+                        SpriteRenderer renderer = Renderer(mapCatalog[index].displayName + " / " + spec.sprite.name + " tile " + i,
+                            spec.sprite, spec.order, parent);
+                        renderer.transform.localScale = new Vector3(spec.height, spec.height, 1f);
+                        renderer.transform.position = new Vector3(spec.stationary ? spec.x : (i - 1) * width - layer.offset, spec.bottom, 0f);
+                        layer.tiles[i] = renderer.transform;
+                    }
+                    layers.Add(layer);
+                }
+                mapLayerCache[index] = layers;
+            }
+            else layers = cached;
+            foreach (Layer layer in layers)
+                foreach (Transform tile in layer.tiles) tile.gameObject.SetActive(true);
+            activeMapIndex = index;
+            RunnerMapCatalog.Map map = mapCatalog[index];
+            mapDustTint = map.dustTint;
+            gameCamera.backgroundColor = map.skyColor;
+            transform.Find("Forest environment/Earth below the trail").GetComponent<SpriteRenderer>().color = map.soilColor;
+            foreach (SpriteRenderer mote in motes)
+            {
+                Color color = map.moteColor;
+                color.a = mote.color.a;
+                mote.color = color;
+            }
+            Scroll(0f);
+        }
+
         private void SetSkyFraming(bool mainMenu)
         {
+            if (activeMapIndex != 0) return;
             foreach (Transform tile in layers[0].tiles)
             {
                 Vector3 position = tile.position;
@@ -574,6 +642,7 @@ namespace DinoRush
         {
             foreach (Layer layer in layers)
             {
+                if (layer.stationary) continue;
                 layer.offset = Mathf.Repeat(layer.offset + travel * layer.speed, layer.width);
                 for (int i = 0; i < layer.tiles.Length; i++)
                 {
@@ -616,6 +685,7 @@ namespace DinoRush
                 particle.size = particle.puff ? Random.Range(impact ? 0.32f : 0.22f, impact ? 0.46f : 0.34f)
                     : Random.Range(impact ? 0.12f : 0.085f, impact ? 0.20f : 0.15f);
                 particle.startColor = DirtColors[Random.Range(particle.puff ? 2 : 0, DirtColors.Length)];
+                particle.startColor *= mapDustTint;
                 particle.startColor.a = particle.puff ? 0.65f : 1f;
                 if (dirtSprites != null && dirtSprites.Length >= 3)
                     particle.renderer.sprite = dirtSprites[particle.puff ? 1 : (i % 2 == 0 ? 0 : 2)];
@@ -717,7 +787,11 @@ namespace DinoRush
             switch (State)
             {
                 case RunState.Ready:
-                    if (!hud.MainMenuDialogOpen) StartRun();
+                    if (!hud.MainMenuDialogOpen)
+                    {
+                        if (mapCatalog != null && mapCatalog.Count > 0 && hud.HasMapSelector) hud.OpenMapSelector();
+                        else StartRun();
+                    }
                     break;
                 case RunState.Running: Jump(); break;
                 case RunState.Paused: TogglePause(); break;
@@ -730,11 +804,13 @@ namespace DinoRush
         public void StartRun()
         {
             if (!initialized) return;
+            ApplyMap(SelectedMapIndex);
             ResetRun();
             State = RunState.Running;
             SetSkyFraming(false);
             gameCamera.transform.position = new Vector3(0, 0, -10);
             hud.ShowRunning();
+            hud.SetMapName(SelectedMapName);
             hud.UpdateLevel(Level);
             hud.UpdateScore(0, best, 0, RunnerRules.Speed(0));
         }
@@ -780,6 +856,7 @@ namespace DinoRush
             SaveBest();
             ResetRun();
             State = RunState.Ready;
+            ApplyMap(0);
             SetSkyFraming(true);
             gameCamera.transform.position = new Vector3(0, 1.4f, -10);
             hud.ShowReady(best);

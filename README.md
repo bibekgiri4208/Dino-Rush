@@ -1,16 +1,16 @@
-# Dino Rush — Forest
+# Dino Rush
 
-A single-player endless runner using the supplied blue dino, forest parallax layers, and obstacle sprites. Requires Unity **6000.4.1f1** and the packages already listed in this project.
+A single-player endless runner with four selectable dinos and Forest, Desert, Jungle, and Rural maps using the supplied sprite sets. Requires Unity **6000.4.1f1** and the packages already listed in this project.
 
 ## Play
 
-Open **Assets/Scenes/ForestRun.unity** (or **Dino Rush → Open Forest Run**) and press **Play**. ForestRun is also the first scene in Build Settings. The original SampleScene and unused character/map art are left intact.
+Open **Assets/Scenes/ForestRun.unity** (or **Dino Rush → Open Forest Run**) and enter Play mode. In the main menu, click **Play**, choose a map preview, then click **Start Run**. ForestRun is also the first scene in Build Settings; all four maps use this shared scene. The original SampleScene and supplied artwork are left intact.
 
 | Action | Controls |
 | --- | --- |
-| Start | Play, Space, or Enter |
-| Retry | Space, Enter, click/tap the forest, or Run Again |
-| Jump | Space, Up, W, click/tap the forest, or JUMP |
+| Choose map / start | Play, Space, or Enter opens the map selector; choose a card, then Start Run |
+| Retry | Space, Enter, click/tap the playfield, or Run Again |
+| Jump | Space, Up, W, click/tap the playfield, or JUMP |
 | Duck / fast drop | Hold Down, S, or DUCK; tap in midair to drop quickly |
 | Pause / resume | Esc, P, or the pause button |
 | Restart / leave run | Pause menu: Restart or Quit to Menu |
@@ -24,7 +24,17 @@ The trail advances through **six difficulty levels** at 0, 12, 28, 48, 75, and 1
 
 Duck uses the dino's crouched running frames and a shorter collision box. In midair it immediately cuts upward momentum and accelerates the descent until landing, even if you release early. Hold to remain crouched on landing; release to stand and jump again. Ducking cancels buffered jumps, so a fast drop never causes an accidental bounce. It does not let you pass through ground obstacles. The on-screen Duck control supports mouse/touch holds and hides with Jump on menus, pause, and results. **Dino Rush → Add Duck Controls** upgrades an older HUD in place.
 
-Your best forest score, sound preference, and chosen dino are saved locally with PlayerPrefs. Restarting a run does not erase your best or change your dino. The game uses a 16:9 viewport with letterboxing for other window shapes.
+Your best score, sound preference, chosen dino, and last map are saved locally with PlayerPrefs. Restarting a run does not erase your best or change your dino/map. The game uses a 16:9 viewport with letterboxing for other window shapes.
+
+## Maps
+
+**Play → Choose Your Map → Start Run** offers four preview cards: **Forest**, **Desert**, **Jungle**, and **Rural** (the riverside village). Selecting a card highlights and remembers it but does not start gameplay. Back or Esc/P returns to the title without starting a run. Customize also shows the selected map; the gameplay badge and pause heading use its name. Retry/Restart retains the same map and chosen dino. Returning to the title restores its original forest backdrop while remembering your choice. Invalid saved map IDs fall back to Forest.
+
+Desert uses `Assets/2D Sprites/desert bg`, Jungle uses `Assets/2D Sprites/jungle bg`, and Rural uses `Assets/2D Sprites/rural area bg`. Each has layered parallax, a matching running surface/soil, and themed dust/ambient colors. They share the same movement, collision bounds, obstacle pool, difficulty progression, and personal best; the existing forest high-score preference is retained.
+
+`Assets/Generated/RunnerMaps/MapCatalog.asset` holds editable source references, sprites, layer heights/bottoms/speeds, and colors. New map layers are created lazily on first use and reused thereafter, rather than duplicated on retry. The original saved forest objects remain intact. Loop variants use reflected extensions with matching edge pixels, point sampling, no compression/mipmaps, and one-texel tile overlap. Skies extend below their supplied transparent horizons; moons use cropped, stationary sprites. Running surfaces recolor the existing ground texture without changing its size or collision height. All source PNGs and import settings are preserved.
+
+**Dino Rush → Add Map Selector and Maps** authors the catalog and editable submenu without rebuilding the world; reapplication preserves existing generated art/catalog edits. **Dino Rush → Refresh Map Previews** explicitly redraws only the four previews from catalog framing. The selector inherits the shared hover, click, and entrance effects.
 
 ## Structure
 
@@ -34,6 +44,7 @@ Your best forest score, sound preference, and chosen dino are saved locally with
 - `RunnerRules.cs`: movement constants, hitboxes, capped speed and fair spawn intervals.
 - `RunnerEncounterDirector.cs`: progressive, randomized obstacle combinations and safe encounter spacing.
 - `RunnerDinoRoster.cs`: the four supplied dino sheets, portraits, and stable selection IDs.
+- `RunnerMapCatalog.cs`: four maps, source/loop sprites, previews, parallax framing, and environment colors.
 - `RunnerUiButtonFeedback.cs`, `RunnerUiReveal.cs`, `RunnerUiEffects.cs`: shared button feedback, panel entrances, and motion styling.
 - `RunnerHud.cs`: start/retry/pause cards, score HUD, touch controls.
 - `RunnerAudio.cs`: short generated jump/crash/milestone cues (no external audio required).
@@ -48,7 +59,7 @@ Gameplay obstacles stay hidden in the main-menu preview and activate through the
 
 The gameplay HUD and results screen share the title menu's pixel font, cream/sage colors, mossy frames, and icons. Pause freezes the run and opens **Resume**, **Restart**, and **Quit to Menu** controls. Resume preserves the exact run, Restart resets its score and obstacle pool, and Quit returns to the title screen while saving your best. The saved `Forest Pause Menu` object is under the UI safe-content root; enable it for layout editing after hiding `Forest Main Menu`. **Dino Rush → Apply Gameplay UI Theme** authors/refreshes this styling in place, without recreating the forest or restoring the removed foreground decorations.
 
-The in-game HUD follows the forest reference: a pine/FOREST RUN badge at top left, stacked trophy score and crown best-score cards at top right, icon-only sound/pause buttons, and green Jump/Duck controls. The lower strip has a live ten-segment pace meter, multiplier, and keyboard keycaps over a subtle dark fade. These overlays hide on the title screen; the meter/guide/Jump/Duck controls also hide while paused or viewing results. HUD-only sprites are editable under `Assets/UI/ForestHud`; `ForestHudArt.cs` generates missing art without overwriting existing sprites.
+The in-game HUD follows the forest reference: a pine/map-name badge at top left, stacked trophy score and crown best-score cards at top right, icon-only sound/pause buttons, and green Jump/Duck controls. The lower strip has a live ten-segment pace meter, multiplier, and keyboard keycaps over a subtle dark fade. These overlays hide on the title screen; the meter/guide/Jump/Duck controls also hide while paused or viewing results. HUD-only sprites are editable under `Assets/UI/ForestHud`; `ForestHudArt.cs` generates missing art without overwriting existing sprites.
 
 Running kicks up a short brown pixel-dirt trail behind the dino's feet; landing creates a larger outward burst of dirt clods and dust puffs. Emission stops in midair and on menus, pause freezes the particles, and restarting/returning to the title clears them. The effect reuses the saved 36 sprites under `Forest effects/Trail dust pool` without allocating objects for each burst. Tune frequency/counts under **Pixel dirt effects** on `ForestRunnerGame`. The three point-filtered sprites live in `Assets/Generated/ForestDirtSprites.asset`; **Dino Rush → Apply Dirt Effects** assigns them to an older scene without rebuilding the world or overwriting existing dirt art.
 
@@ -81,3 +92,5 @@ Duck tests cover the crouch animation/hitbox, fast drops during ascent/apex/desc
 Dino-selector tests verify the four source sheets, saved menu bindings, raycastable cards, selection feedback/persistence/fallback, frame caching, matching animation colors and hitboxes, restart/menu behavior, and normal/tablet/wide layouts. These tests restore the previous dino selection and high score afterward.
 
 UI-motion tests verify saved coverage and idempotent installation, mouse hover/press/click feedback, stable edge hit targets, disabled/right-click behavior, multitouch and keyboard feedback, focus/pause/menu cleanup, unscaled and interrupted modal transitions, and replayable level banners. Optional captures include hover, pressed, pause, tablet, and wide views.
+
+Map tests verify catalog/source references, preview bindings, matching loop edges/import settings, real raycastable selector/start/back controls, cancellation, persistence/fallback, all four running environments, unchanged jump/duck behavior, pause/results/retry continuity, bounded renderer reuse, and scrolling coverage through repeated wraps. Optional captures include every map and selector tablet/wide views. The test suite temporarily defaults to Forest for existing regressions and restores the player's prior map choice afterward.
