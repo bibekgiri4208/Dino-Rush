@@ -286,7 +286,8 @@ namespace DinoRush.Tests
                 Assert.That(background.type, Is.EqualTo(Image.Type.Sliced), button.name + " stretches its frame");
                 Assert.That(background.sprite.border.sqrMagnitude, Is.GreaterThan(0));
                 Transform icon = button.transform.Find("Icon");
-                Transform label = button.GetComponentInChildren<Text>().transform;
+                Text caption = button.GetComponentInChildren<Text>();
+                Transform label = caption != null ? caption.transform : null;
                 if (icon != null && label != null)
                 {
                     Bounds a = RectTransformUtility.CalculateRelativeRectTransformBounds(button.transform, icon);
@@ -343,7 +344,7 @@ namespace DinoRush.Tests
             Assert.That(game.State, Is.EqualTo(ForestRunnerGame.RunState.Running));
         }
 
-        private static IEnumerator Capture(string name, int width = 1280, int height = 720)
+        internal static IEnumerator Capture(string name, int width = 1280, int height = 720)
         {
             // Optional screenshots for local CI, never written into the asset folder.
             string directory = System.Environment.GetEnvironmentVariable("DINO_RUSH_CAPTURE_DIR");

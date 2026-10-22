@@ -15,6 +15,8 @@ namespace DinoRush
         private static readonly Color Cream = new Color32(245, 246, 222, 255);
         private static readonly Color Mint = new Color32(173, 233, 154, 255);
         private static readonly Color Muted = new Color32(174, 199, 187, 255);
+        private static readonly Color PaceLit = new Color32(184, 217, 87, 255);
+        private static readonly Color PaceUnlit = new Color32(26, 53, 46, 255);
         [SerializeField] private Font font;
         [SerializeField] private RectTransform root;
         [SerializeField] private List<Button> buttons = new List<Button>();
@@ -46,6 +48,9 @@ namespace DinoRush
         [SerializeField] private Image soundIcon;
         [SerializeField] private Sprite soundOn;
         [SerializeField] private Sprite soundOff;
+        [SerializeField] private Image[] paceSegments = new Image[0];
+        [SerializeField] private GameObject controlsGuide;
+        [SerializeField] private GameObject gameplayBackdrop;
         private float toastTime;
 
         public bool IsBuilt => root != null;
@@ -157,7 +162,14 @@ namespace DinoRush
         {
             score.text = points.ToString("D6");
             best.text = Mathf.Max(points, highScore).ToString("D6");
-            stats.text = $"{cleared:D2} CLEARED  /  {speed / 6.8f:0.0}x PACE";
+            if (paceSegments != null && paceSegments.Length > 0)
+            {
+                stats.text = $"{speed / RunnerRules.Speed(0):0.0}x";
+                int lit = Mathf.CeilToInt(Mathf.Clamp01(speed / RunnerRules.Speed(100)) * paceSegments.Length);
+                for (int i = 0; i < paceSegments.Length; i++)
+                    if (paceSegments[i] != null) paceSegments[i].color = i < lit ? PaceLit : PaceUnlit;
+            }
+            else stats.text = $"{cleared:D2} CLEARED  /  {speed / 6.8f:0.0}x PACE";
             if (pausedScore != null) pausedScore.text = $"SCORE {points:D6} / BEST {Mathf.Max(points, highScore):D6}";
         }
 
@@ -223,6 +235,9 @@ namespace DinoRush
             pauseButton.SetActive(!visible);
             stats.gameObject.SetActive(!visible);
             if (statsFrame != null) statsFrame.SetActive(!visible);
+            if (controlsGuide != null) controlsGuide.SetActive(!visible);
+            if (gameplayBackdrop != null) gameplayBackdrop.SetActive(!visible);
+            footer.gameObject.SetActive(visible || controlsGuide == null);
             toast.text = "";
             toastTime = 0f;
             footer.text = "SPACE / UP / W : JUMP    CLICK / TAP : JUMP";

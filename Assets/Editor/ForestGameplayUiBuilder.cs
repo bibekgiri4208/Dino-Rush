@@ -22,6 +22,7 @@ namespace DinoRush.Editor
             ForestRunnerGame game = Object.FindAnyObjectByType<ForestRunnerGame>();
             if (game == null || !game.HasAuthoredScene) throw new System.InvalidOperationException("Open the authored forest scene first.");
             PixelMenuArt.Generate();
+            ForestHudArt.Generate();
             font = AssetDatabase.LoadAssetAtPath<Font>("Assets/UI/Fonts/PressStart2P-Regular.ttf");
             if (font == null) throw new System.InvalidOperationException("The forest pixel font is missing.");
             Transform root = game.transform.Find("Forest runner UI/16 by 9 safe content");
@@ -29,42 +30,64 @@ namespace DinoRush.Editor
             if (main == null) throw new System.InvalidOperationException("Apply the forest main menu first.");
 
             Transform badge = root.Find("Top left badge");
-            Position(badge, -450, 292, 316, 88);
-            Frame(badge, "ButtonForest");
+            Position(badge, -446, 292, 316, 80);
+            HudFrame(badge, "HudPanel");
             badge.Find("Badge accent").gameObject.SetActive(false);
-            Label(badge.Find("Brand"), "DINO RUSH", 0, 13, 280, 34, 24);
-            Label(badge.Find("Map"), "FOREST / ENDLESS", 0, -20, 280, 26, 12, Sage);
+            HudArt("Forest pine", badge, "HudPine", -116, 0, 48, 66);
+            Label(badge.Find("Brand"), "FOREST RUN", 35, 13, 216, 30, 20, Cream, TextAnchor.MiddleLeft);
+            Label(badge.Find("Map"), "ENDLESS", 35, -17, 216, 26, 16, Sage, TextAnchor.MiddleLeft);
+            Moss(badge, 316, 80, true);
 
             Transform scores = root.Find("Scoreboard");
-            Position(scores, 64, 292, 468, 88);
-            Frame(scores, "ButtonForest");
-            Label(scores.Find("Score caption"), "SCORE", -112, 20, 204, 26, 12, Sage);
-            Label(scores.Find("Best caption"), "PERSONAL BEST", 112, 20, 204, 26, 12, Sage);
-            Label(scores.Find("Score"), "000000", -112, -12, 204, 36, 24);
-            Label(scores.Find("Best"), "000000", 112, -12, 204, 36, 24);
-            scores.Find("Divider").GetComponent<Image>().color = new Color(0.68f, 0.8f, 0.6f, 0.25f);
+            Position(scores, 398, 254, 260, 148);
+            scores.GetComponent<Image>().enabled = false;
+            ScoreCard(scores, "Score card", "Score", "SCORE", "HudTrophy", 40);
+            ScoreCard(scores, "Best card", "Best", "BEST", "HudCrown", -40);
+            scores.Find("Divider").gameObject.SetActive(false);
 
             Transform sound = root.Find("Sound");
-            Position(sound, 436, 292, 80, 88);
-            Frame(sound, "SoundFrame");
-            Label(sound.Find("Sound label"), "SFX", 0, -23, 64, 26, 12, Sage);
-            Image speaker = Art("Sound icon", sound, "IconSpeaker", 0, 14, 32, 32);
+            Position(sound, 584, 294, 60, 60);
+            HudFrame(sound, "HudControl");
+            sound.Find("Sound label").gameObject.SetActive(false);
+            Image speaker = HudArt("Sound icon", sound, "HudSpeaker", 0, 0, 36, 36);
             Transform pause = root.Find("Pause");
-            Position(pause, 536, 292, 96, 88);
-            Frame(pause, "SoundFrame");
-            Label(pause.Find("Pause label"), "PAUSE", 0, -23, 80, 26, 12, Sage);
-            Art("Pause icon", pause, "IconPause", 0, 14, 28, 28);
+            Position(pause, 584, 214, 60, 60);
+            HudFrame(pause, "HudControl");
+            pause.Find("Pause label").gameObject.SetActive(false);
+            HudArt("Pause icon", pause, "HudPause", 0, 0, 36, 36);
 
             Transform jump = root.Find("Jump");
-            Position(jump, 500, -270, 208, 76);
-            StyleButton(jump.GetComponent<Button>(), "JUMP", "IconJump", true, 20);
-            Transform statsFrame = Node("Trail stats frame", root, -356, -270, 504, 64);
-            Frame(statsFrame, "ButtonForest");
+            Position(jump, 476, -276, 248, 88);
+            HudFrame(jump, "HudJump");
+            HudArt("Icon", jump, "HudJumpArrow", -66, 0, 44, 44);
+            Text jumpCaption = jump.GetComponentInChildren<Text>(true);
+            Label(jumpCaption.transform, "JUMP", 28, 0, 136, 48, 28);
+            Moss(jump, 248, 88, true);
+            Transform statsFrame = Node("Trail stats frame", root, -430, -294, 340, 42);
+            HudFrame(statsFrame, "HudPace");
+            HudArt("Running dino", statsFrame, "HudDino", -144, 0, 28, 30);
+            Transform meter = Node("Pace meter", statsFrame, -28, 0, 180, 14);
+            HudFrame(meter, "HudMeter");
+            var segments = new Image[10];
+            for (int i = 0; i < segments.Length; i++)
+            {
+                Transform segment = Node("Pace segment " + (i + 1), meter, -72 + i * 16, 0, 14, 8);
+                Image fill = segment.GetComponent<Image>();
+                if (fill == null) fill = segment.gameObject.AddComponent<Image>();
+                fill.raycastTarget = false;
+                fill.color = i < 6 ? PixelMenuArt.Hex(0xb8d957) : PixelMenuArt.Hex(0x1a352e);
+                segments[i] = fill;
+            }
             Transform stats = root.Find("Run stats") ?? statsFrame.Find("Run stats");
             stats.SetParent(statsFrame, false);
-            Label(stats, "00 CLEARED  /  1.0x PACE", 0, 0, 456, 34, 16, Sage);
+            Label(stats, "1.0x", 120, 0, 72, 28, 16);
+            Moss(statsFrame, 340, 42);
             statsFrame.SetSiblingIndex(root.Find("Menu scrim").GetSiblingIndex());
-            Label(root.Find("Controls"), "SPACE / UP / W : JUMP    CLICK / TAP : JUMP    ESC / P : PAUSE", 0, -332, 1200, 28, 12, Sage);
+            Transform guide = KeyboardGuide(root);
+            Image bottomFade = HudArt("Gameplay bottom fade", root, "HudBottomFade", 0, -280, 1280, 160);
+            bottomFade.preserveAspect = false;
+            bottomFade.transform.SetSiblingIndex(0);
+            Label(root.Find("Controls"), "", 0, -334, 960, 24, 10, Sage);
             Label(root.Find("Milestone toast"), "", 0, 172, 1000, 48, 24);
 
             Image scrim = root.Find("Menu scrim").GetComponent<Image>();
@@ -108,8 +131,16 @@ namespace DinoRush.Editor
             SetHud(game, "pausedScore", pausedScore);
             SetHud(game, "statsFrame", statsFrame.gameObject);
             SetHud(game, "soundIcon", speaker);
-            SetHud(game, "soundOn", PixelMenuArt.Load("IconSpeaker"));
-            SetHud(game, "soundOff", PixelMenuArt.Load("IconMuted"));
+            SetHud(game, "soundOn", ForestHudArt.Load("HudSpeaker"));
+            SetHud(game, "soundOff", ForestHudArt.Load("HudMuted"));
+            SetHud(game, "controlsGuide", guide.gameObject);
+            SetHud(game, "gameplayBackdrop", bottomFade.gameObject);
+            var segmentData = new SerializedObject(game);
+            SerializedProperty savedSegments = segmentData.FindProperty("hud").FindPropertyRelative("paceSegments");
+            savedSegments.arraySize = segments.Length;
+            for (int i = 0; i < segments.Length; i++)
+                savedSegments.GetArrayElementAtIndex(i).objectReferenceValue = segments[i];
+            segmentData.ApplyModifiedPropertiesWithoutUndo();
 
             var serialized = new SerializedObject(game);
             SerializedProperty buttons = serialized.FindProperty("hud").FindPropertyRelative("buttons");
@@ -152,6 +183,81 @@ namespace DinoRush.Editor
             var data = new SerializedObject(game);
             data.FindProperty("hud").FindPropertyRelative(name).objectReferenceValue = value;
             data.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        private static void ScoreCard(Transform scores, string name, string valueName, string caption, string icon, float y)
+        {
+            Transform heading = scores.Find(valueName + " caption") ?? scores.Find(name + "/" + valueName + " caption");
+            Transform value = scores.Find(valueName) ?? scores.Find(name + "/" + valueName);
+            Transform card = Node(name, scores, 0, y, 260, 68);
+            HudFrame(card, "HudPanel");
+            heading.SetParent(card, false);
+            value.SetParent(card, false);
+            Label(heading, caption, 22, 19, 184, 24, 16, Sage, TextAnchor.MiddleLeft);
+            Label(value, "000000", 22, -11, 184, 36, 28, Cream, TextAnchor.MiddleLeft);
+            HudArt("Medal icon", card, icon, -94, 0, 38, 38);
+            Moss(card, 260, 68);
+        }
+
+        private static Transform KeyboardGuide(Transform root)
+        {
+            Transform guide = Node("Keyboard controls", root, 64, -306, 520, 30);
+            Color hint = PixelMenuArt.Hex(0x91a39f);
+            Key(guide, "Space key", "SPACE", -218, 68);
+            Label(Node("First separator", guide), "/", -174, 0, 12, 26, 12, hint);
+            Transform up = Key(guide, "Up key", "", -150, 24);
+            HudArt("Up arrow", up, "HudJumpArrow", 0, 0, 18, 20);
+            Label(Node("Second separator", guide), "/", -126, 0, 12, 26, 12, hint);
+            Key(guide, "W key", "W", -102, 24);
+            Label(Node("Jump hint", guide), ": JUMP", -47, 0, 72, 26, 12, hint);
+            Image divider = Node("Hint divider", guide, 16, 0, 1, 26).GetComponent<Image>();
+            if (divider == null) divider = guide.Find("Hint divider").gameObject.AddComponent<Image>();
+            divider.color = PixelMenuArt.Hex(0x40565a);
+            divider.raycastTarget = false;
+            Key(guide, "Escape key", "ESC", 64, 48);
+            Label(Node("Pause hint", guide), ": PAUSE", 134, 0, 94, 26, 12, hint);
+            return guide;
+        }
+
+        private static Transform Key(Transform guide, string name, string caption, float x, float width)
+        {
+            Transform key = Node(name, guide, x, 0, width, 26);
+            HudFrame(key, "HudKey");
+            Label(Node("Key caption", key), caption, 0, 0, width - 8, 22, 12, PixelMenuArt.Hex(0xaab6b3));
+            return key;
+        }
+
+        private static void Moss(Transform parent, float width, float height, bool both = false)
+        {
+            HudArt("Right moss sprig", parent, "HudLeaves", width * 0.5f - 7, height * 0.5f - 5, 28, 28);
+            if (both)
+            {
+                Image left = HudArt("Left moss sprig", parent, "HudLeaves", -width * 0.5f + 8, -height * 0.5f + 7, 28, 28);
+                left.rectTransform.localRotation = Quaternion.Euler(0, 0, 180);
+            }
+        }
+
+        private static Image HudArt(string name, Transform parent, string sprite, float x, float y, float width, float height)
+        {
+            Transform node = Node(name, parent, x, y, width, height);
+            Image image = node.GetComponent<Image>();
+            if (image == null) image = node.gameObject.AddComponent<Image>();
+            image.sprite = ForestHudArt.Load(sprite);
+            image.color = Color.white;
+            image.raycastTarget = false;
+            image.preserveAspect = true;
+            return image;
+        }
+
+        private static void HudFrame(Transform node, string sprite)
+        {
+            Image image = node.GetComponent<Image>();
+            if (image == null) image = node.gameObject.AddComponent<Image>();
+            image.sprite = ForestHudArt.Load(sprite);
+            image.type = Image.Type.Sliced;
+            image.pixelsPerUnitMultiplier = 0.5f;
+            image.color = Color.white;
+            image.raycastTarget = node.GetComponent<Button>() != null;
         }
 
         private static Button NewButton(string name, Transform parent, string caption, string icon, float y, bool primary = false, int size = 24)
@@ -198,7 +304,8 @@ namespace DinoRush.Editor
             image.raycastTarget = node.GetComponent<Button>() != null;
         }
 
-        private static Text Label(Transform node, string caption, float x, float y, float width, float height, int size, Color? color = null)
+        private static Text Label(Transform node, string caption, float x, float y, float width, float height, int size, Color? color = null,
+            TextAnchor alignment = TextAnchor.MiddleCenter)
         {
             Position(node, x, y, width, height);
             Text text = node.GetComponent<Text>();
@@ -208,7 +315,7 @@ namespace DinoRush.Editor
             text.fontSize = size;
             text.text = caption;
             text.color = color ?? Cream;
-            text.alignment = TextAnchor.MiddleCenter;
+            text.alignment = alignment;
             text.alignByGeometry = true;
             text.lineSpacing = 1.65f;
             text.horizontalOverflow = HorizontalWrapMode.Wrap;
