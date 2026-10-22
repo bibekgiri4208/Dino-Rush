@@ -39,6 +39,7 @@ namespace DinoRush.Editor
             container.SetAssets(assets);
             AssetDatabase.CreateAsset(container, SpriteAssetPath);
             foreach (Object asset in assets) AssetDatabase.AddObjectToAsset(asset, container);
+            ForestParallaxRepair.Repair(game);
             EditorUtility.SetDirty(container);
             EditorUtility.SetDirty(game);
             AssetDatabase.SaveAssets();

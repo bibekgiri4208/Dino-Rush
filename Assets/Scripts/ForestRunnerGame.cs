@@ -26,7 +26,7 @@ namespace DinoRush
         private sealed class Layer
         {
             public Transform[] tiles;
-            public float width;
+            public float width; // Repeat stride; render quads overlap by one texture pixel.
             public float speed;
             public float offset;
         }
@@ -366,7 +366,7 @@ namespace DinoRush
         private void AddLayer(Texture2D texture, float height, float bottom, float speed, int order)
         {
             Sprite sprite = MakeSprite(texture, new Vector2(0.5f, 0));
-            float width = sprite.bounds.size.x * height;
+            float width = (sprite.rect.width - 1) / sprite.pixelsPerUnit * height;
             var layer = new Layer { tiles = new Transform[3], width = width, speed = speed };
             Transform group = Group(texture.name + " parallax", environmentGroup);
             for (int i = 0; i < 3; i++)
