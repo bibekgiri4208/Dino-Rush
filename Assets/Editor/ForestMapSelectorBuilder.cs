@@ -13,6 +13,22 @@ namespace DinoRush.Editor
         private static readonly Color Cream = PixelMenuArt.Hex(0xf0f2cf);
         private static readonly Color Sage = PixelMenuArt.Hex(0xaecb98);
 
+        [MenuItem("Dino Rush/Refine New Map Layer Placement")]
+        public static void RefineLayerPlacement()
+        {
+            if (Application.isPlaying) return;
+            RunnerMapCatalog catalog = AssetDatabase.LoadAssetAtPath<RunnerMapCatalog>(CatalogPath);
+            if (catalog == null) throw new System.InvalidOperationException("Add the map selector first.");
+            for (int i = 1; i < catalog.Count; i++)
+            {
+                RefineFraming(catalog[i]);
+                catalog[i].preview = RunnerMapArt.Preview(catalog[i], true);
+            }
+            EditorUtility.SetDirty(catalog);
+            AssetDatabase.SaveAssets();
+            Debug.Log("Refined Desert / Jungle / Rural layer framing. Forest, native artwork, running surface, and gameplay unchanged.");
+        }
+
         [MenuItem("Dino Rush/Restore Map Background Source Resolution")]
         public static void RestoreSourceResolution()
         {
@@ -187,6 +203,7 @@ namespace DinoRush.Editor
             for (int i = 0; i < maps.Count; i++)
             {
                 RunnerMapCatalog.Map map = maps[i];
+                RefineFraming(map);
                 map.preview = RunnerMapArt.Preview(map);
                 SerializedProperty entry = entries.GetArrayElementAtIndex(i);
                 entry.FindPropertyRelative("id").stringValue = map.id;
@@ -216,6 +233,54 @@ namespace DinoRush.Editor
             serialized.ApplyModifiedPropertiesWithoutUndo();
             AssetDatabase.CreateAsset(catalog, CatalogPath);
             return catalog;
+        }
+
+        private static void RefineFraming(RunnerMapCatalog.Map map)
+        {
+            // Frames refer to the complete source canvas, including transparent margins.
+            // The trail is at -2.96: foreground scenery extends just below it instead
+            // of losing its lower quarter below the trail as in the old 12/-5.625 frame.
+            if (map.id == "desert")
+            {
+                Frame(map, "desert_sky.png", 12f, -5.625f);
+                Frame(map, "desert_cloud.png", 10.4f, -4.3f);
+                Frame(map, "desert_mountain.png", 9f, -4.35f);
+                Frame(map, "desert_dunemid.png", 9f, -3.28f);
+                Frame(map, "desert_dunefrontt.png", 9f, -3.28f);
+                Frame(map, "desert_moon.png", 0.85f, 3.85f, 1.5f);
+            }
+            else if (map.id == "jungle")
+            {
+                // These five sheets share a canvas: retain their registration, with
+                // roots behind the trail and enough canopy to cover the top of the view.
+                for (int i = 1; i <= 5; i++) Frame(map, $"plx-{i}.png", 9.3f, -3.5f);
+            }
+            else if (map.id == "rural")
+            {
+                Frame(map, "ruralparallaxsky.png", 12f, -5.625f);
+                Frame(map, "ruralparallaxclouds.png", 10.4f, -4.2f);
+                Frame(map, "ruralparallaxmountainback2.png", 8.4f, -5.05f);
+                Frame(map, "ruralparallaxmountainback.png", 8.4f, -4.95f);
+                Frame(map, "ruralparallaxmountain.png", 8.4f, -4.8f);
+                // Village fields meet the far bank. Water/reflection/near bank use
+                // one frame, with the near bank slightly above the running surface.
+                Frame(map, "ruralparallaxvillage.png", 8.4f, -3.7f);
+                Frame(map, "ruralparallaxriver.png", 8.4f, -3.7f);
+                Frame(map, "ruralparallaxriverskyredlex.png", 8.4f, -3.7f);
+                Frame(map, "ruralparallaxriverfront.png", 8.4f, -3.7f);
+                Frame(map, "ruralparalaxmoon.png", 0.85f, 3.7f, -1.8f);
+            }
+        }
+
+        private static void Frame(RunnerMapCatalog.Map map, string sourceName, float height, float bottom, float? x = null)
+        {
+            foreach (RunnerMapCatalog.MapLayer layer in map.layers)
+            {
+                if (Path.GetFileName(AssetDatabase.GetAssetPath(layer.source)) != sourceName) continue;
+                layer.height = height;
+                layer.bottom = bottom;
+                if (x.HasValue) layer.x = x.Value;
+            }
         }
 
         private static RunnerMapCatalog.MapLayer Layer(string relativePath, string name, float speed, int order, bool sky = false)

@@ -97,40 +97,40 @@ MonoBehaviour:
       x: 0
     - source: {fileID: 2800000, guid: b94cd2f72ed437347a49c2ad16cb2938, type: 3}
       sprite: {fileID: 21300000, guid: 87796903d256aa84e99b7016da3db551, type: 3}
-      height: 1.2
-      bottom: 2.9
+      height: 0.85
+      bottom: 3.85
       speed: 0
       order: -95
       stationary: 1
-      x: 6.4
+      x: 1.5
     - source: {fileID: 2800000, guid: 4d976efc6e53c544686f2343cc82ae03, type: 3}
       sprite: {fileID: 21300000, guid: d59381af54957d54aba2b65eaae4ad42, type: 3}
-      height: 12
-      bottom: -5.625
+      height: 10.4
+      bottom: -4.3
       speed: 0.035
       order: -90
       stationary: 0
       x: 0
     - source: {fileID: 2800000, guid: 0076f762b1fe66745a6ef694941f64eb, type: 3}
       sprite: {fileID: 21300000, guid: cbddfbe77b750f54b8a47769ce42cae6, type: 3}
-      height: 12
-      bottom: -5.625
+      height: 9
+      bottom: -4.35
       speed: 0.08
       order: -80
       stationary: 0
       x: 0
     - source: {fileID: 2800000, guid: 8df116f363d9ca24d939b900398e99bd, type: 3}
       sprite: {fileID: 21300000, guid: b8bb4fe7634d1bd49b00ff2d0dfafd3b, type: 3}
-      height: 12
-      bottom: -5.625
+      height: 9
+      bottom: -3.28
       speed: 0.18
       order: -70
       stationary: 0
       x: 0
     - source: {fileID: 2800000, guid: 67ea11e328fb70e40816ac79256fd983, type: 3}
       sprite: {fileID: 21300000, guid: dd1faddeb1fc05f479c7fce8cf3034b1, type: 3}
-      height: 12
-      bottom: -5.625
+      height: 9
+      bottom: -3.28
       speed: 0.4
       order: -50
       stationary: 0
@@ -154,40 +154,40 @@ MonoBehaviour:
     layers:
     - source: {fileID: 2800000, guid: 3f8822d72a513d24696875b2aa6da6fb, type: 3}
       sprite: {fileID: 21300000, guid: c2f1da8d00c4e7f448c7825a678377ed, type: 3}
-      height: 12
-      bottom: -5.625
+      height: 9.3
+      bottom: -3.5
       speed: 0.015
       order: -100
       stationary: 0
       x: 0
     - source: {fileID: 2800000, guid: 86ca2308ff6d2bd4d91e261e2119df96, type: 3}
       sprite: {fileID: 21300000, guid: c0ecfaf71700982419630eb99f90d447, type: 3}
-      height: 12
-      bottom: -5.625
+      height: 9.3
+      bottom: -3.5
       speed: 0.07
       order: -90
       stationary: 0
       x: 0
     - source: {fileID: 2800000, guid: dec53941113a530479a4c5c202b6decf, type: 3}
       sprite: {fileID: 21300000, guid: 32a757b7e077bc840ab108c70a104520, type: 3}
-      height: 12
-      bottom: -5.625
+      height: 9.3
+      bottom: -3.5
       speed: 0.17
       order: -80
       stationary: 0
       x: 0
     - source: {fileID: 2800000, guid: 92a702668c9980a45a80250fd6ad9a4e, type: 3}
       sprite: {fileID: 21300000, guid: 7de094b7068e03844807dd286d3b3e71, type: 3}
-      height: 12
-      bottom: -5.625
+      height: 9.3
+      bottom: -3.5
       speed: 0.3
       order: -70
       stationary: 0
       x: 0
     - source: {fileID: 2800000, guid: 35b01e4bf6335504393cdaf6802eae50, type: 3}
       sprite: {fileID: 21300000, guid: e0ef2721c7c94d14faffdd3ccfb4a359, type: 3}
-      height: 12
-      bottom: -5.625
+      height: 9.3
+      bottom: -3.5
       speed: 0.46
       order: -60
       stationary: 0
@@ -219,72 +219,72 @@ MonoBehaviour:
       x: 0
     - source: {fileID: 2800000, guid: 05c2774f8dfd35c489ab8758456e1f3c, type: 3}
       sprite: {fileID: 21300000, guid: eb85e0af10b7d754eac03c4311d3b49c, type: 3}
-      height: 1.2
-      bottom: 2.9
+      height: 0.85
+      bottom: 3.7
       speed: 0
       order: -95
       stationary: 1
-      x: 6.4
+      x: -1.8
     - source: {fileID: 2800000, guid: 2969d407746300341b8a5b135b9bf72c, type: 3}
       sprite: {fileID: 21300000, guid: 3092aac075d31a14991dd0367c6135e1, type: 3}
-      height: 12
-      bottom: -5.625
+      height: 10.4
+      bottom: -4.2
       speed: 0.03
       order: -90
       stationary: 0
       x: 0
     - source: {fileID: 2800000, guid: a161b520d67eadc4c9248e3b607be714, type: 3}
       sprite: {fileID: 21300000, guid: 6e6529fa76855354d850cdcf3b3ed049, type: 3}
-      height: 12
-      bottom: -5.625
+      height: 8.4
+      bottom: -5.05
       speed: 0.05
       order: -85
       stationary: 0
       x: 0
     - source: {fileID: 2800000, guid: 95c5e993dddbb494da9868ecb7ab5f3d, type: 3}
       sprite: {fileID: 21300000, guid: bef6a6cd8e148184bb0f77ead4fbd8d3, type: 3}
-      height: 12
-      bottom: -5.625
+      height: 8.4
+      bottom: -4.95
       speed: 0.07
       order: -80
       stationary: 0
       x: 0
     - source: {fileID: 2800000, guid: 8c40fb74bf0f75d45958f937a59d72da, type: 3}
       sprite: {fileID: 21300000, guid: d879c79f8fec6c041b17d78a9f5f6a63, type: 3}
-      height: 12
-      bottom: -5.625
+      height: 8.4
+      bottom: -4.8
       speed: 0.12
       order: -75
       stationary: 0
       x: 0
     - source: {fileID: 2800000, guid: 61a139581db381447864368778c531fe, type: 3}
       sprite: {fileID: 21300000, guid: 5c6dfb3d8db6ce14ba89cc91926ddec7, type: 3}
-      height: 12
-      bottom: -5.625
+      height: 8.4
+      bottom: -3.7
       speed: 0.24
       order: -60
       stationary: 0
       x: 0
     - source: {fileID: 2800000, guid: d1213911adb6ff14b93c549fe57fd419, type: 3}
       sprite: {fileID: 21300000, guid: aa1bab4e5a477484181944f5bc9b1906, type: 3}
-      height: 12
-      bottom: -5.625
+      height: 8.4
+      bottom: -3.7
       speed: 0.3
       order: -50
       stationary: 0
       x: 0
     - source: {fileID: 2800000, guid: 40e255bc7963c4d42b10c33e945c8b8e, type: 3}
       sprite: {fileID: 21300000, guid: 1269b6d8b6c02da4895e386c5a7a4055, type: 3}
-      height: 12
-      bottom: -5.625
+      height: 8.4
+      bottom: -3.7
       speed: 0.3
       order: -49
       stationary: 0
       x: 0
     - source: {fileID: 2800000, guid: d84d135ff3fcea84ab99c5aa61b23730, type: 3}
       sprite: {fileID: 21300000, guid: 6dac4c4bb67afe94493f9203c30ef902, type: 3}
-      height: 12
-      bottom: -5.625
+      height: 8.4
+      bottom: -3.7
       speed: 0.4
       order: -45
       stationary: 0

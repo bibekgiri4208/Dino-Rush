@@ -106,6 +106,19 @@ namespace DinoRush.Tests
                     Is.EqualTo(game.MapCatalog[i].displayName.ToUpperInvariant() + " RUN"));
                 IList layers = (IList)Get("layers");
                 Assert.That(layers.Count, Is.EqualTo(game.MapCatalog[i].layers.Length));
+                if (i > 0)
+                {
+                    for (int layerIndex = 0; layerIndex < layers.Count; layerIndex++)
+                    {
+                        RunnerMapCatalog.MapLayer spec = game.MapCatalog[i].layers[layerIndex];
+                        foreach (Transform tile in Tiles(layers[layerIndex]))
+                        {
+                            Assert.That(tile.position.y, Is.EqualTo(spec.bottom).Within(0.0001f), tile.name);
+                            Assert.That(tile.localScale.y, Is.EqualTo(spec.height).Within(0.0001f), tile.name);
+                            if (spec.stationary) Assert.That(tile.position.x, Is.EqualTo(spec.x).Within(0.0001f), tile.name);
+                        }
+                    }
+                }
                 Assert.That(game.transform.Find("Forest environment/Earth below the trail").GetComponent<SpriteRenderer>().color,
                     Is.EqualTo(game.MapCatalog[i].soilColor));
                 int rendererCount = game.GetComponentsInChildren<SpriteRenderer>(true).Length;
@@ -183,6 +196,16 @@ namespace DinoRush.Tests
                         Assert.That(first.bounds.min.x, Is.LessThan(-10.1f));
                         Assert.That(tiles[tiles.Length - 1].GetComponent<SpriteRenderer>().bounds.max.x, Is.GreaterThan(10.1f));
                     }
+                }
+                foreach (float travel in new[] { 0f, 140f, 420f })
+                {
+                    foreach (object layer in (IList)Get("layers"))
+                    {
+                        System.Type type = layer.GetType();
+                        type.GetField("offset").SetValue(layer, (float)type.GetField("width").GetValue(layer) * 0.25f);
+                    }
+                    scroll.Invoke(game, new object[] { travel });
+                    yield return ForestRunTests.Capture("map-" + game.MapCatalog[map].id + "-framing-scroll-" + (int)travel);
                 }
                 game.ReturnToMenu();
             }

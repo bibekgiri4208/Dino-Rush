@@ -171,5 +171,75 @@ namespace DinoRush.Tests
                 if (previous.IsValid() && previous.isLoaded) SceneManager.SetActiveScene(previous);
             }
         }
+
+        [TestCase(1, "desert_dunemid.png")]
+        [TestCase(2, "plx-5.png")]
+        [TestCase(3, "ruralparallaxriverfront.png")]
+        public void ForegroundIsAnchoredToTheTrailWithoutTransparentGapsAndSkyCoversTheView(int index, string foregroundSource)
+        {
+            RunnerMapCatalog catalog = AssetDatabase.LoadAssetAtPath<RunnerMapCatalog>(Directory + "/MapCatalog.asset");
+            RunnerMapCatalog.Map map = catalog[index];
+            RunnerMapCatalog.MapLayer sky = map.layers[0];
+            Assert.That(sky.bottom, Is.LessThanOrEqualTo(RunnerRules.GroundY));
+            Assert.That(sky.bottom + sky.height, Is.GreaterThanOrEqualTo(5.625f));
+            RunnerMapCatalog.MapLayer foreground = FindLayer(map, foregroundSource);
+            Assert.That(foreground.bottom, Is.InRange(RunnerRules.GroundY - 1f, RunnerRules.GroundY));
+            Assert.That(foreground.height, Is.InRange(8f, 10f), "Use the map's scenic frame, not a one-size-fits-all full-screen crop.");
+            var texture = new Texture2D(2, 2);
+            try
+            {
+                texture.LoadImage(File.ReadAllBytes(AssetDatabase.GetAssetPath(foreground.sprite)));
+                Color32[] pixels = texture.GetPixels32();
+                int row = Mathf.FloorToInt((RunnerRules.GroundY + 0.08f - foreground.bottom) / foreground.height * texture.height);
+                Assert.That(row, Is.InRange(0, texture.height - 1));
+                // A continuous opaque row immediately above the trail prevents sky
+                // leaks for every horizontal phase, not just the initial screenshot.
+                for (int x = 0; x < texture.width; x++)
+                    Assert.That(pixels[row * texture.width + x].a, Is.EqualTo(255), map.id + " trail gap at texture x=" + x);
+            }
+            finally { Object.DestroyImmediate(texture); }
+        }
+
+        [Test]
+        public void RuralVillageWaterAndBankShareTheirSourceCanvasAndJungleLayersRemainRegistered()
+        {
+            RunnerMapCatalog catalog = AssetDatabase.LoadAssetAtPath<RunnerMapCatalog>(Directory + "/MapCatalog.asset");
+            RunnerMapCatalog.Map rural = catalog[3];
+            RunnerMapCatalog.MapLayer river = FindLayer(rural, "ruralparallaxriver.png");
+            RunnerMapCatalog.MapLayer reflection = FindLayer(rural, "ruralparallaxriverskyredlex.png");
+            Assert.That(reflection.speed, Is.EqualTo(river.speed), "The reflection must not drift out of the water.");
+            foreach (string source in new[] { "ruralparallaxvillage.png", "ruralparallaxriverskyredlex.png", "ruralparallaxriverfront.png" })
+            {
+                RunnerMapCatalog.MapLayer layer = FindLayer(rural, source);
+                Assert.That(layer.height, Is.EqualTo(river.height), source);
+                Assert.That(layer.bottom, Is.EqualTo(river.bottom), source);
+            }
+            RunnerMapCatalog.MapLayer mountain = FindLayer(rural, "ruralparallaxmountain.png");
+            // The source summit is 202px from the top of a 1200px canvas.
+            float summit = mountain.bottom + mountain.height * (1f - 202f / 1200f);
+            Assert.That(summit, Is.InRange(1.5f, 3f), "The distant mountain should not fill the upper sky/HUD.");
+            foreach (RunnerMapCatalog.MapLayer layer in catalog[2].layers)
+            {
+                if (layer.order >= 0) continue;
+                Assert.That(layer.height, Is.EqualTo(catalog[2].layers[0].height));
+                Assert.That(layer.bottom, Is.EqualTo(catalog[2].layers[0].bottom));
+            }
+            foreach (int index in new[] { 1, 3 })
+            foreach (RunnerMapCatalog.MapLayer layer in catalog[index].layers)
+            {
+                if (!layer.stationary) continue;
+                float halfWidth = layer.sprite.rect.width / layer.sprite.pixelsPerUnit * layer.height * 0.5f;
+                Assert.That(Mathf.Abs(layer.x) + halfWidth, Is.LessThan(3.5f), "Moon should sit between the HUD cards, not behind them.");
+                Assert.That(layer.bottom, Is.GreaterThan(3.3f));
+                Assert.That(layer.bottom + layer.height, Is.LessThan(5.2f));
+            }
+        }
+
+        private static RunnerMapCatalog.MapLayer FindLayer(RunnerMapCatalog.Map map, string sourceName)
+        {
+            foreach (RunnerMapCatalog.MapLayer layer in map.layers)
+                if (Path.GetFileName(AssetDatabase.GetAssetPath(layer.source)) == sourceName) return layer;
+            throw new AssertionException("Missing map layer: " + sourceName);
+        }
     }
 }

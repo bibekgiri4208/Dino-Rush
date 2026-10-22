@@ -38,6 +38,8 @@ Desert uses `Assets/2D Sprites/desert bg`, Jungle uses `Assets/2D Sprites/jungle
 
 **Dino Rush → Restore Map Background Source Resolution** explicitly replaces the generated Desert/Jungle/Rural scenery and refreshes their previews from the original sources, keeping their asset GUIDs and catalog framing. Use this to upgrade older 256-pixel-high generated backgrounds. It leaves the forest, shared running surfaces, custom artwork references, and original source files unchanged. Full-resolution backgrounds use more texture memory than the old reduced-resolution versions.
 
+New maps use individual scenic framing rather than one full-screen frame for every layer. Desert dunes sit just behind the trail with the mesas farther back; Jungle's five registered layers place the roots behind the running surface and keep the canopy overhead. Rural's smaller distant mountain leaves open sky, and the village/river/reflection/near bank share a canvas so the bank meets the trail instead of hiding below it. Moons sit in the open area between the HUD cards. **Dino Rush → Refine New Map Layer Placement** explicitly reapplies these defaults and refreshes the three map previews; normal map-selector rebuilding preserves manual catalog framing edits. The forest and gameplay collision height are unchanged.
+
 ## Structure
 
 - `ForestRunnerGame.cs`: scene setup, game states, pooled obstacles/particles, spawning, scoring, input, persistence.
