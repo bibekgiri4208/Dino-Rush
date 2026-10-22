@@ -1,0 +1,6 @@
+{
+  "name": "DinoRush.Editor",
+  "rootNamespace": "DinoRush.Editor",
+  "references": ["DinoRush"],
+  "includePlatforms": ["Editor"]
+}

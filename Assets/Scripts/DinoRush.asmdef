@@ -1,0 +1,6 @@
+{
+  "name": "DinoRush",
+  "rootNamespace": "DinoRush",
+  "references": ["Unity.InputSystem", "UnityEngine.UI"],
+  "autoReferenced": true
+}
