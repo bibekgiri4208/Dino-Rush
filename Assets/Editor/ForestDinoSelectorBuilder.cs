@@ -24,6 +24,7 @@ namespace DinoRush.Editor
             ForestMainMenu menu = game != null ? game.GetComponentInChildren<ForestMainMenu>(true) : null;
             if (menu == null || !game.HasAuthoredScene) throw new System.InvalidOperationException("The authored forest menu is missing.");
             Apply(game, menu);
+            ForestUiMotionBuilder.Apply(game);
             AssetDatabase.SaveAssets();
             EditorSceneManager.MarkSceneDirty(scene);
             EditorSceneManager.SaveScene(scene);

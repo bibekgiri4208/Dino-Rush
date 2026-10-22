@@ -12,6 +12,14 @@ namespace DinoRush.Editor
         private static readonly Color Sage = PixelMenuArt.Hex(0xaecb98);
         private static Font font;
 
+        [MenuItem("Dino Rush/Refine Title Logo")]
+        public static void RefineTitleLogo()
+        {
+            if (Application.isPlaying) return;
+            PixelMenuArt.RebuildLogo();
+            Debug.Log("Refined only the title logo's leafy edges; scene layout and other menu artwork were preserved.");
+        }
+
         [MenuItem("Dino Rush/Apply Forest Main Menu")]
         public static void Build()
         {
@@ -27,6 +35,7 @@ namespace DinoRush.Editor
                 // Refresh framing without recreating or replacing any authored UI objects.
                 ForestDinoSelectorBuilder.Apply(game, existing);
                 ForestUiRepair.Repair(game);
+                ForestUiMotionBuilder.Apply(game);
                 game.AssignMainMenu(existing);
                 EditorUtility.SetDirty(game);
                 EditorSceneManager.MarkSceneDirty(scene);
@@ -102,6 +111,7 @@ namespace DinoRush.Editor
             ForestDinoSelectorBuilder.Apply(game, menu);
             game.AssignMainMenu(menu);
             ForestUiRepair.Repair(game);
+            ForestUiMotionBuilder.Apply(game);
             EditorUtility.SetDirty(menu);
             EditorUtility.SetDirty(game);
             Canvas.ForceUpdateCanvases();

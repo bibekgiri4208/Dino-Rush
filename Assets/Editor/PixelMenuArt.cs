@@ -95,6 +95,8 @@ namespace DinoRush.Editor
             Save("ButtonForest", ButtonFrame(false), true);
         }
 
+        internal static void RebuildLogo() => Save("DinoRushLogo", Logo(), true);
+
         private static void Save(string name, Pixels pixels, bool replace = false)
         {
             string path = $"{Directory}/{name}.png";
@@ -210,18 +212,7 @@ namespace DinoRush.Editor
                 int x = 36 + Noise(i, 1) % 266, y = 84 + Noise(i, 3) % 64;
                 art.Rect(x, y, 4 + Noise(i, 5) % 12, 2, Hex(0x302f2b));
             }
-            for (int side = 0; side < 2; side++)
-            {
-                int x = side == 0 ? 40 : 300;
-                art.Line(x, 38, x + (side == 0 ? 4 : -4), 151, 4, Ink);
-                art.Line(x, 38, x + (side == 0 ? 4 : -4), 151, 1, Greens[1]);
-                for (int i = 0; i < 8; i++)
-                {
-                    int y = 24 + i * 17;
-                    Leaf(art, x + (side == 0 ? -10 : 10), y, 10, side == 0 ? -1 : 1);
-                    if (i % 2 == 0) Leaf(art, x + (side == 0 ? 8 : -8), y + 7, 7, side == 0 ? 1 : -1);
-                }
-            }
+            LogoSprigs(art);
             Word(art, "DINO", 61, 9, true);
             Word(art, "RUSH", 61, 79, false);
             // Tiny sapling above the stone word.
@@ -230,6 +221,48 @@ namespace DinoRush.Editor
             Leaf(art, 164, 4, 5, -1);
             Leaf(art, 177, 5, 5, 1);
             return art;
+        }
+
+        private static void LogoSprigs(Pixels art)
+        {
+            // Draw one continuous ivy stem and mirror its actual pixels, not its
+            // polygon vertices. This keeps both silhouettes equally crisp and avoids
+            // the old self-crossing leaf polygons and floating diagonal stripes.
+            var sprig = new Pixels(art.width, art.height);
+            Vector2Int[] stem = { P(46, 145), P(42, 125), P(39, 103), P(39, 81), P(41, 60), P(45, 38), P(48, 26) };
+            for (int i = 1; i < stem.Length; i++)
+                sprig.Line(stem[i - 1].x, stem[i - 1].y, stem[i].x, stem[i].y, 2, Ink);
+            for (int i = 1; i < stem.Length; i++)
+                sprig.Line(stem[i - 1].x, stem[i - 1].y, stem[i].x, stem[i].y, 1, Greens[1]);
+            for (int i = 0; i < 4; i++)
+            {
+                int y = 40 + i * 28;
+                int x = i == 0 ? 44 : i == 3 ? 42 : 39;
+                LogoLeaf(sprig, x, y, -1);
+                if (i < 3) LogoLeaf(sprig, i == 0 ? 41 : 39, y + 14, 1);
+            }
+            for (int y = 0; y < sprig.height; y++)
+            for (int x = 0; x < 56; x++)
+            {
+                Color32 pixel = sprig.data[(sprig.height - 1 - y) * sprig.width + x];
+                if (pixel.a == 0) continue;
+                art.Set(x, y, pixel);
+                art.Set(art.width - 1 - x, y, pixel);
+            }
+        }
+
+        private static void LogoLeaf(Pixels art, int x, int y, int direction)
+        {
+            Vector2Int At(int dx, int dy) => P(x + dx * direction, y + dy);
+            // A broad, bevel-ended leaf with ordered perimeter points: no spikes,
+            // intersecting edges, detached highlights, or one-pixel diagonal joints.
+            art.Poly(Ink, At(-1, 5), At(2, -1), At(7, -6), At(12, -7),
+                At(14, -5), At(14, -1), At(11, 3), At(6, 6), At(1, 7));
+            art.Poly(Greens[1], At(1, 4), At(4, -1), At(8, -4), At(12, -5),
+                At(12, -1), At(9, 2), At(5, 4), At(1, 5));
+            art.Poly(Greens[2], At(2, 2), At(5, -2), At(9, -4), At(12, -5),
+                At(11, -1), At(7, 2), At(3, 4));
+            art.Line(x + 3 * direction, y + 2, x + 10 * direction, y - 3, 0, Greens[3]);
         }
 
         private static void Word(Pixels art, string word, int left, int top, bool stone)

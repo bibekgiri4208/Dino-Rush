@@ -10,6 +10,22 @@ namespace DinoRush.Tests
     public sealed class MenuButtonLayoutTests
     {
         [UnityTest]
+        public IEnumerator TitleLogoKeepsItsAspectAndUncroppedEdges()
+        {
+            yield return SceneManager.LoadSceneAsync("ForestRun");
+            ForestMainMenu menu = Object.FindAnyObjectByType<ForestMainMenu>();
+            Image logo = menu.transform.Find("Dino Rush Logo/Mossy stone and amber logo").GetComponent<Image>();
+            Assert.That(logo.type, Is.EqualTo(Image.Type.Simple));
+            Assert.That(logo.preserveAspect, Is.True);
+            Assert.That(logo.sprite.rect.size, Is.EqualTo(new Vector2(340, 166)));
+            Assert.That(logo.sprite.texture.filterMode, Is.EqualTo(FilterMode.Point));
+            Assert.That(logo.rectTransform.sizeDelta, Is.EqualTo(new Vector2(578, 282)));
+            yield return ForestRunTests.Capture("menu-refined-logo");
+            yield return ForestRunTests.Capture("menu-refined-logo-tablet", 1024, 768);
+            yield return ForestRunTests.Capture("menu-refined-logo-wide", 1920, 820);
+        }
+
+        [UnityTest]
         public IEnumerator MainButtonsShareShapeSpacingAndTypography()
         {
             yield return SceneManager.LoadSceneAsync("ForestRun");

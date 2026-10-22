@@ -34,6 +34,7 @@ Your best forest score, sound preference, and chosen dino are saved locally with
 - `RunnerRules.cs`: movement constants, hitboxes, capped speed and fair spawn intervals.
 - `RunnerEncounterDirector.cs`: progressive, randomized obstacle combinations and safe encounter spacing.
 - `RunnerDinoRoster.cs`: the four supplied dino sheets, portraits, and stable selection IDs.
+- `RunnerUiButtonFeedback.cs`, `RunnerUiReveal.cs`, `RunnerUiEffects.cs`: shared button feedback, panel entrances, and motion styling.
 - `RunnerHud.cs`: start/retry/pause cards, score HUD, touch controls.
 - `RunnerAudio.cs`: short generated jump/crash/milestone cues (no external audio required).
 
@@ -57,6 +58,16 @@ Scrolling layers use cleaned variants in `Assets/Generated/ForestLoops`, leaving
 
 Original menu sprites are in `Assets/UI/ForestMenu` and can be edited/replaced normally. `PixelMenuArt.cs` provides their deterministic authoring source, and **Dino Rush → Apply Forest Main Menu** upgrades an older scene once without replacing an existing menu. The Press Start 2P font is distributed under the SIL Open Font License; its license and attribution are included in `Assets/UI/Fonts/OFL.txt`.
 
+The title logo uses mirrored, connected ivy sprigs with broad beveled leaves instead of jagged side spikes. **Dino Rush → Refine Title Logo** explicitly regenerates only `DinoRushLogo.png`, preserving the lettering, sprite reference, scene layout, and other menu art. Normal menu generation continues to preserve edited artwork.
+
+### UI feedback and animation
+
+All menu, dino-selector, settings, pause, results, and gameplay buttons share a soft sage hover glow, a small visual lift, press-down compression, and a short click pulse. The artwork moves rather than the button's RectTransform, keeping the actual click/touch area stable even at its edges. Touch holds support multiple pointers without sticky hover; keyboard jump/duck use the same feedback. Disabling a control, changing screens, or losing focus clears its visual state.
+
+Menus and dialogs have short fade/slide entrances, gameplay HUD groups ease into view, and level/milestone banners pop in. The title gently floats by whole design pixels to keep its pixel-art edges crisp. Animation uses unscaled time, including on pause screens, and never delays a button action or changes a modal's input blocking. Interrupted transitions restore the exact original positions, scales, and opacity, so repeated opening/closing cannot shift the layout.
+
+The saved scene contains editable `RunnerUiButtonFeedback`, `Outline`, `RunnerUiReveal`, and `CanvasGroup` components. **Dino Rush → Apply UI Motion** upgrades existing UI without rebuilding the scene or artwork. Menu/HUD/selector authoring tools also preserve/install these effects, and runtime initialization fills in missing components for older scenes. No tween package or Burst compilation is required.
+
 Menu frames use nine-sliced borders, icons and labels have separate padded areas, and multiline pixel text uses extra line spacing. Only the Options page is enabled inside the inactive dialog for a clean editor preview. **Dino Rush → Repair UI Layout** reapplies these fixes to the existing hierarchy without deleting or regenerating the scene's artwork.
 
 The four main-menu buttons share the same size, symmetric pixel-cut frame, mirrored corner decorations, and equal vertical gaps. Their captions use matching font sizes and two-pixel letter spacing. Each icon and caption is centered together as one group with a 12-pixel visible gap, accounting for transparent icon padding. **Dino Rush → Fix Main Menu Buttons** reapplies this layout and explicitly refreshes only the two button-frame textures; other artwork is preserved.
@@ -68,3 +79,5 @@ Open **Window → General → Test Runner**. EditMode tests check pace limits, j
 Duck tests cover the crouch animation/hitbox, fast drops during ascent/apex/descent, ground clamping, jump-buffer cancellation, returning to normal jumps, combined Down/S and multitouch holds, pause/focus/reset cleanup, menu/results visibility, and raycastable touch input without accidental jumps. Optional captures include crouched and midair-drop views.
 
 Dino-selector tests verify the four source sheets, saved menu bindings, raycastable cards, selection feedback/persistence/fallback, frame caching, matching animation colors and hitboxes, restart/menu behavior, and normal/tablet/wide layouts. These tests restore the previous dino selection and high score afterward.
+
+UI-motion tests verify saved coverage and idempotent installation, mouse hover/press/click feedback, stable edge hit targets, disabled/right-click behavior, multitouch and keyboard feedback, focus/pause/menu cleanup, unscaled and interrupted modal transitions, and replayable level banners. Optional captures include hover, pressed, pause, tablet, and wide views.

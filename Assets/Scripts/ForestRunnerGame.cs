@@ -742,6 +742,7 @@ namespace DinoRush
         private void ResetRun()
         {
             keyboardDuckHeld = pointerDuckHeld = false;
+            hud.FeedbackDuck(false);
             nextEncounterDistance = 0f;
             announcedLevel = 1;
             var aspects = new float[obstacleSprites.Count];
@@ -788,7 +789,9 @@ namespace DinoRush
 
         public void Jump()
         {
-            if (State == RunState.Running) player.QueueJump();
+            if (State != RunState.Running) return;
+            player.QueueJump();
+            hud.FeedbackJump();
         }
 
         public void SetDuckHeld(bool held)
@@ -797,7 +800,12 @@ namespace DinoRush
             ApplyDuckInput();
         }
 
-        private void ApplyDuckInput() => player.SetDucking(keyboardDuckHeld || pointerDuckHeld);
+        private void ApplyDuckInput()
+        {
+            bool held = keyboardDuckHeld || pointerDuckHeld;
+            player.SetDucking(held);
+            hud.FeedbackDuck(held);
+        }
 
         private void ReleaseDuckInput()
         {

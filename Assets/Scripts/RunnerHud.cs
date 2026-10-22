@@ -70,6 +70,13 @@ namespace DinoRush
             if (mainMenu != null) mainMenu.SetDinoSelection(selected);
         }
 
+        public void FeedbackJump() => jumpButton.GetComponent<RunnerUiButtonFeedback>()?.Pulse();
+
+        public void FeedbackDuck(bool held)
+        {
+            if (duckButton != null) duckButton.GetComponent<RunnerUiButtonFeedback>()?.SetHeld(held);
+        }
+
         public void CloseMainMenuDialog()
         {
             if (mainMenu != null) mainMenu.CloseDialog();
@@ -144,6 +151,7 @@ namespace DinoRush
         public void Initialize(Action primary, Action pause, Action jump, Action mute, Action restart, Action quitRun,
             Action<bool> duck)
         {
+            RunnerUiEffects.Install(root);
             levelLabel = root.Find("Top left badge/Map")?.GetComponent<Text>();
             Bind(primaryControl, primary);
             Bind(pauseButton.GetComponent<Button>(), pause);
@@ -270,6 +278,7 @@ namespace DinoRush
         {
             toast.text = message;
             toastTime = 2.4f;
+            toast.GetComponent<RunnerUiReveal>()?.Replay();
         }
 
         public void Tick(float dt)
