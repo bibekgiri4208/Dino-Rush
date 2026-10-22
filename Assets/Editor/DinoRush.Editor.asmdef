@@ -1,6 +1,6 @@
 {
   "name": "DinoRush.Editor",
   "rootNamespace": "DinoRush.Editor",
-  "references": ["DinoRush"],
+  "references": ["DinoRush", "UnityEngine.UI"],
   "includePlatforms": ["Editor"]
 }

@@ -22,6 +22,7 @@ namespace DinoRush
         [SerializeField] private Texture2D[] obstacleTextures;
         [SerializeField] private Material spriteMaterial;
 
+        [System.Serializable]
         private sealed class Layer
         {
             public Transform[] tiles;
@@ -30,6 +31,7 @@ namespace DinoRush
             public float offset;
         }
 
+        [System.Serializable]
         private sealed class Obstacle
         {
             public SpriteRenderer renderer;
@@ -39,6 +41,7 @@ namespace DinoRush
             public bool passed;
         }
 
+        [System.Serializable]
         private sealed class Dust
         {
             public SpriteRenderer renderer;
@@ -49,16 +52,25 @@ namespace DinoRush
 
         private readonly List<Sprite> generatedSprites = new List<Sprite>();
         private readonly List<Texture2D> generatedTextures = new List<Texture2D>();
-        private readonly List<Layer> layers = new List<Layer>();
-        private readonly List<Obstacle> obstacles = new List<Obstacle>();
-        private readonly List<Dust> dust = new List<Dust>();
-        private readonly List<SpriteRenderer> motes = new List<SpriteRenderer>();
-        private readonly List<Sprite> obstacleSprites = new List<Sprite>();
-        private Camera gameCamera;
+        [Header("Saved scene objects")]
+        [SerializeField] private Camera gameCamera;
+        [SerializeField] private SpriteRenderer dinoRenderer;
+        [SerializeField] private Transform playerShadow;
+        [SerializeField] private Sprite[] dinoFrames;
+        [SerializeField] private List<Layer> layers = new List<Layer>();
+        [SerializeField] private List<Obstacle> obstacles = new List<Obstacle>();
+        [SerializeField] private List<Dust> dust = new List<Dust>();
+        [SerializeField] private List<SpriteRenderer> motes = new List<SpriteRenderer>();
+        [SerializeField] private List<Sprite> obstacleSprites = new List<Sprite>();
+        [SerializeField] private RunnerHud hud;
         private RunnerPlayer player;
-        private RunnerHud hud;
         private RunnerAudio audioCues;
         private Sprite pixel;
+        private Transform environmentGroup;
+        private Transform playerGroup;
+        private Transform obstacleGroup;
+        private Transform dustGroup;
+        private Transform motesGroup;
         private float elapsed;
         private float distance;
         private float spawnTimer;
@@ -79,6 +91,20 @@ namespace DinoRush
         public int Score => Mathf.FloorToInt(distance);
         public int HighScore => best;
         public int ObstaclesCleared => cleared;
+        public bool HasAuthoredScene => gameCamera != null && dinoRenderer != null &&
+            playerShadow != null && dinoFrames != null && dinoFrames.Length == 24 && hud != null && hud.IsBuilt;
+
+#if UNITY_EDITOR
+        public void AssignMainMenu(ForestMainMenu menu)
+        {
+            hud.SetMainMenu(menu);
+            hud.ShowReady(0);
+            gameCamera.transform.position = new Vector3(0, 1.4f, -10);
+            SetSkyFraming(true);
+            dinoRenderer.transform.localScale = new Vector3(1.8f, 1.8f, 1f);
+            foreach (Obstacle obstacle in obstacles) obstacle.renderer.gameObject.SetActive(false);
+        }
+#endif
 
         private void Awake()
         {
@@ -90,16 +116,92 @@ namespace DinoRush
             }
 
             best = Mathf.Max(0, PlayerPrefs.GetInt(HighScoreKey, 0));
-            CreateCamera();
-            BuildWorld();
+            // Older, unbaked scenes still work; the saved ForestRun scene takes this path zero times.
+            if (!HasAuthoredScene) CreateSceneObjects();
+            UpdateViewport();
+            ApplyPixelFiltering();
+            player = new RunnerPlayer(dinoRenderer, dinoFrames, playerShadow);
+            foreach (Obstacle obstacle in obstacles)
+            {
+                obstacle.active = false;
+                obstacle.renderer.gameObject.SetActive(false);
+            }
             audioCues = new RunnerAudio(gameObject);
-            hud = new RunnerHud(transform, PrimaryAction, TogglePause, Jump, ToggleMute);
+            hud.Initialize(PrimaryAction, TogglePause, Jump, ToggleMute, RestartRun, ReturnToMenu);
             hud.SetSound(audioCues.Muted);
             hud.UpdateScore(0, best, 0, RunnerRules.Speed(0));
             hud.ShowReady(best);
             State = RunState.Ready;
             initialized = true;
         }
+
+        private void CreateSceneObjects()
+        {
+            CreateCamera();
+            environmentGroup = Group("Forest environment", transform);
+            playerGroup = Group("Player", transform);
+            obstacleGroup = Group("Obstacle pool", transform);
+            Transform effects = Group("Forest effects", transform);
+            dustGroup = Group("Trail dust pool", effects);
+            motesGroup = Group("Floating motes", effects);
+            BuildWorld();
+            hud = new RunnerHud(transform);
+        }
+
+        private static Transform Group(string groupName, Transform parent)
+        {
+            Transform group = new GameObject(groupName).transform;
+            group.SetParent(parent, false);
+            return group;
+        }
+
+        private void ApplyPixelFiltering()
+        {
+            dinoSheet.filterMode = sky.filterMode = mountains.filterMode = FilterMode.Point;
+            distantForest.filterMode = middleForest.filterMode = tallTrees.filterMode = FilterMode.Point;
+            nearForest.filterMode = ground.filterMode = FilterMode.Point;
+            foreach (Texture2D texture in obstacleTextures) texture.filterMode = FilterMode.Point;
+        }
+
+        private void SetSkyFraming(bool mainMenu)
+        {
+            foreach (Transform tile in layers[0].tiles)
+            {
+                Vector3 position = tile.position;
+                position.y = -8.775f + (mainMenu ? 1.4f : 0f);
+                tile.position = position;
+            }
+        }
+
+#if UNITY_EDITOR
+        // Called explicitly by the editor authoring tool, never on edit-mode updates or reloads.
+        public IReadOnlyList<Object> CreateEditorScene()
+        {
+            if (Application.isPlaying || HasAuthoredScene || transform.childCount > 0)
+                throw new System.InvalidOperationException("Scene objects already exist; they will not be overwritten.");
+            if (!AssetsAssigned()) throw new System.InvalidOperationException("Assign the forest art before baking the scene.");
+            CreateSceneObjects();
+            gameCamera.rect = new Rect(0, 0, 1, 1);
+            gameCamera.aspect = 16f / 9f;
+            hud.UpdateScore(0, 0, 0, RunnerRules.Speed(0));
+            hud.ShowReady(0);
+
+            // Stage actual pool members on the trail so obstacle art is visible in edit mode.
+            // Awake hides these until their first runtime spawn.
+            for (int i = 0; i < 3; i++)
+            {
+                SpriteRenderer obstacle = obstacles[i].renderer;
+                obstacle.sprite = obstacleSprites[i];
+                obstacle.transform.position = new Vector3(1.5f + i * 3.4f, RunnerRules.GroundY, 0);
+                obstacle.transform.localScale = Vector3.one * 1.05f;
+                obstacle.gameObject.SetActive(true);
+            }
+            var assets = new List<Object>();
+            assets.AddRange(generatedTextures);
+            assets.AddRange(generatedSprites);
+            return assets;
+        }
+#endif
 
         private bool AssetsAssigned()
         {
@@ -153,7 +255,7 @@ namespace DinoRush
             AddLayer(tallTrees, 7f, -3.1f, 0.37f, -60);
             AddLayer(nearForest, 14f, -3.12f, 0.49f, -50);
 
-            SpriteRenderer soil = Renderer("Earth below the trail", pixel, -5);
+            SpriteRenderer soil = Renderer("Earth below the trail", pixel, -5, environmentGroup);
             soil.color = new Color32(19, 48, 49, 255);
             soil.transform.position = new Vector3(0, -6.5f, 0);
             soil.transform.localScale = new Vector3(24, 6, 1);
@@ -168,8 +270,9 @@ namespace DinoRush
             }
             shadowTexture.Apply();
             generatedTextures.Add(shadowTexture);
-            SpriteRenderer shadow = Renderer("Dino ground shadow", MakeSprite(shadowTexture, Vector2.one * 0.5f), 2);
+            SpriteRenderer shadow = Renderer("Dino ground shadow", MakeSprite(shadowTexture, Vector2.one * 0.5f), 2, playerGroup);
             shadow.transform.position = new Vector3(RunnerRules.PlayerX, RunnerRules.GroundY - 0.025f, 0);
+            playerShadow = shadow.transform;
 
             var frames = new Sprite[24];
             dinoSheet.filterMode = FilterMode.Point;
@@ -181,27 +284,28 @@ namespace DinoRush
                 frames[i].name = "Blue dino frame " + i;
                 generatedSprites.Add(frames[i]);
             }
-            SpriteRenderer dino = Renderer("Blue dino player", frames[0], 20);
-            player = new RunnerPlayer(dino, frames, shadow.transform);
+            dinoFrames = frames;
+            dinoRenderer = Renderer("Blue dino player", frames[0], 20, playerGroup);
+            player = new RunnerPlayer(dinoRenderer, frames, playerShadow);
 
             foreach (Texture2D texture in obstacleTextures)
                 obstacleSprites.Add(MakeSprite(texture, new Vector2(0.5f, 0f)));
             for (int i = 0; i < 10; i++)
             {
-                SpriteRenderer obstacle = Renderer("Pooled obstacle " + i, obstacleSprites[0], 15);
+                SpriteRenderer obstacle = Renderer("Pooled obstacle " + i, obstacleSprites[0], 15, obstacleGroup);
                 obstacle.gameObject.SetActive(false);
                 obstacles.Add(new Obstacle { renderer = obstacle });
             }
 
             for (int i = 0; i < 36; i++)
             {
-                SpriteRenderer particle = Renderer("Trail dust " + i, pixel, 25);
+                SpriteRenderer particle = Renderer("Trail dust " + i, pixel, 25, dustGroup);
                 particle.gameObject.SetActive(false);
                 dust.Add(new Dust { renderer = particle });
             }
             for (int i = 0; i < 22; i++)
             {
-                SpriteRenderer mote = Renderer("Forest mote " + i, pixel, -10);
+                SpriteRenderer mote = Renderer("Forest mote " + i, pixel, -10, motesGroup);
                 mote.transform.position = new Vector3(Random.Range(-10f, 10f), Random.Range(-2.5f, 4.6f), 0);
                 mote.transform.localScale = Vector3.one * Random.Range(0.025f, 0.06f);
                 mote.color = new Color(0.85f, 1f, 0.64f, Random.Range(0.15f, 0.4f));
@@ -214,14 +318,15 @@ namespace DinoRush
             texture.filterMode = FilterMode.Point;
             Sprite sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height),
                 pivot, texture.height, 0, SpriteMeshType.FullRect);
+            sprite.name = texture.name + " sprite";
             generatedSprites.Add(sprite);
             return sprite;
         }
 
-        private SpriteRenderer Renderer(string objectName, Sprite sprite, int order)
+        private SpriteRenderer Renderer(string objectName, Sprite sprite, int order, Transform parent)
         {
             var renderer = new GameObject(objectName, typeof(SpriteRenderer)).GetComponent<SpriteRenderer>();
-            renderer.transform.SetParent(transform, false);
+            renderer.transform.SetParent(parent, false);
             renderer.sprite = sprite;
             renderer.sortingOrder = order;
             renderer.sharedMaterial = spriteMaterial;
@@ -233,9 +338,10 @@ namespace DinoRush
             Sprite sprite = MakeSprite(texture, new Vector2(0.5f, 0));
             float width = sprite.bounds.size.x * height;
             var layer = new Layer { tiles = new Transform[3], width = width, speed = speed };
+            Transform group = Group(texture.name + " parallax", environmentGroup);
             for (int i = 0; i < 3; i++)
             {
-                Transform tile = Renderer(texture.name + " tile " + i, sprite, order).transform;
+                Transform tile = Renderer(texture.name + " tile " + i, sprite, order, group).transform;
                 tile.localScale = new Vector3(height, height, 1);
                 tile.position = new Vector3((i - 1) * width, bottom, 0);
                 layer.tiles[i] = tile;
@@ -276,10 +382,12 @@ namespace DinoRush
             }
 
             player.Render(dt, State == RunState.Running, State == RunState.GameOver, RunnerRules.Speed(elapsed) / 6.8f);
+            SetSkyFraming(State == RunState.Ready);
+            if (State == RunState.Ready) dinoRenderer.transform.localScale *= 0.9f;
             UpdateParticles(dt);
             shake = Mathf.MoveTowards(shake, 0f, dt * 0.75f);
             gameCamera.transform.position = new Vector3(Mathf.Sin(Time.unscaledTime * 81f) * shake,
-                Mathf.Cos(Time.unscaledTime * 67f) * shake * 0.55f, -10);
+                (State == RunState.Ready ? 1.4f : 0f) + Mathf.Cos(Time.unscaledTime * 67f) * shake * 0.55f, -10);
         }
 
         private void Step(float dt)
@@ -430,7 +538,8 @@ namespace DinoRush
             {
                 if (keyboard.escapeKey.wasPressedThisFrame || keyboard.pKey.wasPressedThisFrame)
                 {
-                    TogglePause();
+                    if (State == RunState.Ready) hud.CloseMainMenuDialog();
+                    else TogglePause();
                     return;
                 }
                 if (keyboard.spaceKey.wasPressedThisFrame || keyboard.upArrowKey.wasPressedThisFrame ||
@@ -453,6 +562,7 @@ namespace DinoRush
 
         private void PointerAction(Vector2 screenPoint)
         {
+            if (State == RunState.Ready || State == RunState.Paused) return; // Menus use explicit buttons.
             if (hud.IsOverButton(screenPoint) || !gameCamera.pixelRect.Contains(screenPoint)) return;
             PrimaryAction();
         }
@@ -462,7 +572,9 @@ namespace DinoRush
             if (!initialized) return;
             switch (State)
             {
-                case RunState.Ready: StartRun(); break;
+                case RunState.Ready:
+                    if (!hud.MainMenuDialogOpen) StartRun();
+                    break;
                 case RunState.Running: Jump(); break;
                 case RunState.Paused: TogglePause(); break;
                 case RunState.GameOver:
@@ -474,6 +586,16 @@ namespace DinoRush
         public void StartRun()
         {
             if (!initialized) return;
+            ResetRun();
+            State = RunState.Running;
+            SetSkyFraming(false);
+            gameCamera.transform.position = new Vector3(0, 0, -10);
+            hud.ShowRunning();
+            hud.UpdateScore(0, best, 0, RunnerRules.Speed(0));
+        }
+
+        private void ResetRun()
+        {
             elapsed = distance = accumulator = dustTimer = timeSinceCrash = shake = 0f;
             cleared = milestone = 0;
             bestAtRunStart = best;
@@ -490,8 +612,24 @@ namespace DinoRush
                 particle.renderer.gameObject.SetActive(false);
             }
             player.Reset();
-            State = RunState.Running;
-            hud.ShowRunning();
+        }
+
+        public void RestartRun()
+        {
+            if (!initialized || State == RunState.Ready) return;
+            SaveBest();
+            StartRun();
+        }
+
+        public void ReturnToMenu()
+        {
+            if (!initialized) return;
+            SaveBest();
+            ResetRun();
+            State = RunState.Ready;
+            SetSkyFraming(true);
+            gameCamera.transform.position = new Vector3(0, 1.4f, -10);
+            hud.ShowReady(best);
             hud.UpdateScore(0, best, 0, RunnerRules.Speed(0));
         }
 
@@ -562,8 +700,20 @@ namespace DinoRush
         {
             if (initialized) SaveBest();
             audioCues?.Dispose();
-            foreach (Sprite sprite in generatedSprites) Destroy(sprite);
-            foreach (Texture2D texture in generatedTextures) Destroy(texture);
+            // Saved subassets belong to the project, not to this play session.
+            foreach (Sprite sprite in generatedSprites)
+                if (sprite != null && !IsSavedAsset(sprite)) Destroy(sprite);
+            foreach (Texture2D texture in generatedTextures)
+                if (texture != null && !IsSavedAsset(texture)) Destroy(texture);
+        }
+
+        private static bool IsSavedAsset(Object asset)
+        {
+#if UNITY_EDITOR
+            return UnityEditor.EditorUtility.IsPersistent(asset);
+#else
+            return false;
+#endif
         }
     }
 }
