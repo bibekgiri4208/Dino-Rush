@@ -61,7 +61,8 @@ namespace DinoRush.Tests
             Bounds guideBounds = RectTransformUtility.CalculateRelativeRectTransformBounds(root, root.Find("Keyboard controls"));
             Assert.That(guideBounds.max.x, Is.LessThan(duckBounds.min.x));
             Assert.That(duckBounds.max.x, Is.LessThan(jumpBounds.min.x));
-            Assert.That(root.Find("Keyboard controls").gameObject.activeInHierarchy, Is.True);
+            Assert.That(root.Find("Keyboard controls").gameObject.activeInHierarchy, Is.False, "Full controls help belongs in Options, not over the playfield.");
+            Assert.That(root.Find("Duck/Drop hint").gameObject.activeInHierarchy, Is.False);
             Assert.That(root.Find("Gameplay bottom fade").gameObject.activeInHierarchy, Is.True);
             Assert.That(root.Find("Controls").gameObject.activeSelf, Is.False, "Do not draw the old text over the keycaps.");
             Canvas.ForceUpdateCanvases();
@@ -111,7 +112,7 @@ namespace DinoRush.Tests
             Assert.That(root.Find("Gameplay bottom fade").gameObject.activeSelf, Is.False);
             yield return null; // Allow the newly enabled modal controls to register with the UI raycaster.
             Click("Resume run");
-            Assert.That(root.Find("Keyboard controls").gameObject.activeInHierarchy, Is.True);
+            Assert.That(root.Find("Keyboard controls").gameObject.activeInHierarchy, Is.False);
             game.ReturnToMenu();
             Assert.That(root.Find("Duck").gameObject.activeSelf, Is.False);
             Assert.That(root.Find("Keyboard controls").gameObject.activeSelf, Is.False);

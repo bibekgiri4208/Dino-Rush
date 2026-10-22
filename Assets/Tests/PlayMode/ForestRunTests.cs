@@ -277,6 +277,7 @@ namespace DinoRush.Tests
             Canvas.ForceUpdateCanvases();
             foreach (Text text in root.GetComponentsInChildren<Text>())
             {
+                Assert.That(text.font, Is.Not.Null, text.name + " has no font");
                 Assert.That(text.font.fontNames, Does.Contain("Press Start 2P"), text.name + " uses the wrong font");
                 Assert.That(text.preferredWidth, Is.LessThanOrEqualTo(text.rectTransform.rect.width + 1f), text.name + " overflows horizontally");
                 Assert.That(text.preferredHeight, Is.LessThanOrEqualTo(text.rectTransform.rect.height + 1f), text.name + " overflows vertically");
@@ -291,7 +292,7 @@ namespace DinoRush.Tests
                 Transform icon = button.transform.Find("Icon");
                 Text caption = button.GetComponentInChildren<Text>();
                 Transform label = caption != null ? caption.transform : null;
-                if (icon != null && label != null)
+                if (icon != null && icon.gameObject.activeInHierarchy && label != null)
                 {
                     Bounds a = RectTransformUtility.CalculateRelativeRectTransformBounds(button.transform, icon);
                     Bounds b = RectTransformUtility.CalculateRelativeRectTransformBounds(button.transform, label);

@@ -36,6 +36,7 @@ namespace DinoRush.Editor
             AppendReference(menuData.FindProperty("gameplayChrome"), duck.gameObject);
             menuData.ApplyModifiedPropertiesWithoutUndo();
             game.AssignMainMenu(main);
+            if (ForestMinimalUiBuilder.IsApplied(game)) ForestMinimalUiBuilder.Apply(game);
             ForestUiMotionBuilder.Apply(game);
             EditorUtility.SetDirty(game);
             EditorUtility.SetDirty(main);
@@ -212,6 +213,7 @@ namespace DinoRush.Editor
             mainData.ApplyModifiedPropertiesWithoutUndo();
 
             game.AssignMainMenu(main);
+            if (ForestMinimalUiBuilder.IsApplied(game)) ForestMinimalUiBuilder.Apply(game);
             ForestUiMotionBuilder.Apply(game);
             // Resetting the preview above hides the newly authored gameplay objects too.
             EditorUtility.SetDirty(game);

@@ -52,8 +52,13 @@ namespace DinoRush
         [SerializeField] private Image[] paceSegments = new Image[0];
         [SerializeField] private GameObject controlsGuide;
         [SerializeField] private GameObject gameplayBackdrop;
+        [SerializeField] private bool minimalPresentation;
+        [SerializeField] private Text pausedBest;
+        [SerializeField] private Text resultScore;
+        [SerializeField] private Text resultBest;
         private float toastTime;
         private Text levelLabel;
+        private string activeMapName = "Forest";
 
         public bool IsBuilt => root != null;
         public bool MainMenuDialogOpen => mainMenu != null && mainMenu.DialogOpen;
@@ -90,10 +95,11 @@ namespace DinoRush
 
         public void SetMapName(string name)
         {
+            activeMapName = name;
             Text brand = root.Find("Top left badge/Brand")?.GetComponent<Text>();
             if (brand != null) brand.text = name.ToUpperInvariant() + " RUN";
             Text pauseMap = pausePanel != null ? pausePanel.transform.Find("Pause eyebrow")?.GetComponent<Text>() : null;
-            if (pauseMap != null) pauseMap.text = name.ToUpperInvariant() + " / ENDLESS RUNNER";
+            if (pauseMap != null) pauseMap.text = minimalPresentation ? name.ToUpperInvariant() : name.ToUpperInvariant() + " / ENDLESS RUNNER";
         }
 
         public void FeedbackDuck(bool held)
@@ -219,7 +225,9 @@ namespace DinoRush
                     if (paceSegments[i] != null) paceSegments[i].color = i < lit ? PaceLit : PaceUnlit;
             }
             else stats.text = $"{cleared:D2} CLEARED  /  {speed / 6.8f:0.0}x PACE";
-            if (pausedScore != null) pausedScore.text = $"SCORE {points:D6} / BEST {Mathf.Max(points, highScore):D6}";
+            if (pausedScore != null) pausedScore.text = minimalPresentation ? points.ToString("N0")
+                : $"SCORE {points:D6} / BEST {Mathf.Max(points, highScore):D6}";
+            if (pausedBest != null) pausedBest.text = Mathf.Max(points, highScore).ToString("N0");
         }
 
         public void UpdateLevel(int level)
@@ -271,6 +279,16 @@ namespace DinoRush
         public void ShowGameOver(int points, int highScore, bool record)
         {
             Menu(true);
+            if (minimalPresentation)
+            {
+                eyebrow.text = record ? "NEW BEST" : activeMapName.ToUpperInvariant();
+                eyebrow.color = record ? new Color32(255, 210, 117, 255) : new Color32(174, 203, 152, 255);
+                title.text = "GAME OVER";
+                resultScore.text = points.ToString("N0");
+                resultBest.text = Mathf.Max(points, highScore).ToString("N0");
+                actionLabel.text = "PLAY AGAIN";
+                return;
+            }
             eyebrow.text = record ? "A NEW PERSONAL BEST!" : "EVERY RUN IS A FRESH START";
             title.text = "NICE RUN!";
             description.text = $"SCORE {points:D6} / BEST {highScore:D6}\nONE MORE JUMP. ONE MORE TRY.";
@@ -290,9 +308,14 @@ namespace DinoRush
             pauseButton.SetActive(!visible);
             stats.gameObject.SetActive(!visible);
             if (statsFrame != null) statsFrame.SetActive(!visible);
-            if (controlsGuide != null) controlsGuide.SetActive(!visible);
+            if (controlsGuide != null) controlsGuide.SetActive(!visible && !minimalPresentation);
             if (gameplayBackdrop != null) gameplayBackdrop.SetActive(!visible);
-            footer.gameObject.SetActive(visible || controlsGuide == null);
+            footer.gameObject.SetActive(!minimalPresentation && (visible || controlsGuide == null));
+            if (minimalPresentation)
+            {
+                foreach (string name in new[] { "Top left badge", "Scoreboard", "Sound" })
+                    root.Find(name)?.gameObject.SetActive(!visible);
+            }
             toast.text = "";
             toastTime = 0f;
             footer.text = "SPACE / UP / W : JUMP    CLICK / TAP : JUMP";
