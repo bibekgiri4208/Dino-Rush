@@ -53,6 +53,7 @@ namespace DinoRush
         [SerializeField] private GameObject controlsGuide;
         [SerializeField] private GameObject gameplayBackdrop;
         private float toastTime;
+        private Text levelLabel;
 
         public bool IsBuilt => root != null;
         public bool MainMenuDialogOpen => mainMenu != null && mainMenu.DialogOpen;
@@ -133,6 +134,7 @@ namespace DinoRush
         public void Initialize(Action primary, Action pause, Action jump, Action mute, Action restart, Action quitRun,
             Action<bool> duck)
         {
+            levelLabel = root.Find("Top left badge/Map")?.GetComponent<Text>();
             Bind(primaryControl, primary);
             Bind(pauseButton.GetComponent<Button>(), pause);
             Bind(jumpButton.GetComponent<Button>(), jump);
@@ -176,6 +178,11 @@ namespace DinoRush
             }
             else stats.text = $"{cleared:D2} CLEARED  /  {speed / 6.8f:0.0}x PACE";
             if (pausedScore != null) pausedScore.text = $"SCORE {points:D6} / BEST {Mathf.Max(points, highScore):D6}";
+        }
+
+        public void UpdateLevel(int level)
+        {
+            if (levelLabel != null) levelLabel.text = level > 0 ? $"LEVEL {level:00}" : "ENDLESS";
         }
 
         public void SetSound(bool muted)

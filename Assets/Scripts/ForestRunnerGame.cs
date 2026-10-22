@@ -77,6 +77,9 @@ namespace DinoRush
         [SerializeField, Range(8, 24)] private int landingDirtCount = 18;
         private RunnerPlayer player;
         private RunnerAudio audioCues;
+        private RunnerEncounterDirector encounterDirector;
+        private float nextEncounterDistance;
+        private int announcedLevel = 1;
         private Sprite pixel;
         private Transform environmentGroup;
         private Transform playerGroup;
@@ -111,6 +114,7 @@ namespace DinoRush
         public int Score => Mathf.FloorToInt(distance);
         public int HighScore => best;
         public int ObstaclesCleared => cleared;
+        public int Level => RunnerRules.Level(elapsed);
         public bool HasAuthoredScene => gameCamera != null && dinoRenderer != null &&
             playerShadow != null && dinoFrames != null && dinoFrames.Length == 24 && hud != null && hud.IsBuilt;
 
@@ -425,6 +429,13 @@ namespace DinoRush
         private void Step(float dt)
         {
             elapsed += dt;
+            bool levelChanged = Level > announcedLevel;
+            if (levelChanged)
+            {
+                announcedLevel = Level;
+                hud.UpdateLevel(Level);
+                hud.Toast($"LEVEL {Level:00} / {RunnerRules.LevelHint(Level)}");
+            }
             float speed = RunnerRules.Speed(elapsed);
             float travel = speed * dt;
             distance += travel;
@@ -441,11 +452,10 @@ namespace DinoRush
             }
             Scroll(travel);
 
-            spawnTimer -= dt;
-            if (spawnTimer <= 0f)
+            spawnTimer = Mathf.Max(0f, spawnTimer - dt);
+            if (spawnTimer <= 0f && distance >= nextEncounterDistance)
             {
-                SpawnObstacle();
-                spawnTimer = RunnerRules.MinimumSpawnInterval(speed) + Random.Range(0.12f, 0.7f);
+                SpawnEncounter();
             }
 
             Rect playerBox = player.Hitbox;
@@ -484,34 +494,35 @@ namespace DinoRush
             {
                 milestone = nextMilestone;
                 audioCues.Milestone();
-                hud.Toast($"{milestone * 100} METRES  /  KEEP GOING!");
+                if (!levelChanged) hud.Toast($"{milestone * 100} METRES  /  KEEP GOING!");
                 SaveBest();
             }
         }
 
-        private void SpawnObstacle()
+        private void SpawnEncounter()
         {
+            int available = 0;
+            foreach (Obstacle obstacle in obstacles) if (!obstacle.active) available++;
+            // Never partially emit a combination if a custom scene has a small pool.
+            if (available < 3) return;
+            RunnerEncounter encounter = encounterDirector.Next(elapsed);
+            int index = 0;
             foreach (Obstacle obstacle in obstacles)
             {
                 if (obstacle.active) continue;
-                Sprite sprite = obstacleSprites[Random.Range(0, obstacleSprites.Count)];
-                float height = Random.Range(0.82f, RunnerRules.MaximumObstacleHeight);
-                float width = sprite.bounds.size.x * height;
-                if (width > RunnerRules.MaximumObstacleWidth)
-                {
-                    height *= RunnerRules.MaximumObstacleWidth / width;
-                    width = RunnerRules.MaximumObstacleWidth;
-                }
+                RunnerObstacleSpawn item = encounter.Obstacles[index++];
+                Sprite sprite = obstacleSprites[item.SpriteIndex];
                 obstacle.renderer.sprite = sprite;
-                obstacle.renderer.transform.localScale = new Vector3(height, height, 1);
-                obstacle.renderer.transform.position = new Vector3(11.7f, RunnerRules.GroundY, 0);
+                obstacle.renderer.transform.localScale = new Vector3(item.Height, item.Height, 1);
+                obstacle.renderer.transform.position = new Vector3(11.7f + item.Offset, RunnerRules.GroundY, 0);
                 obstacle.renderer.gameObject.SetActive(true);
-                obstacle.width = width;
-                obstacle.height = height;
+                obstacle.width = item.Width;
+                obstacle.height = item.Height;
                 obstacle.active = true;
                 obstacle.passed = false;
-                return;
+                if (index == encounter.Obstacles.Length) break;
             }
+            nextEncounterDistance = distance + encounter.Spacing;
         }
 
         private void Scroll(float travel)
@@ -679,12 +690,18 @@ namespace DinoRush
             SetSkyFraming(false);
             gameCamera.transform.position = new Vector3(0, 0, -10);
             hud.ShowRunning();
+            hud.UpdateLevel(Level);
             hud.UpdateScore(0, best, 0, RunnerRules.Speed(0));
         }
 
         private void ResetRun()
         {
             keyboardDuckHeld = pointerDuckHeld = false;
+            nextEncounterDistance = 0f;
+            announcedLevel = 1;
+            var aspects = new float[obstacleSprites.Count];
+            for (int i = 0; i < aspects.Length; i++) aspects[i] = obstacleSprites[i].bounds.size.x / obstacleSprites[i].bounds.size.y;
+            encounterDirector = new RunnerEncounterDirector(Random.Range(1, int.MaxValue), aspects);
             elapsed = distance = accumulator = dustTimer = timeSinceCrash = shake = 0f;
             cleared = milestone = 0;
             bestAtRunStart = best;
@@ -720,6 +737,7 @@ namespace DinoRush
             SetSkyFraming(true);
             gameCamera.transform.position = new Vector3(0, 1.4f, -10);
             hud.ShowReady(best);
+            hud.UpdateLevel(0);
             hud.UpdateScore(0, best, 0, RunnerRules.Speed(0));
         }
 

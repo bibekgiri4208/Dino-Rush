@@ -18,6 +18,10 @@ Open **Assets/Scenes/ForestRun.unity** (or **Dino Rush → Open Forest Run**) an
 
 Jump over rocks, stumps, and crates. Your distance is your score; speed gradually increases to a cap. There is one jump (no double jump), with a small pre-landing input buffer. Obstacle sizes and spacing allow time to jump and land between obstacles. Switching away from the game automatically pauses it.
 
+The trail advances through **six difficulty levels** at 0, 12, 28, 48, 75, and 105 seconds of active running. The badge shows the current level, and a short banner announces each increase. After three introductory hurdles, a per-run encounter director mixes singles, double/triple clusters, longer leaps, and rapid two/three-jump follow-ups as they unlock. Obstacle artwork, size, group gaps, and recovery gaps vary; occasional longer breaks prevent nonstop pressure. Later levels favor combinations and tighter recovery windows rather than only speeding up the same pattern. Every retry uses a fresh course.
+
+`RunnerEncounterDirector.cs` uses its own seeded random stream, so dust effects cannot change the course. Encounters are spaced by distance rather than a fixed repeating timer. Cluster spans are limited by jump clearance, separate jumps reserve landing/recovery time at the predicted arrival pace, and combinations spawn atomically from the existing pool. Difficulty, upcoming spacing, and the course freeze while paused and reset on Restart. Tests simulate thousands of encounters and complete accelerating three-minute courses using the real jump/collision rules.
+
 Duck uses the dino's crouched running frames and a shorter collision box. In midair it immediately cuts upward momentum and accelerates the descent until landing, even if you release early. Hold to remain crouched on landing; release to stand and jump again. Ducking cancels buffered jumps, so a fast drop never causes an accidental bounce. It does not let you pass through ground obstacles. The on-screen Duck control supports mouse/touch holds and hides with Jump on menus, pause, and results. **Dino Rush → Add Duck Controls** upgrades an older HUD in place.
 
 Your best forest score and sound preference are saved locally with PlayerPrefs. Restarting a run does not erase your best. The game uses a 16:9 viewport with letterboxing for other window shapes.
@@ -28,6 +32,7 @@ Your best forest score and sound preference are saved locally with PlayerPrefs. 
 - `RunnerPlayer.cs`: jump/fast-drop integration, crouch hitbox, input buffer, sprite animation, landing squash.
 - `RunnerDuckControl.cs`: mouse/touch hold and release handling for the Duck button.
 - `RunnerRules.cs`: movement constants, hitboxes, capped speed and fair spawn intervals.
+- `RunnerEncounterDirector.cs`: progressive, randomized obstacle combinations and safe encounter spacing.
 - `RunnerHud.cs`: start/retry/pause cards, score HUD, touch controls.
 - `RunnerAudio.cs`: short generated jump/crash/milestone cues (no external audio required).
 

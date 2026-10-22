@@ -18,6 +18,29 @@ namespace DinoRush
         public const float MaximumObstacleHeight = 1.2f;
         public const float SimulationStep = 1f / 120f;
 
+        public static int Level(float elapsed)
+        {
+            if (elapsed < 12f) return 1;
+            if (elapsed < 28f) return 2;
+            if (elapsed < 48f) return 3;
+            if (elapsed < 75f) return 4;
+            if (elapsed < 105f) return 5;
+            return 6;
+        }
+
+        public static string LevelHint(int level)
+        {
+            switch (level)
+            {
+                case 2: return "MIX IT UP";
+                case 3: return "LONGER LEAPS";
+                case 4: return "QUICK STEPS";
+                case 5: return "TIGHTER GAPS";
+                case 6: return "WILD TRAIL";
+                default: return "WARM UP";
+            }
+        }
+
         public static float Speed(float elapsed)
         {
             return Mathf.Lerp(6.8f, 13.2f, Mathf.Clamp01(elapsed / 100f));

@@ -46,7 +46,7 @@ namespace DinoRush.Tests
         {
             Transform root = game.transform.Find("Forest runner UI/16 by 9 safe content");
             Assert.That(root.Find("Top left badge/Brand").GetComponent<Text>().text, Is.EqualTo("FOREST RUN"));
-            Assert.That(root.Find("Top left badge/Map").GetComponent<Text>().text, Is.EqualTo("ENDLESS"));
+            Assert.That(root.Find("Top left badge/Map").GetComponent<Text>().text, Is.EqualTo("LEVEL 01"));
             Transform scoreCard = root.Find("Scoreboard/Score card");
             Transform bestCard = root.Find("Scoreboard/Best card");
             Assert.That(((RectTransform)scoreCard).anchoredPosition.y, Is.GreaterThan(((RectTransform)bestCard).anchoredPosition.y));
