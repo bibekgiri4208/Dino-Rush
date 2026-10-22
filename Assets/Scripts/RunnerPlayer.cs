@@ -6,7 +6,8 @@ namespace DinoRush
     public sealed class RunnerPlayer
     {
         private readonly SpriteRenderer renderer;
-        private readonly Sprite[] frames;
+        private Sprite[] frames;
+        private int renderedFrame;
         private readonly Transform shadow;
         private float height;
         private float velocity;
@@ -42,6 +43,16 @@ namespace DinoRush
         {
             if (IsDucking) return;
             jumpBuffer = 0.13f;
+        }
+
+        public void SetFrames(Sprite[] replacement)
+        {
+            if (replacement == null || replacement.Length != 24)
+                throw new System.ArgumentException("A dino needs all 24 animation frames.", nameof(replacement));
+            foreach (Sprite frame in replacement)
+                if (frame == null) throw new System.ArgumentException("Dino frames cannot be missing.", nameof(replacement));
+            frames = replacement;
+            renderer.sprite = frames[renderedFrame]; // Preserve movement, pose, scale and animation timing.
         }
 
         public void SetDucking(bool held)
@@ -91,6 +102,7 @@ namespace DinoRush
                 : !Grounded ? (velocity > 0f ? 11 : 12)
                 : running ? 4 + (int)animationTime % 6 : (int)animationTime % 4;
             renderer.sprite = frames[frame];
+            renderedFrame = frame;
             renderer.transform.position = Feet;
             squash = Mathf.MoveTowards(squash, 0f, dt * 1.8f);
             renderer.transform.localScale = new Vector3(2f * (1f + squash), 2f * (1f - squash), 1f);

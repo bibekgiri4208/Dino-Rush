@@ -25,6 +25,7 @@ namespace DinoRush.Editor
             if (existing != null)
             {
                 // Refresh framing without recreating or replacing any authored UI objects.
+                ForestDinoSelectorBuilder.Apply(game, existing);
                 ForestUiRepair.Repair(game);
                 game.AssignMainMenu(existing);
                 EditorUtility.SetDirty(game);
@@ -98,6 +99,7 @@ namespace DinoRush.Editor
             for (int i = 0; i < legacy.Count; i++) chrome.GetArrayElementAtIndex(i).objectReferenceValue = legacy[i];
             serialized.ApplyModifiedPropertiesWithoutUndo();
             menu.SetSound(false);
+            ForestDinoSelectorBuilder.Apply(game, menu);
             game.AssignMainMenu(menu);
             ForestUiRepair.Repair(game);
             EditorUtility.SetDirty(menu);

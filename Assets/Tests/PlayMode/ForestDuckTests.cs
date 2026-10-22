@@ -89,7 +89,7 @@ namespace DinoRush.Tests
             player.Render(0.1f, true, false, 1f);
             Assert.That(player.Hitbox.height, Is.EqualTo(RunnerRules.DuckHeight));
             Assert.That(game.transform.Find("Player/Blue dino player").GetComponent<SpriteRenderer>().sprite.name,
-                Does.Match("Blue dino frame (18|19|20|21|22|23)"));
+                Does.Match(game.SelectedDinoName + " dino frame (18|19|20|21|22|23)"));
             yield return ForestRunTests.Capture("forest-duck-ground");
             yield return ForestRunTests.Capture("forest-duck-tablet", 1024, 768);
             yield return ForestRunTests.Capture("forest-duck-wide", 1920, 820);

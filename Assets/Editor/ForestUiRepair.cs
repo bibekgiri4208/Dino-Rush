@@ -80,12 +80,16 @@ namespace DinoRush.Editor
 
             Transform custom = card.Find("Customize page");
             Rect(custom, 0, 0, 500, 224);
-            Rect(custom.Find("Selected blue dino"), -148, 24, 96, 96);
-            custom.Find("Selected blue dino").GetComponent<Image>().preserveAspect = true;
-            TextLayout(custom.Find("Dino selection"), 64, 58, 280, 44, 20);
-            TextLayout(custom.Find("Map selection"), 64, 14, 280, 36, 16);
-            TextLayout(custom.Find("Selected status"), 64, -26, 280, 34, 16);
-            TextLayout(custom.Find("Single adventure"), 0, -78, 480, 50, 12);
+            if (custom.Find("Dino choices") != null) ForestDinoSelectorBuilder.RepairLayout(custom);
+            else
+            {
+                Rect(custom.Find("Selected blue dino"), -148, 24, 96, 96);
+                custom.Find("Selected blue dino").GetComponent<Image>().preserveAspect = true;
+                TextLayout(custom.Find("Dino selection"), 64, 58, 280, 44, 20);
+                TextLayout(custom.Find("Map selection"), 64, 14, 280, 36, 16);
+                TextLayout(custom.Find("Selected status"), 64, -26, 280, 34, 16);
+                TextLayout(custom.Find("Single adventure"), 0, -78, 480, 50, 12);
+            }
 
             Transform options = card.Find("Options page");
             Rect(options, 0, 0, 500, 224);

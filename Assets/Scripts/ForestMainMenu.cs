@@ -5,7 +5,7 @@ using UnityEngine.EventSystems;
 
 namespace DinoRush
 {
-    /// <summary>The scene-authored title screen and its small, single-character submenus.</summary>
+    /// <summary>The scene-authored title screen, dino selector, and settings dialogs.</summary>
     public sealed class ForestMainMenu : MonoBehaviour
     {
         [SerializeField] private Button play;
@@ -29,6 +29,14 @@ namespace DinoRush
         [SerializeField] private Text soundCaption;
         [SerializeField] private Text optionsSoundCaption;
         [SerializeField] private Text dialogTitle;
+        [SerializeField] private Button[] dinoChoices = new Button[0];
+        [SerializeField] private Image[] dinoPortraits = new Image[0];
+        [SerializeField] private Text[] dinoCaptions = new Text[0];
+        [SerializeField] private Text selectedDinoLabel;
+        [SerializeField] private Sprite selectedDinoFrame;
+        [SerializeField] private Sprite unselectedDinoFrame;
+        private RunnerDinoRoster dinoRoster;
+        private bool dinosBound;
         private bool bound;
 
         public bool DialogOpen => dialog != null && dialog.activeInHierarchy;
@@ -38,13 +46,41 @@ namespace DinoRush
             if (bound) return;
             bound = true;
             Bind(play, start);
-            Bind(customize, () => OpenDialog("YOUR ADVENTURE", customizePage));
+            Bind(customize, () => OpenDialog("CHOOSE YOUR DINO", customizePage));
             Bind(options, () => OpenDialog("OPTIONS", optionsPage));
             Bind(quit, () => OpenDialog("QUIT GAME?", quitPage));
             Bind(back, CloseDialog);
             Bind(sound, toggleSound);
             Bind(optionsSound, toggleSound);
             Bind(confirmQuit, QuitGame);
+        }
+
+        public void InitializeDinos(RunnerDinoRoster roster, int selected, Action<int> select)
+        {
+            dinoRoster = roster;
+            if (roster == null || roster.Count == 0 || dinoChoices.Length != roster.Count) return;
+            if (!dinosBound)
+            {
+                dinosBound = true;
+                for (int i = 0; i < dinoChoices.Length; i++)
+                {
+                    int index = i;
+                    Bind(dinoChoices[i], () => select(index));
+                }
+            }
+            SetDinoSelection(selected);
+        }
+
+        public void SetDinoSelection(int selected)
+        {
+            if (dinoRoster == null || selected < 0 || selected >= dinoRoster.Count || dinoChoices.Length != dinoRoster.Count) return;
+            for (int i = 0; i < dinoChoices.Length; i++)
+            {
+                dinoPortraits[i].sprite = dinoRoster[i].Portrait;
+                dinoCaptions[i].text = dinoRoster[i].DisplayName.ToUpperInvariant();
+                dinoChoices[i].GetComponent<Image>().sprite = i == selected ? selectedDinoFrame : unselectedDinoFrame;
+            }
+            selectedDinoLabel.text = dinoRoster[selected].DisplayName.ToUpperInvariant() + " DINO SELECTED";
         }
 
         private static void Bind(Button button, Action action)

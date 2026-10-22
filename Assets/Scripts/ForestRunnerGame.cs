@@ -12,6 +12,7 @@ namespace DinoRush
 
         [Header("One player / forest map")]
         [SerializeField] private Texture2D dinoSheet;
+        [SerializeField] private RunnerDinoRoster dinoRoster;
         [SerializeField] private Texture2D sky;
         [SerializeField] private Texture2D mountains;
         [SerializeField] private Texture2D distantForest;
@@ -59,6 +60,7 @@ namespace DinoRush
 
         private readonly List<Sprite> generatedSprites = new List<Sprite>();
         private readonly List<Texture2D> generatedTextures = new List<Texture2D>();
+        private readonly Dictionary<int, Sprite[]> dinoFrameCache = new Dictionary<int, Sprite[]>();
         [Header("Saved scene objects")]
         [SerializeField] private Camera gameCamera;
         [SerializeField] private SpriteRenderer dinoRenderer;
@@ -115,6 +117,10 @@ namespace DinoRush
         public int HighScore => best;
         public int ObstaclesCleared => cleared;
         public int Level => RunnerRules.Level(elapsed);
+        public RunnerDinoRoster DinoRoster => dinoRoster;
+        public int SelectedDinoIndex { get; private set; }
+        public string SelectedDinoName => dinoRoster != null && dinoRoster.Count > 0
+            ? dinoRoster[SelectedDinoIndex].DisplayName : "Blue";
         public bool HasAuthoredScene => gameCamera != null && dinoRenderer != null &&
             playerShadow != null && dinoFrames != null && dinoFrames.Length == 24 && hud != null && hud.IsBuilt;
 
@@ -145,6 +151,11 @@ namespace DinoRush
             UpdateViewport();
             ApplyPixelFiltering();
             player = new RunnerPlayer(dinoRenderer, dinoFrames, playerShadow);
+            if (dinoRoster != null && dinoRoster.Count > 0)
+            {
+                SelectedDinoIndex = dinoRoster.Find(PlayerPrefs.GetString(RunnerDinoRoster.SelectionKey, "blue"));
+                player.SetFrames(DinoFrames(SelectedDinoIndex));
+            }
             foreach (Obstacle obstacle in obstacles)
             {
                 obstacle.active = false;
@@ -157,6 +168,7 @@ namespace DinoRush
             }
             audioCues = new RunnerAudio(gameObject);
             hud.Initialize(PrimaryAction, TogglePause, Jump, ToggleMute, RestartRun, ReturnToMenu, SetDuckHeld);
+            hud.InitializeDinos(dinoRoster, SelectedDinoIndex, SelectDino);
             hud.SetSound(audioCues.Muted);
             hud.UpdateScore(0, best, 0, RunnerRules.Speed(0));
             hud.ShowReady(best);
@@ -190,6 +202,39 @@ namespace DinoRush
             distantForest.filterMode = middleForest.filterMode = tallTrees.filterMode = FilterMode.Point;
             nearForest.filterMode = ground.filterMode = FilterMode.Point;
             foreach (Texture2D texture in obstacleTextures) texture.filterMode = FilterMode.Point;
+            if (dinoRoster != null)
+                for (int i = 0; i < dinoRoster.Count; i++) dinoRoster[i].Sheet.filterMode = FilterMode.Point;
+        }
+
+        public void SelectDino(int index)
+        {
+            if (!initialized || State != RunState.Ready || dinoRoster == null || index < 0 || index >= dinoRoster.Count) return;
+            player.SetFrames(DinoFrames(index));
+            SelectedDinoIndex = index;
+            hud.SetDinoSelection(index);
+            if (PlayerPrefs.GetString(RunnerDinoRoster.SelectionKey, "") != dinoRoster[index].Id)
+            {
+                PlayerPrefs.SetString(RunnerDinoRoster.SelectionKey, dinoRoster[index].Id);
+                PlayerPrefs.Save();
+            }
+        }
+
+        private Sprite[] DinoFrames(int index)
+        {
+            if (dinoFrameCache.TryGetValue(index, out Sprite[] cached)) return cached;
+            Texture2D sheet = dinoRoster[index].Sheet;
+            if (sheet == dinoSheet) return dinoFrameCache[index] = dinoFrames;
+            float cell = sheet.width / 24f;
+            var frames = new Sprite[24];
+            for (int i = 0; i < frames.Length; i++)
+            {
+                frames[i] = Sprite.Create(sheet, new Rect(i * cell, 0, cell, sheet.height),
+                    new Vector2(0.5f, 2f / 24f), cell, 0, SpriteMeshType.FullRect);
+                frames[i].name = dinoRoster[index].DisplayName + " dino frame " + i;
+                generatedSprites.Add(frames[i]);
+            }
+            dinoFrameCache[index] = frames;
+            return frames;
         }
 
         private void SetSkyFraming(bool mainMenu)

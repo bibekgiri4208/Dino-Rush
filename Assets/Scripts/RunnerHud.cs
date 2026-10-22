@@ -60,6 +60,16 @@ namespace DinoRush
 
         public void SetMainMenu(ForestMainMenu menu) => mainMenu = menu;
 
+        public void InitializeDinos(RunnerDinoRoster roster, int selected, Action<int> select)
+        {
+            if (mainMenu != null) mainMenu.InitializeDinos(roster, selected, select);
+        }
+
+        public void SetDinoSelection(int selected)
+        {
+            if (mainMenu != null) mainMenu.SetDinoSelection(selected);
+        }
+
         public void CloseMainMenuDialog()
         {
             if (mainMenu != null) mainMenu.CloseDialog();

@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2ac8350953c84a8d9a112f364ca26084, type: 3}
+  m_Name: ForestDinoRoster
+  m_EditorClassIdentifier: DinoRush::DinoRush.RunnerDinoRoster
+  dinos:
+  - id: blue
+    displayName: Blue
+    sheet: {fileID: 2800000, guid: 099ea73f3b37a7a4cac3a72fbe4de529, type: 3}
+    portrait: {fileID: 7380589141714603092, guid: 099ea73f3b37a7a4cac3a72fbe4de529, type: 3}
+  - id: red
+    displayName: Red
+    sheet: {fileID: 2800000, guid: 19e4d016ab205ff4d9bc85d7cce8fd55, type: 3}
+    portrait: {fileID: 6100862100302883321, guid: 19e4d016ab205ff4d9bc85d7cce8fd55, type: 3}
+  - id: yellow
+    displayName: Yellow
+    sheet: {fileID: 2800000, guid: 0d9076ee868f96f4595fabeabaaf27f9, type: 3}
+    portrait: {fileID: 7735352874621778000, guid: 0d9076ee868f96f4595fabeabaaf27f9, type: 3}
+  - id: green
+    displayName: Green
+    sheet: {fileID: 2800000, guid: 065c75be80852714d8e07defc134c893, type: 3}
+    portrait: {fileID: -8459571847589683294, guid: 065c75be80852714d8e07defc134c893, type: 3}

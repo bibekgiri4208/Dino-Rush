@@ -24,7 +24,7 @@ The trail advances through **six difficulty levels** at 0, 12, 28, 48, 75, and 1
 
 Duck uses the dino's crouched running frames and a shorter collision box. In midair it immediately cuts upward momentum and accelerates the descent until landing, even if you release early. Hold to remain crouched on landing; release to stand and jump again. Ducking cancels buffered jumps, so a fast drop never causes an accidental bounce. It does not let you pass through ground obstacles. The on-screen Duck control supports mouse/touch holds and hides with Jump on menus, pause, and results. **Dino Rush → Add Duck Controls** upgrades an older HUD in place.
 
-Your best forest score and sound preference are saved locally with PlayerPrefs. Restarting a run does not erase your best. The game uses a 16:9 viewport with letterboxing for other window shapes.
+Your best forest score, sound preference, and chosen dino are saved locally with PlayerPrefs. Restarting a run does not erase your best or change your dino. The game uses a 16:9 viewport with letterboxing for other window shapes.
 
 ## Structure
 
@@ -33,12 +33,15 @@ Your best forest score and sound preference are saved locally with PlayerPrefs. 
 - `RunnerDuckControl.cs`: mouse/touch hold and release handling for the Duck button.
 - `RunnerRules.cs`: movement constants, hitboxes, capped speed and fair spawn intervals.
 - `RunnerEncounterDirector.cs`: progressive, randomized obstacle combinations and safe encounter spacing.
+- `RunnerDinoRoster.cs`: the four supplied dino sheets, portraits, and stable selection IDs.
 - `RunnerHud.cs`: start/retry/pause cards, score HUD, touch controls.
 - `RunnerAudio.cs`: short generated jump/crash/milestone cues (no external audio required).
 
 The ForestRun scene contains its **saved camera, forest layers, player, obstacle pool, effects, and complete UI**. They are visible and editable in the Hierarchy, Scene view, and Game view without pressing Play. Expand `Dino Rush - Forest` to find the grouped objects. Select the camera to see its frame, or use the Game tab for the start-screen preview. UI layout, colors, and fonts can be edited normally. Menu/score text still updates according to the game state.
 
-The title screen recreates the supplied reference's centered stone/amber logo, moss-covered buttons, pixel lettering, and top-right SFX toggle. The original forest background remains unobstructed by extra corner branches or canopy overlays, and the trail has no extra UI logs, grass clumps, rocks, or floating leaf fragments. Its objects are under `Forest runner UI/16 by 9 safe content/Forest Main Menu`. **Customize** displays the selected blue dino and forest; **Options** provides the persistent SFX toggle and control help; **Quit** asks for confirmation (and stops Play mode in the Editor). Esc closes these panels. The title-screen camera framing and smaller idle dino switch back to the gameplay framing on Play.
+The title screen recreates the supplied reference's centered stone/amber logo, moss-covered buttons, pixel lettering, and top-right SFX toggle. The original forest background remains unobstructed by extra corner branches or canopy overlays, and the trail has no extra UI logs, grass clumps, rocks, or floating leaf fragments. Its objects are under `Forest runner UI/16 by 9 safe content/Forest Main Menu`. **Customize** offers clickable Blue, Red, Yellow, and Green dino portraits, highlights the selected card, and saves the choice immediately; **Options** provides the persistent SFX toggle and control help; **Quit** asks for confirmation (and stops Play mode in the Editor). Esc closes these panels. The title-screen camera framing and smaller idle dino switch back to the gameplay framing on Play.
+
+All four dinos are unlocked cosmetic choices using `Assets/2D Sprites/dino/DinoSprites - 1.png` through `DinoSprites - 4.png`. The selected sheet drives idle, run, jump, duck, and crash frames with identical sizing, pivots, and hitboxes. Selection persists across restarts and scene/app reloads; unknown saved IDs safely fall back to Blue. `Assets/Generated/ForestDinoRoster.asset` references the original sheets and existing portrait slices without modifying their importers. Additional 24-frame animation sets are created once per selected color, cached for the current session, and cleaned up on scene exit. **Dino Rush → Add Dino Selector** authors the four cards and bindings in place; menu creation and layout repair also preserve the selector.
 
 Gameplay obstacles stay hidden in the main-menu preview and activate through the pool when a run starts. The game reuses the saved hierarchy rather than generating another copy when Play starts.
 
@@ -63,3 +66,5 @@ The four main-menu buttons share the same size, symmetric pixel-cut frame, mirro
 Open **Window → General → Test Runner**. EditMode tests check pace limits, jump feasibility, obstacle spacing, collision bounds, no double jump, saved scene/UI/dirt references, and frame slicing. PlayMode tests load the actual scene and check start/pause/jump, collision, saved best, retry, and clearing obstacles. They also verify the running dirt trail, no midair emission, larger landing bursts, particle pooling/cleanup, that pause freezes the world, Resume preserves progress, Restart clears the previous run, and both pause/results menus return to the title without losing the best score. UI tests raycast buttons (rather than bypassing them), check fonts, label/icon bounds and multiline spacing, and capture menus at normal, tablet, and wide aspect ratios when `DINO_RUSH_CAPTURE_DIR` is set. Tests restore the prior high score and sound preference when finished.
 
 Duck tests cover the crouch animation/hitbox, fast drops during ascent/apex/descent, ground clamping, jump-buffer cancellation, returning to normal jumps, combined Down/S and multitouch holds, pause/focus/reset cleanup, menu/results visibility, and raycastable touch input without accidental jumps. Optional captures include crouched and midair-drop views.
+
+Dino-selector tests verify the four source sheets, saved menu bindings, raycastable cards, selection feedback/persistence/fallback, frame caching, matching animation colors and hitboxes, restart/menu behavior, and normal/tablet/wide layouts. These tests restore the previous dino selection and high score afterward.
