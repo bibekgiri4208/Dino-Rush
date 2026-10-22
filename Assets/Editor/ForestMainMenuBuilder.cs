@@ -38,7 +38,6 @@ namespace DinoRush.Editor
             Transform content = game.transform.Find("Forest runner UI/16 by 9 safe content");
             RectTransform menuRoot = Rect("Forest Main Menu", content, Vector2.zero, new Vector2(1280, 720));
             ForestMainMenu menu = menuRoot.gameObject.AddComponent<ForestMainMenu>();
-            ImageArt("Forest framing - canopy, log, rocks and flowers", menuRoot, "ForestFrame", Vector2.zero, new Vector2(1280, 720));
 
             RectTransform logo = Rect("Dino Rush Logo", menuRoot, Vector2.zero, new Vector2(1280, 720));
             ImageArt("Mossy stone and amber logo", logo, "DinoRushLogo", new Vector2(0, 177), new Vector2(588, 287));

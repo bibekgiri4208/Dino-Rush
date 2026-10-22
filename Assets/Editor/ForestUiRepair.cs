@@ -52,6 +52,12 @@ namespace DinoRush.Editor
             SetBorder("DialogFrame", new Vector4(14, 14, 14, 14));
 
             Transform root = menu.transform;
+            Transform cornerBranches = root.Find("Forest framing - canopy, log, rocks and flowers");
+            if (cornerBranches != null)
+            {
+                cornerBranches.gameObject.SetActive(false);
+                EditorUtility.SetDirty(cornerBranches.gameObject);
+            }
             Rect(root.Find("Dino Rush Logo/Mossy stone and amber logo"), 0, 188, 578, 282);
             root.Find("Dino Rush Logo/Mossy stone and amber logo").GetComponent<Image>().preserveAspect = true;
             Rect(root.Find("Dino Rush Logo/Forest subtitle plaque"), 0, 49, 388, 34);

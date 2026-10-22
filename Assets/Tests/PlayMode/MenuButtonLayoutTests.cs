@@ -15,6 +15,9 @@ namespace DinoRush.Tests
             yield return SceneManager.LoadSceneAsync("ForestRun");
             Canvas.ForceUpdateCanvases();
             ForestMainMenu menu = Object.FindAnyObjectByType<ForestMainMenu>();
+            Transform cornerBranches = menu.transform.Find("Forest framing - canopy, log, rocks and flowers");
+            Assert.That(cornerBranches == null || !cornerBranches.gameObject.activeSelf, Is.True,
+                "Decorative branches must not cover the main menu's upper corners.");
             // Measure design-space pixel gaps at the native canvas scale. Dynamic
             // font hinting at a fractional Game view scale changes glyph bounds.
             Canvas canvas = menu.GetComponentInParent<Canvas>();
