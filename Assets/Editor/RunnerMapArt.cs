@@ -20,28 +20,28 @@ namespace DinoRush.Editor
                 try
                 {
                     int height = source.height;
-                    int halfWidth = source.width;
-                    var pixels = new Color32[halfWidth * 2 * height];
+                    // The supplied sheets already tile left-to-right. Their terminal column
+                    // is an edge sample (or a transparent gutter), not another strip of scenery.
+                    // Keep two forward repeats so the existing three-tile pool covers the view,
+                    // then append one shared edge texel for the runtime's one-texel overlap.
+                    int period = source.width - 1;
+                    int width = period * 2 + 1;
+                    var pixels = new Color32[width * height];
                     Color32[] raw = source.GetPixels32();
-                    for (int x = 0; x < halfWidth; x++)
+                    for (int x = 0; x < period; x++)
                     {
                         Color32 below = Color.clear;
                         for (int y = height - 1; y >= 0; y--)
                         {
                             Color32 color = raw[y * source.width + x];
-                            // The snow sheets have a one-pixel transparent right gutter. Pad the
-                            // derived edge before mirroring so the cloud bank never exposes a slit of sky.
-                            if (name.StartsWith("snow_", System.StringComparison.Ordinal) && x == halfWidth - 1 && color.a == 0)
-                                color = raw[y * source.width + x - 1];
                             if (sky && color.a == 0) color = below; // Sky fills below its supplied transparent horizon.
                             if (color.a > 0) below = color;
-                            pixels[y * halfWidth * 2 + x] = color;
-                            pixels[y * halfWidth * 2 + halfWidth * 2 - 1 - x] = color;
+                            pixels[y * width + x] = color;
+                            pixels[y * width + period + x] = color;
                         }
                     }
-                    // A reflected repeat preserves silhouettes at both joins, instead of
-                    // blending a mountain or canopy into a vertical seam. Source art is untouched.
-                    Write(path, halfWidth * 2, height, pixels);
+                    for (int y = 0; y < height; y++) pixels[y * width + width - 1] = pixels[y * width];
+                    Write(path, width, height, pixels);
                 }
                 finally { Object.DestroyImmediate(source); }
             }
@@ -193,8 +193,8 @@ namespace DinoRush.Editor
             settings.spritePivot = bottomPivot ? new Vector2(0.5f, 0f) : Vector2.one * 0.5f;
             importer.SetTextureSettings(settings);
             importer.npotScale = TextureImporterNPOTScale.None;
-            // Reflected 3800px source layers are 7600px wide. A 4096 cap would
-            // silently downsample the supposedly full-resolution PNG on import.
+            // Two native source repeats can exceed 4096px. Avoid silently downsampling
+            // the full-resolution PNG on import.
             importer.maxTextureSize = Mathf.Max(4096, Mathf.NextPowerOfTwo(Mathf.Max(width, height)));
             importer.filterMode = filter;
             importer.wrapMode = TextureWrapMode.Clamp;

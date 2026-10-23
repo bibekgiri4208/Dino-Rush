@@ -30,7 +30,12 @@ namespace DinoRush.Editor
         }
 
         [MenuItem("Dino Rush/Restore Map Background Source Resolution")]
-        public static void RestoreSourceResolution()
+        public static void RestoreSourceResolution() => RegenerateScenery(true);
+
+        [MenuItem("Dino Rush/Remove Mirrored Map Backgrounds")]
+        public static void RemoveMirroredBackgrounds() => RegenerateScenery(false);
+
+        private static void RegenerateScenery(bool includeMoons)
         {
             if (Application.isPlaying) return;
             RunnerMapCatalog catalog = AssetDatabase.LoadAssetAtPath<RunnerMapCatalog>(CatalogPath);
@@ -49,14 +54,14 @@ namespace DinoRush.Editor
                     if (name.EndsWith("_loop", System.StringComparison.Ordinal))
                         layer.sprite = RunnerMapArt.Loop(source, name.Substring(0, name.Length - 5), layer.order == -100,
                             map.id == "jungle" ? FilterMode.Point : FilterMode.Bilinear, true);
-                    else if (name.EndsWith("_moon", System.StringComparison.Ordinal))
+                    else if (includeMoons && name.EndsWith("_moon", System.StringComparison.Ordinal))
                         layer.sprite = RunnerMapArt.Moon(source, name.Substring(0, name.Length - 5), true);
                 }
                 map.preview = RunnerMapArt.Preview(map, true);
             }
             EditorUtility.SetDirty(catalog);
             AssetDatabase.SaveAssets();
-            Debug.Log("Restored native-resolution map scenery: smooth Desert/Rural, crisp Jungle pixel art. Source art, GUIDs, ground, and map framing preserved.");
+            Debug.Log("Rebuilt native-resolution map scenery with forward repeats, not mirrored extensions. Source art, GUIDs, ground, and map framing preserved.");
         }
 
         [MenuItem("Dino Rush/Refresh Map Previews")]

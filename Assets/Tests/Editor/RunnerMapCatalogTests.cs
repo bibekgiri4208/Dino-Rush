@@ -114,11 +114,11 @@ namespace DinoRush.Tests
                     }
                     else
                     {
-                        Assert.That(generated.width, Is.EqualTo(source.width * 2), generatedPath);
+                        Assert.That(generated.width, Is.EqualTo((source.width - 1) * 2 + 1), generatedPath);
                         Assert.That(generated.height, Is.EqualTo(source.height), generatedPath);
                     }
                     // Compare source samples, not imported source textures (which may have their own size caps).
-                    int width = layer.stationary ? generated.width : source.width;
+                    int width = layer.stationary ? generated.width : source.width - 1;
                     for (int y = 0; y < generated.height; y += Mathf.Max(1, generated.height / 64))
                     for (int x = 0; x < width; x += Mathf.Max(1, width / 64))
                     {
@@ -140,6 +140,36 @@ namespace DinoRush.Tests
                     Object.DestroyImmediate(source);
                     Object.DestroyImmediate(generated);
                 }
+            }
+        }
+
+        [TestCase(1)]
+        [TestCase(2)]
+        [TestCase(3)]
+        [TestCase(4)]
+        public void SceneryRepeatsInItsOriginalOrientationInsteadOfMirroring(int mapIndex)
+        {
+            RunnerMapCatalog catalog = AssetDatabase.LoadAssetAtPath<RunnerMapCatalog>(Directory + "/MapCatalog.asset");
+            foreach (RunnerMapCatalog.MapLayer layer in catalog[mapIndex].layers)
+            {
+                if (layer.stationary || layer.order >= 0) continue;
+                string path = AssetDatabase.GetAssetPath(layer.sprite);
+                var texture = new Texture2D(2, 2);
+                try
+                {
+                    texture.LoadImage(File.ReadAllBytes(path));
+                    Color32[] pixels = texture.GetPixels32();
+                    int period = (texture.width - 1) / 2;
+                    for (int y = 0; y < texture.height; y++)
+                    {
+                        int row = y * texture.width;
+                        for (int x = 0; x < period; x++)
+                            if (!pixels[row + x].Equals(pixels[row + period + x]))
+                                Assert.Fail(path + " reverses or alters the repeat at " + x + "," + y);
+                        Assert.That(pixels[row + texture.width - 1], Is.EqualTo(pixels[row]), "Shared edge texel: " + path);
+                    }
+                }
+                finally { Object.DestroyImmediate(texture); }
             }
         }
 
