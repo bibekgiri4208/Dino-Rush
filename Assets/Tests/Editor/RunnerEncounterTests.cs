@@ -37,15 +37,22 @@ namespace DinoRush.Tests
             RunnerEncounter introduction = director.Next(elapsed);
             Assert.That(introduction.Pattern, Is.EqualTo(signature));
             Assert.That(introduction.Phase, Is.EqualTo(RunnerEncounterPhase.Introduction));
-            Assert.That(director.Next(elapsed).Pattern, Is.EqualTo(RunnerPattern.Single));
-            Assert.That(director.Next(elapsed).Pattern, Is.EqualTo(signature));
+            bool advanced = RunnerRules.Level(elapsed) >= 4;
+            if (!advanced)
+            {
+                Assert.That(director.Next(elapsed).Pattern, Is.EqualTo(RunnerPattern.Single));
+                Assert.That(director.Next(elapsed).Pattern, Is.EqualTo(signature));
+            }
             for (int wave = 0; wave < 8; wave++)
             {
-                for (int slot = 0; slot < 6; slot++)
+                int sectionLength = advanced ? 8 : 6;
+                for (int slot = 0; slot < sectionLength; slot++)
                 {
                     RunnerEncounter encounter = director.Next(elapsed);
-                    Assert.That(encounter.Breather, Is.EqualTo(slot == 5));
-                    if (slot == 2 || slot == 3) Assert.That(encounter.Phase, Is.EqualTo(RunnerEncounterPhase.Challenge));
+                    Assert.That(encounter.Breather, Is.EqualTo(slot == sectionLength - 1));
+                    RunnerEncounterPhase expected = slot == sectionLength - 1 ? RunnerEncounterPhase.Recovery :
+                        slot >= 2 && (advanced || slot <= 3) ? RunnerEncounterPhase.Challenge : RunnerEncounterPhase.Build;
+                    Assert.That(encounter.Phase, Is.EqualTo(expected));
                 }
             }
         }
@@ -68,12 +75,14 @@ namespace DinoRush.Tests
         }
 
         [Test]
-        public void EndlessLapsReopenWithRecoveryRatherThanEscalatingWithoutLimit()
+        public void EndlessLapsKeepTheirChallengeAfterABriefRecoveryWithoutRepeatingTheTutorial()
         {
             var director = new RunnerEncounterDirector(17, Aspects);
             for (int i = 0; i < 20; i++) director.Next(110f);
             Assert.That(director.Next(135f).Phase, Is.EqualTo(RunnerEncounterPhase.Recovery));
-            Assert.That(director.Next(135f).Phase, Is.EqualTo(RunnerEncounterPhase.Introduction));
+            for (int i = 0; i < 16; i++)
+                Assert.That(director.Next(135f).Phase, Is.Not.EqualTo(RunnerEncounterPhase.Introduction),
+                    "An endless lap must not reset to four easy teaching encounters.");
             Assert.That(RunnerRules.Speed(135f), Is.EqualTo(RunnerRules.Speed(600f)));
         }
 
@@ -152,7 +161,33 @@ namespace DinoRush.Tests
         public void LateGameIsDenserThanWarmupWithoutRemovingBreathingRoom()
         {
             float earlyRate = Density(0), lateRate = Density(120);
-            Assert.That(lateRate, Is.GreaterThan(earlyRate * 1.6f), "Progression must change the challenge, not just the badge.");
+            Assert.That(lateRate, Is.GreaterThan(earlyRate * 1.8f), "Progression must change the challenge, not just the badge.");
+        }
+
+        [TestCase(48f)]
+        [TestCase(75f)]
+        [TestCase(120f)]
+        public void AdvancedStagesFavorSustainedChallengeOverEasySingles(float elapsed)
+        {
+            for (int seed = 0; seed < 16; seed++)
+            {
+                var director = new RunnerEncounterDirector(seed, Aspects);
+                for (int warmup = 0; warmup < 16; warmup++) director.Next(elapsed);
+                int singles = 0, rapid = 0, challenges = 0, recovery = 0;
+                for (int i = 0; i < 400; i++)
+                {
+                    RunnerEncounter encounter = director.Next(elapsed);
+                    if (encounter.Pattern == RunnerPattern.Single) singles++;
+                    if (encounter.Pattern == RunnerPattern.QuickSteps || encounter.Pattern == RunnerPattern.Burst) rapid++;
+                    if (encounter.Phase == RunnerEncounterPhase.Challenge) challenges++;
+                    if (encounter.Breather) recovery++;
+                    Assert.That(encounter.Phase, Is.Not.EqualTo(RunnerEncounterPhase.Introduction));
+                }
+                Assert.That(singles, Is.LessThan(100), "Easy singles should not dominate later stages.");
+                Assert.That(rapid, Is.GreaterThan(100), "Later stages need frequent separate, timed jumps.");
+                Assert.That(challenges, Is.EqualTo(250), "Five of every eight advanced encounters sustain pressure.");
+                Assert.That(recovery, Is.EqualTo(50), "Keep one guaranteed recovery in each eight-encounter section.");
+            }
         }
 
         [Test]

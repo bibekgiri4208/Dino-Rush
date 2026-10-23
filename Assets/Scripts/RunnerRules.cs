@@ -20,7 +20,9 @@ namespace DinoRush
         public const float MaximumObstacleHeight = 1.2f;
         public const float SimulationStep = 1f / 120f;
         public const float EndlessLapSeconds = 30f;
+        public const float MaximumSpeed = 16.8f;
         private static readonly float[] LevelStarts = { 0f, 12f, 28f, 48f, 75f, 105f };
+        private static readonly float[] StageSpeeds = { 6.8f, 8.8f, 11f, 13.4f, 15.3f, MaximumSpeed };
 
         public static int Level(float elapsed)
         {
@@ -64,7 +66,10 @@ namespace DinoRush
 
         public static float Speed(float elapsed)
         {
-            return Mathf.Lerp(6.8f, 13.2f, Mathf.Clamp01(elapsed / 100f));
+            int stage = Level(elapsed) - 1;
+            if (stage == StageSpeeds.Length - 1) return MaximumSpeed;
+            return Mathf.Lerp(StageSpeeds[stage], StageSpeeds[stage + 1],
+                Mathf.InverseLerp(LevelStarts[stage], LevelStarts[stage + 1], elapsed));
         }
 
         public static float MinimumSpawnInterval(float speed)

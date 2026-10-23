@@ -61,25 +61,31 @@ namespace DinoRush
             // faster pace at arrival, not just the speed when they were spawned.
             float arrivalSpeed = RunnerRules.Speed(elapsed + 6f);
             int lap = RunnerRules.EndlessLap(elapsed);
-            if (level != currentLevel || lap != currentLap)
+            bool newLap = level == currentLevel && lap != currentLap;
+            if (level != currentLevel)
             {
                 currentLevel = level;
-                currentLap = lap;
                 stageEncounters = 0;
             }
+            currentLap = lap;
             bool warmup = encounters < 3;
-            int section = Mathf.Max(0, stageEncounters - 4) % 6;
-            bool breather = !warmup && (stageEncounters == 0 || stageEncounters >= 4 && section == 5);
+            bool advanced = level >= 4;
+            int teaching = advanced ? 2 : 4;
+            int section = Mathf.Max(0, stageEncounters - teaching) % (advanced ? 8 : 6);
+            bool breather = !warmup && (stageEncounters == 0 || newLap ||
+                stageEncounters >= teaching && section == (advanced ? 7 : 5));
+            bool challenge = advanced ? section >= 2 : section == 2 || section == 3;
             RunnerEncounterPhase phase = breather ? RunnerEncounterPhase.Recovery :
-                warmup || stageEncounters < 4 ? RunnerEncounterPhase.Introduction :
-                section == 2 || section == 3 ? RunnerEncounterPhase.Challenge : RunnerEncounterPhase.Build;
+                warmup || stageEncounters < teaching ? RunnerEncounterPhase.Introduction :
+                challenge ? RunnerEncounterPhase.Challenge : RunnerEncounterPhase.Build;
             RunnerPattern pattern;
             if (warmup) pattern = RunnerPattern.Single;
             else if (breather) pattern = previous == RunnerPattern.Single && repeats >= 2 ? RunnerPattern.Double : RunnerPattern.Single;
-            else if (stageEncounters == 1 || stageEncounters == 3 || stageEncounters >= 4 && section == 2) pattern = FeaturedPattern(level);
-            else if (stageEncounters == 2) pattern = RunnerPattern.Single;
-            else if (section == 4) pattern = random.Next(2) == 0 ? RunnerPattern.Single : RunnerPattern.Double;
-            else pattern = Pick(section == 3 ? level : Mathf.Max(1, level - 1));
+            else if (stageEncounters == 1 || (!advanced && stageEncounters == 3) ||
+                (stageEncounters >= teaching && section == 2)) pattern = FeaturedPattern(level);
+            else if (!advanced && stageEncounters == 2) pattern = RunnerPattern.Single;
+            else if (!advanced && section == 4) pattern = random.Next(2) == 0 ? RunnerPattern.Single : RunnerPattern.Double;
+            else pattern = Pick(advanced || section == 3 ? level : Mathf.Max(1, level - 1));
             if (!warmup && (repeats >= 2 && pattern == previous || hardStreak >= 2 && IsRapid(pattern)))
                 pattern = Pick(level);
             repeats = encounters > 0 && pattern == previous ? repeats + 1 : 1;
@@ -105,7 +111,7 @@ namespace DinoRush
                     width = widthLimit;
                 }
                 if (i > 0)
-                    cursor += rapid ? arrivalSpeed * Range(0.94f, 1.18f) :
+                    cursor += rapid ? arrivalSpeed * Range(0.94f, Mathf.Lerp(1.18f, 1.04f, difficulty)) :
                         (spawns[i - 1].Width + width) * 0.5f + Range(
                             pattern == RunnerPattern.LongJump ? 0.65f : 0.12f,
                             pattern == RunnerPattern.LongJump ? 1.1f : 0.4f);
@@ -128,8 +134,8 @@ namespace DinoRush
                 cursor *= scale;
             }
 
-            float recovery = Range(Mathf.Lerp(1.65f, 0.92f, difficulty), Mathf.Lerp(2.35f, 1.25f, difficulty));
-            if (breather) recovery += Range(0.35f, 0.7f);
+            float recovery = Range(Mathf.Lerp(1.65f, 0.94f, difficulty), Mathf.Lerp(2.35f, 1.08f, difficulty));
+            if (breather) recovery += Range(advanced ? 0.2f : 0.35f, advanced ? 0.4f : 0.7f);
             else if (phase == RunnerEncounterPhase.Introduction) recovery += 0.25f;
             else if (phase == RunnerEncounterPhase.Build) recovery += 0.1f;
             encounters++;
@@ -148,19 +154,22 @@ namespace DinoRush
         {
             // Weighted choices rather than a repeating playlist. Allow one repeat,
             // but never three identical patterns or three rapid encounters in a row.
-            int single = level >= 4 ? 2 : 4;
-            int doubles = level == 1 ? 1 : 3;
-            int total = single + doubles + (level >= 2 ? 2 : 0) + (level >= 3 ? 2 : 0) +
-                (level >= 4 ? 2 : 0) + (level >= 5 ? 2 : 0);
+            int single = level >= 4 ? 1 : 4;
+            int doubles = level >= 4 ? 2 : level == 1 ? 1 : 3;
+            int longJumps = level >= 2 ? level >= 4 ? 3 : 2 : 0;
+            int triples = level >= 3 ? level >= 4 ? 3 : 2 : 0;
+            int quickSteps = level >= 4 ? 5 : 0;
+            int bursts = level >= 5 ? 6 : 0;
+            int total = single + doubles + longJumps + triples + quickSteps + bursts;
             for (int attempt = 0; attempt < 32; attempt++)
             {
                 int choice = random.Next(total);
                 RunnerPattern pattern;
                 if (choice < single) pattern = RunnerPattern.Single;
                 else if ((choice -= single) < doubles) pattern = RunnerPattern.Double;
-                else if ((choice -= doubles) < 2) pattern = RunnerPattern.LongJump;
-                else if ((choice -= 2) < 2) pattern = RunnerPattern.Triple;
-                else if ((choice -= 2) < 2) pattern = RunnerPattern.QuickSteps;
+                else if ((choice -= doubles) < longJumps) pattern = RunnerPattern.LongJump;
+                else if ((choice -= longJumps) < triples) pattern = RunnerPattern.Triple;
+                else if ((choice -= triples) < quickSteps) pattern = RunnerPattern.QuickSteps;
                 else pattern = RunnerPattern.Burst;
                 if (repeats >= 2 && pattern == previous) continue;
                 if (hardStreak >= 2 && IsRapid(pattern)) continue;

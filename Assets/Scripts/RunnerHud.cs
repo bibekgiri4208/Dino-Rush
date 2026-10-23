@@ -251,7 +251,7 @@ namespace DinoRush
             if (paceSegments != null && paceSegments.Length > 0)
             {
                 stats.text = $"{speed / RunnerRules.Speed(0):0.0}x";
-                int lit = Mathf.CeilToInt(Mathf.Clamp01(speed / RunnerRules.Speed(100)) * paceSegments.Length);
+                int lit = Mathf.CeilToInt(Mathf.Clamp01(speed / RunnerRules.MaximumSpeed) * paceSegments.Length);
                 for (int i = 0; i < paceSegments.Length; i++)
                     if (paceSegments[i] != null) paceSegments[i].color = i < lit ? PaceLit : PaceUnlit;
             }

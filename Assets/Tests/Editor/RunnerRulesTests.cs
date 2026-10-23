@@ -10,7 +10,21 @@ namespace DinoRush.Tests
         {
             Assert.That(RunnerRules.Speed(0), Is.EqualTo(6.8f).Within(0.001f));
             Assert.That(RunnerRules.Speed(50), Is.GreaterThan(RunnerRules.Speed(0)));
-            Assert.That(RunnerRules.Speed(10000), Is.EqualTo(13.2f).Within(0.001f));
+            Assert.That(RunnerRules.Speed(10000), Is.EqualTo(RunnerRules.MaximumSpeed).Within(0.001f));
+        }
+
+        [TestCase(12f, 8.8f)]
+        [TestCase(28f, 11f)]
+        [TestCase(48f, 13.4f)]
+        [TestCase(75f, 15.3f)]
+        [TestCase(105f, 16.8f)]
+        public void StagePaceRampsContinuouslyIntoAMoreDemandingLateGame(float elapsed, float speed)
+        {
+            Assert.That(RunnerRules.Speed(elapsed), Is.EqualTo(speed).Within(0.001f));
+            Assert.That(RunnerRules.Speed(elapsed - 0.001f), Is.EqualTo(speed).Within(0.001f),
+                "Stage transitions must not create abrupt speed jumps.");
+            Assert.That(RunnerRules.Speed(elapsed + 0.001f), Is.EqualTo(speed).Within(0.001f));
+            Assert.That(RunnerRules.Speed(-10f), Is.EqualTo(RunnerRules.Speed(0f)));
         }
 
         [TestCase(0f, 0f, 12f, 0)]
@@ -32,6 +46,7 @@ namespace DinoRush.Tests
         [TestCase(6.8f)]
         [TestCase(10f)]
         [TestCase(13.2f)]
+        [TestCase(16.8f)]
         public void WidestTallestObstacleCanBeClearedAtEveryPace(float speed)
         {
             float flight = 2f * RunnerRules.JumpSpeed / RunnerRules.Gravity;
@@ -47,6 +62,7 @@ namespace DinoRush.Tests
 
         [TestCase(6.8f)]
         [TestCase(13.2f)]
+        [TestCase(16.8f)]
         public void SpawnIntervalAllowsLandingAndRecovery(float speed)
         {
             float flight = 2f * RunnerRules.JumpSpeed / RunnerRules.Gravity;

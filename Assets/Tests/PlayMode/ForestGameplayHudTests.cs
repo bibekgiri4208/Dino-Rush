@@ -84,11 +84,11 @@ namespace DinoRush.Tests
             Assert.That(bestCard.Find("Best").GetComponent<Text>().text, Is.EqualTo("000529"));
             Transform meter = root.Find("Trail stats frame/Pace meter");
             Assert.That(meter.childCount, Is.EqualTo(10));
-            Assert.That(LitSegments(meter), Is.EqualTo(6));
+            Assert.That(LitSegments(meter), Is.EqualTo(5));
             Assert.That(root.Find("Trail stats frame/Run stats").GetComponent<Text>().text, Is.EqualTo("1.0x"));
-            hud.UpdateScore(72, 529, 8, RunnerRules.Speed(100));
+            hud.UpdateScore(72, 529, 8, RunnerRules.MaximumSpeed);
             Assert.That(LitSegments(meter), Is.EqualTo(10));
-            Assert.That(root.Find("Trail stats frame/Run stats").GetComponent<Text>().text, Is.EqualTo("1.9x"));
+            Assert.That(root.Find("Trail stats frame/Run stats").GetComponent<Text>().text, Is.EqualTo("2.5x"));
             game.RestartRun();
             yield return ForestRunTests.Capture("forest-hud");
             yield return ForestRunTests.Capture("forest-hud-tablet", 1024, 768);
