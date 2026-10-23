@@ -9,6 +9,7 @@ namespace DinoRush
         public const float GroundY = -3.12f;
         public const float PlayerX = -5.8f;
         public const float JumpSpeed = 11.5f;
+        public const int MaxJumps = 2;
         public const float Gravity = 29f;
         public const float FastFallSpeed = 15f;
         public const float FastFallGravity = 58f;

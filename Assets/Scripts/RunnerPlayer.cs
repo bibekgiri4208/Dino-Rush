@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace DinoRush
 {
-    /// <summary>Deterministic jump, crouch and fast-fall movement without physics or an Animator.</summary>
+    /// <summary>Deterministic double-jump, crouch and fast-fall movement without physics or an Animator.</summary>
     public sealed class RunnerPlayer
     {
         private readonly SpriteRenderer renderer;
@@ -12,6 +12,7 @@ namespace DinoRush
         private float height;
         private float velocity;
         private float jumpBuffer;
+        private int jumpsUsed;
         private float animationTime;
         private float squash;
         private float hurtTime;
@@ -20,6 +21,7 @@ namespace DinoRush
         private bool fastFalling;
 
         public bool Grounded => height <= 0f;
+        public int JumpsRemaining => RunnerRules.MaxJumps - jumpsUsed;
         public bool IsDucking => duckHeld || fastFalling;
         public Rect Hitbox => RunnerRules.PlayerHitbox(height, IsDucking);
         public Vector3 Feet => new Vector3(RunnerRules.PlayerX, RunnerRules.GroundY + height, 0f);
@@ -35,6 +37,7 @@ namespace DinoRush
         public void Reset()
         {
             height = velocity = jumpBuffer = animationTime = squash = hurtTime = 0f;
+            jumpsUsed = 0;
             duckHeld = fastFalling = false;
             renderer.color = Color.white;
             renderer.transform.rotation = Quaternion.identity;
@@ -77,9 +80,10 @@ namespace DinoRush
         public void Step(float dt, out bool jumped, out bool landed)
         {
             jumped = landed = false;
-            if (jumpBuffer > 0f && Grounded && !IsDucking)
+            if (jumpBuffer > 0f && jumpsUsed < RunnerRules.MaxJumps && !IsDucking)
             {
                 velocity = RunnerRules.JumpSpeed;
+                jumpsUsed++;
                 jumpBuffer = 0f;
                 squash = -0.13f;
                 jumped = true;
@@ -95,6 +99,7 @@ namespace DinoRush
                 if (height <= 0f)
                 {
                     height = velocity = 0f;
+                    jumpsUsed = 0;
                     fastFalling = false;
                     squash = 0.2f;
                     landed = true;

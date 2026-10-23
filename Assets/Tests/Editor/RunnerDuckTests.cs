@@ -81,6 +81,7 @@ namespace DinoRush.Tests
             Assert.That(landTime, Is.LessThan(0.16f));
             Assert.That(player.Grounded, Is.True);
             Assert.That(player.IsDucking, Is.False);
+            Assert.That(player.JumpsRemaining, Is.EqualTo(2));
             player.QueueJump();
             player.Step(RunnerRules.SimulationStep, out jumped, out _);
             Assert.That(jumped, Is.True, "Jump must work immediately after a released fast drop lands.");
@@ -117,6 +118,7 @@ namespace DinoRush.Tests
             Assert.That(player.Grounded, Is.True);
             Assert.That(player.IsDucking, Is.False);
             Assert.That(player.Hitbox.height, Is.EqualTo(RunnerRules.PlayerHeight));
+            Assert.That(player.JumpsRemaining, Is.EqualTo(2));
             player.Step(RunnerRules.SimulationStep, out bool jumped, out bool landed);
             Assert.That(jumped || landed, Is.False);
             player.QueueJump();

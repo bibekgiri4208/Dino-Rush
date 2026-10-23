@@ -25275,9 +25275,9 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1.65
-  m_Text: 'SPACE / UP / W : JUMP
+  m_Text: 'SPACE / UP / W / TAP : JUMP
 
-    CLICK OR TAP : JUMP
+    PRESS AGAIN : DOUBLE JUMP
 
     DOWN / S : DUCK /
     FAST DROP

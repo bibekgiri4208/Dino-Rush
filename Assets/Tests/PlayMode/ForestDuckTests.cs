@@ -148,6 +148,70 @@ namespace DinoRush.Tests
             }
         }
 
+        [UnityTest]
+        public IEnumerator DoubleJumpUsesKeyboardAndWorldTapsAndResetsOnlyOnLandingOrRestart()
+        {
+            InputSettings.BackgroundBehavior previousBackground = InputSystem.settings.backgroundBehavior;
+            InputSettings.EditorInputBehaviorInPlayMode previousEditorInput = InputSystem.settings.editorInputBehaviorInPlayMode;
+            InputSystem.settings.backgroundBehavior = InputSettings.BackgroundBehavior.IgnoreFocus;
+            InputSystem.settings.editorInputBehaviorInPlayMode = InputSettings.EditorInputBehaviorInPlayMode.AllDeviceInputAlwaysGoesToGameView;
+            Keyboard original = Keyboard.current;
+            Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
+            _ = keyboard.spaceKey.wasPressedThisFrame;
+            try
+            {
+                SetKeys(keyboard, Key.Space);
+                Step(24);
+                Assert.That(player.JumpsRemaining, Is.EqualTo(1));
+                SetKeys(keyboard); // The air jump requires a fresh press, not a held button.
+                game.TogglePause();
+                float pausedHeight = player.Feet.y;
+                game.Jump();
+                yield return null;
+                Assert.That(player.Feet.y, Is.EqualTo(pausedHeight));
+                Assert.That(player.JumpsRemaining, Is.EqualTo(1));
+                game.TogglePause();
+
+                int dirtCursor = (int)typeof(ForestRunnerGame).GetField("nextDirtParticle", Private).GetValue(game);
+                Vector2 point = Camera.main.WorldToScreenPoint(Vector3.zero);
+                Invoke("PointerAction", point);
+                Step(1);
+                Assert.That(player.JumpsRemaining, Is.Zero);
+                Assert.That(player.Feet.y, Is.GreaterThan(pausedHeight));
+                Assert.That((int)typeof(ForestRunnerGame).GetField("nextDirtParticle", Private).GetValue(game),
+                    Is.EqualTo(dirtCursor), "The air jump must not emit ground dirt in midair.");
+                player.Render(0f, true, false, 1f);
+                Assert.That(game.transform.Find("Player/Blue dino player").GetComponent<SpriteRenderer>().sprite.name,
+                    Is.EqualTo(game.SelectedDinoName + " dino frame 11"));
+
+                SetKeys(keyboard, Key.Space);
+                Step(1);
+                Assert.That(player.JumpsRemaining, Is.Zero, "A third press cannot jump again in midair.");
+                SetKeys(keyboard);
+                Step(180);
+                Assert.That(player.Grounded, Is.True);
+                Assert.That(player.JumpsRemaining, Is.EqualTo(2));
+                game.Jump();
+                Step(1);
+                game.Jump();
+                Step(1);
+                Assert.That(player.JumpsRemaining, Is.Zero);
+                game.RestartRun();
+                Assert.That(player.Grounded, Is.True);
+                Assert.That(player.JumpsRemaining, Is.EqualTo(2));
+                game.ReturnToMenu();
+                game.Jump();
+                Assert.That(player.JumpsRemaining, Is.EqualTo(2), "Menu input must not consume a jump.");
+            }
+            finally
+            {
+                InputSystem.RemoveDevice(keyboard);
+                if (original != null && original.added) original.MakeCurrent();
+                InputSystem.settings.backgroundBehavior = previousBackground;
+                InputSystem.settings.editorInputBehaviorInPlayMode = previousEditorInput;
+            }
+        }
+
         private void SetKeys(Keyboard keyboard, params Key[] keys)
         {
             InputSystem.QueueStateEvent(keyboard, new KeyboardState(keys));

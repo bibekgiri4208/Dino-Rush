@@ -60,8 +60,10 @@ namespace DinoRush.Tests
                 RunnerRules.ObstacleHitbox(RunnerRules.PlayerX, 1f, 1f)), Is.True);
         }
 
-        [Test]
-        public void JumpBufferDoesNotAllowADoubleJump()
+        [TestCase(0.1f)]
+        [TestCase(0.4f)]
+        [TestCase(0.6f)]
+        public void DoubleJumpBoostsDuringAscentApexOrDescentButNeverAllowsAThirdJump(float jumpTime)
         {
             var playerObject = new GameObject("Test player", typeof(SpriteRenderer));
             var shadow = new GameObject("Test shadow");
@@ -72,17 +74,43 @@ namespace DinoRush.Tests
             try
             {
                 var player = new RunnerPlayer(playerObject.GetComponent<SpriteRenderer>(), frames, shadow.transform);
+                Assert.That(player.JumpsRemaining, Is.EqualTo(2));
                 player.QueueJump();
-                player.Step(0.1f, out bool firstJump, out _);
+                player.Step(RunnerRules.SimulationStep, out bool firstJump, out _);
                 Assert.That(firstJump, Is.True);
+                for (float t = RunnerRules.SimulationStep; t < jumpTime; t += RunnerRules.SimulationStep)
+                    player.Step(RunnerRules.SimulationStep, out _, out _);
+                Assert.That(player.Grounded, Is.False);
+                Assert.That(player.JumpsRemaining, Is.EqualTo(1), "A single press must not consume the air jump automatically.");
+                float before = player.Feet.y;
                 player.QueueJump();
-                player.Step(0.1f, out bool secondJump, out _);
-                Assert.That(secondJump, Is.False);
-                for (int i = 0; i < 100; i++) player.Step(RunnerRules.SimulationStep, out _, out _);
+                player.Step(RunnerRules.SimulationStep, out bool secondJump, out _);
+                Assert.That(secondJump, Is.True);
+                Assert.That(player.Feet.y - before, Is.EqualTo(RunnerRules.JumpSpeed * RunnerRules.SimulationStep
+                    - 0.5f * RunnerRules.Gravity * RunnerRules.SimulationStep * RunnerRules.SimulationStep).Within(0.0001f));
+                Assert.That(player.JumpsRemaining, Is.Zero);
+                player.QueueJump();
+                player.Step(RunnerRules.SimulationStep, out bool thirdJump, out _);
+                Assert.That(thirdJump, Is.False);
+                for (int i = 0; i < 200; i++)
+                {
+                    player.Step(RunnerRules.SimulationStep, out bool extraJump, out _);
+                    Assert.That(extraJump, Is.False, "An exhausted jump request must expire without an automatic bounce.");
+                }
                 Assert.That(player.Grounded, Is.True);
+                Assert.That(player.JumpsRemaining, Is.EqualTo(2));
                 player.QueueJump();
                 player.Step(RunnerRules.SimulationStep, out bool nextJump, out _);
                 Assert.That(nextJump, Is.True);
+                player.QueueJump();
+                player.Step(RunnerRules.SimulationStep, out bool nextAirJump, out _);
+                Assert.That(nextAirJump, Is.True, "Landing restores both jumps, not just the ground jump.");
+                player.QueueJump();
+                player.Reset();
+                Assert.That(player.Grounded, Is.True);
+                Assert.That(player.JumpsRemaining, Is.EqualTo(2));
+                player.Step(RunnerRules.SimulationStep, out bool resetJump, out _);
+                Assert.That(resetJump, Is.False, "Reset must also clear any buffered third jump.");
             }
             finally
             {

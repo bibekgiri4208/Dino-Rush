@@ -139,7 +139,7 @@ namespace DinoRush.Tests
             Click("Forest Main Menu/Main menu buttons/Options");
             Text help = root.Find("Forest Main Menu/Menu dialog/Moss framed dialog/Options page/Controls help").GetComponent<Text>();
             Assert.That(help.gameObject.activeInHierarchy, Is.True);
-            Assert.That(help.text, Does.Contain("JUMP").And.Contain("DUCK").And.Contain("PAUSE"));
+            Assert.That(help.text, Does.Contain("DOUBLE JUMP").And.Contain("DUCK").And.Contain("PAUSE"));
         }
 
         private void AssertRunningWithoutHints()

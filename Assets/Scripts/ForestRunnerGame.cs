@@ -648,11 +648,12 @@ namespace DinoRush
             float speed = RunnerRules.Speed(elapsed);
             float travel = speed * dt;
             distance += travel;
+            bool wasGrounded = player.Grounded;
             player.Step(dt, out bool jumped, out bool landed);
             if (jumped)
             {
                 audioCues.Jump();
-                EmitDirt(player.Feet, 5, DirtEmission.Takeoff);
+                if (wasGrounded) EmitDirt(player.Feet, 5, DirtEmission.Takeoff);
             }
             if (landed)
             {

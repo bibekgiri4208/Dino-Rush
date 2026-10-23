@@ -170,6 +170,9 @@ namespace DinoRush.Tests
                 game.Jump();
                 for (int frame = 0; frame < 16; frame++) Step();
                 Assert.That(player.Grounded, Is.False);
+                game.Jump();
+                Step();
+                Assert.That(player.JumpsRemaining, Is.Zero, "Every map must support the second jump.");
                 game.SetDuckHeld(true);
                 for (int frame = 0; frame < 45; frame++) Step();
                 Assert.That(player.Grounded, Is.True, "Fast drops must land identically on every map.");
