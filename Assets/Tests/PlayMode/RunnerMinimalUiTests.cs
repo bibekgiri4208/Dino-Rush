@@ -88,7 +88,7 @@ namespace DinoRush.Tests
         }
 
         [UnityTest]
-        public IEnumerator ResultsShowOnlyScoreBestAndTwoActionsAndKeepTheChosenMap()
+        public IEnumerator ResultsShowScoreBestEggsAndTwoActionsAndKeepTheChosenMap()
         {
             game.SelectMap(3);
             game.StartRun();
@@ -106,7 +106,7 @@ namespace DinoRush.Tests
             Assert.That(card.Find("Results score").GetComponent<Text>().text, Is.EqualTo(1234.ToString("N0")));
             Assert.That(card.Find("Results best").GetComponent<Text>().text, Is.EqualTo(1234.ToString("N0")));
             Assert.That(card.GetComponentsInChildren<Button>().Length, Is.EqualTo(2));
-            Assert.That(card.GetComponentsInChildren<Text>().Length, Is.EqualTo(8));
+            Assert.That(card.GetComponentsInChildren<Text>().Length, Is.EqualTo(9));
             AssertFocusedModal(card);
             yield return ForestRunTests.Capture("minimal-results-record");
             yield return ForestRunTests.Capture("minimal-results-tablet", 1024, 768);
@@ -146,13 +146,13 @@ namespace DinoRush.Tests
         {
             foreach (string name in new[] { "Jump", "Duck", "Controls", "Keyboard controls", "Duck/Drop hint", "Top left badge" })
                 Assert.That(root.Find(name).gameObject.activeInHierarchy, Is.False, name);
-            foreach (string name in new[] { "Pause", "Sound", "Scoreboard", "Life hearts", "Stage progress" })
+            foreach (string name in new[] { "Pause", "Sound", "Scoreboard", "Life hearts", "Egg counter", "Stage progress" })
                 Assert.That(root.Find(name).gameObject.activeInHierarchy, Is.True, name);
         }
 
         private void AssertFocusedModal(Transform card)
         {
-            foreach (string name in new[] { "Top left badge", "Life hearts", "Stage progress", "Scoreboard", "Sound", "Jump", "Duck", "Controls", "Keyboard controls", "Trail stats frame" })
+            foreach (string name in new[] { "Top left badge", "Life hearts", "Egg counter", "Stage progress", "Scoreboard", "Sound", "Jump", "Duck", "Controls", "Keyboard controls", "Trail stats frame" })
                 Assert.That(root.Find(name).gameObject.activeInHierarchy, Is.False, name + " crowds the modal");
             Assert.That(root.Find("Menu scrim").GetComponent<Image>().raycastTarget, Is.True);
             Assert.That(card.GetComponent<CanvasGroup>().blocksRaycasts, Is.True);

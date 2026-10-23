@@ -112,7 +112,7 @@ namespace DinoRush
             else
             {
                 float extra = (layout.UiSize.y - 720f) * 0.5f;
-                foreach (string path in new[] { "Life hearts", "Stage progress", "Scoreboard", "Sound", "Pause", "Milestone toast", "Forest Main Menu/SFX toggle" })
+                foreach (string path in new[] { "Life hearts", "Egg counter", "Stage progress", "Scoreboard", "Sound", "Pause", "Milestone toast", "Forest Main Menu/SFX toggle" })
                     ShiftVertical(path, extra);
                 foreach (string path in new[] { "Jump", "Duck", "Trail stats frame", "Gameplay bottom fade", "Controls", "Keyboard controls" })
                     ShiftVertical(path, -extra);
@@ -144,6 +144,7 @@ namespace DinoRush
             Place("Life hearts", -220, top - 51);
             Place("Stage progress", -146, top - 126);
             Scale("Stage progress", 0.82f);
+            Place("Egg counter", -220, top - 195);
             Place("Scoreboard", 202, top - 102);
             Place("Sound", 222, top - 212, 68, 68);
             Place("Pause", 306, top - 212, 68, 68);

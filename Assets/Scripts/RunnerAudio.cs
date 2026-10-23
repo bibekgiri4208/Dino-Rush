@@ -10,6 +10,7 @@ namespace DinoRush
         private readonly AudioClip jump;
         private readonly AudioClip crash;
         private readonly AudioClip milestone;
+        private readonly AudioClip pickup;
         public bool Muted { get; private set; }
 
         public RunnerAudio(GameObject owner)
@@ -22,6 +23,7 @@ namespace DinoRush
             jump = Tone("Jump", 0.13f, 420f, 880f);
             crash = Tone("Bump", 0.24f, 180f, 45f);
             milestone = Tone("New milestone", 0.3f, 660f, 1320f);
+            pickup = Tone("Egg pickup", 0.09f, 1100f, 1760f);
         }
 
         public void ToggleMute()
@@ -35,6 +37,7 @@ namespace DinoRush
         public void Jump() => source.PlayOneShot(jump, 0.6f);
         public void Crash() => source.PlayOneShot(crash);
         public void Milestone() => source.PlayOneShot(milestone, 0.5f);
+        public void Pickup() => source.PlayOneShot(pickup, 0.45f);
 
         private static AudioClip Tone(string name, float duration, float start, float end)
         {
@@ -58,6 +61,7 @@ namespace DinoRush
             UnityEngine.Object.Destroy(jump);
             UnityEngine.Object.Destroy(crash);
             UnityEngine.Object.Destroy(milestone);
+            UnityEngine.Object.Destroy(pickup);
         }
     }
 }

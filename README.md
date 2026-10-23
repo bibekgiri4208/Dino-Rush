@@ -42,6 +42,14 @@ Duck uses the dino's crouched running frames and a shorter collision box. In mid
 
 Your best score, sound preference, chosen dino, and last map are saved locally with PlayerPrefs. Restarting a run does not erase your best or change your dino/map.
 
+### Collectible dinosaur eggs
+
+Every map now offers optional **speckled egg trails**. Four safe starter eggs introduce collecting before the first obstacle. Low trails sit in clear recovery gaps (four eggs), riskier single-jump arcs offer six eggs around obstacles, and high arcs offer eight eggs along a double-jump route. High arcs only appear where there is room to land before the next encounter; rapid obstacle sequences keep their existing single-jump rhythm. Eggs never overlap obstacle hitboxes, and skipping a trail has no penalty. Obstacle patterns, spacing, difficulty, distance scoring, and health are unchanged.
+
+Touch an egg with the dino to collect it once. A short chime (respecting SFX mute), golden pixel sparkles, and a pulsing **EGGS** counter provide feedback. The counter adapts to portrait/safe areas, and the results card shows the run's total. Eggs and sparkles freeze during pause/game over, stay absent on menus and Tap to Start, and reset on retry/restart or returning to the title. Counts are per-run only in this first version—there is no shop, permanent currency, or unlock requirement.
+
+`RunnerEggTrail.cs` designs optional routes using its own seeded random stream. `RunnerEggCollectibles.cs` reuses 64 egg renderers and 36 sparkle renderers without changing gameplay randomness. `RunnerEggArt.cs` creates the small point-filtered egg/glint artwork at runtime and disposes it on scene exit; supplied art and saved scene objects are untouched.
+
 ### Screen sizes and orientation
 
 The display adapts automatically to resolution changes, desktop window resizing, portrait/landscape rotation, and phone safe areas (notches and home indicators). Landscape keeps the existing layout; portrait moves the readouts to the top and reflows map and dino choices into two columns. Jump/Duck buttons stay hidden in both orientations. Menus and scrims fit the usable area, and returning to landscape restores the authored layout without resetting the run.
@@ -135,6 +143,8 @@ The four main-menu buttons share the same size, symmetric pixel-cut frame, mirro
 Open **Window → General → Test Runner**. EditMode tests check pace limits, jump feasibility, obstacle spacing, collision bounds, double-jump boosts/limits/reset, saved scene/UI/dirt references, and frame slicing. PlayMode tests load the actual scene and check start/pause/jump, collision, saved best, retry, and clearing obstacles. They also verify keyboard/tap double jumps across maps, the running dirt trail, no midair emission, larger landing bursts, particle pooling/cleanup, that pause freezes the world, Resume preserves progress, Restart clears the previous run, and both pause/results menus return to the title without losing the best score. UI tests raycast buttons (rather than bypassing them), check fonts, label/icon bounds and multiline spacing, and capture menus at normal, tablet, and wide aspect ratios when `DINO_RUSH_CAPTURE_DIR` is set. Tests restore the prior high score and sound preference when finished.
 
 Health tests check all five hearts, one loss per obstacle, cluster grace time, white/crying frames, floating heart-loss text, pause freezing, final-heart game over, and clean restart/menu state. The clean-course regression also requires keeping all five hearts.
+
+Egg tests check safe placement and playable routes across stages/speeds, high arcs requiring double jump, seeded variety independent of gameplay randomness, real single/double-jump collection, every map/dino, exact-once awards, pool reuse/exhaustion, offscreen expiry, pause/results/restart state, non-blocking responsive HUD, mute-compatible audio, and runtime-art cleanup. Optional captures include `eggs-Low`, `eggs-Risky`, `eggs-HighArc`, `eggs-high-portrait`, `eggs-collected`, and `eggs-results`.
 
 Level-design tests verify signature introductions, skill unlock gates, guaranteed recovery sections, endless-lap resets, repetition limits, jump clearance, and full accelerating courses. Progress tests check boundary/countdown math, live bar geometry, resize/pause/restart preservation, and stage/lap banner priority. Optional captures include `forest-progression-level-4` and `progress-wild-run`.
 

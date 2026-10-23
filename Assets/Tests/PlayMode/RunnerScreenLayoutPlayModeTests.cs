@@ -207,6 +207,18 @@ namespace DinoRush.Tests
         private void AssertVisibleUi(RunnerScreenLayout layout)
         {
             Canvas.ForceUpdateCanvases();
+            var eggCounter = (RectTransform)root.Find("Egg counter");
+            if (eggCounter.gameObject.activeInHierarchy)
+            {
+                Rect bounds = Pixels(eggCounter);
+                Assert.That(bounds.xMin, Is.GreaterThanOrEqualTo(layout.SafeArea.xMin - 1f));
+                Assert.That(bounds.xMax, Is.LessThanOrEqualTo(layout.SafeArea.xMax + 1f));
+                Assert.That(bounds.yMin, Is.GreaterThanOrEqualTo(layout.SafeArea.yMin - 1f));
+                Assert.That(bounds.yMax, Is.LessThanOrEqualTo(layout.SafeArea.yMax + 1f));
+                foreach (string name in new[] { "Life hearts", "Stage progress", "Scoreboard", "Sound", "Pause" })
+                    Assert.That(bounds.Overlaps(Pixels((RectTransform)root.Find(name))), Is.False,
+                        "The egg counter must not cover " + name);
+            }
             var stage = (RectTransform)root.Find("Stage progress");
             if (stage.gameObject.activeInHierarchy)
             {

@@ -75,6 +75,9 @@ namespace DinoRush
         private const float StageProgressWidth = 416f;
         private GameObject startPrompt;
         private Text startMapName;
+        private GameObject eggDisplay;
+        private Text eggCount, resultEggs;
+        private float eggPulse;
 
         public bool IsBuilt => root != null;
         public bool MainMenuDialogOpen => mainMenu != null && mainMenu.DialogOpen;
@@ -201,11 +204,12 @@ namespace DinoRush
         }
 
         public void Initialize(Action primary, Action pause, Action jump, Action mute, Action restart, Action quitRun,
-            Action<bool> duck)
+            Action<bool> duck, Sprite eggSprite = null)
         {
             CreateLifeDisplay();
             CreateStageDisplay();
             CreateStartPrompt();
+            CreateEggDisplay(eggSprite);
             RunnerUiEffects.Install(root);
             responsiveUi = new RunnerResponsiveUi(root);
             levelLabel = root.Find("Top left badge/Map")?.GetComponent<Text>();
@@ -372,6 +376,7 @@ namespace DinoRush
             pauseButton.SetActive(!visible);
             if (lifeBar != null) lifeBar.SetActive(!visible);
             if (stageDisplay != null) stageDisplay.SetActive(!visible);
+            if (eggDisplay != null) eggDisplay.SetActive(!visible);
             stats.gameObject.SetActive(!visible);
             if (statsFrame != null) statsFrame.SetActive(!visible);
             if (controlsGuide != null) controlsGuide.SetActive(!visible && !minimalPresentation);
@@ -402,6 +407,51 @@ namespace DinoRush
             Color color = Cream;
             color.a = Mathf.Clamp01(toastTime);
             toast.color = color;
+            if (eggCount != null && eggDisplay.activeInHierarchy)
+            {
+                eggPulse = Mathf.Max(0f, eggPulse - dt);
+                eggCount.transform.localScale = Vector3.one * (1f + Mathf.Sin(eggPulse / 0.22f * Mathf.PI) * 0.14f);
+                eggCount.color = Color.Lerp(Cream, new Color32(255, 218, 119, 255), eggPulse / 0.22f);
+            }
+        }
+
+        private void CreateEggDisplay(Sprite sprite)
+        {
+            if (eggDisplay != null) return;
+            Image frame = Box("Egg counter", root, new Vector2(-492, 250), new Vector2(224, 42), Ink);
+            Image theme = lifeBar.GetComponent<Image>();
+            if (theme.sprite != null)
+            {
+                frame.sprite = theme.sprite;
+                frame.type = theme.type;
+                frame.color = theme.color;
+            }
+            eggDisplay = frame.gameObject;
+            Image icon = Box("Egg icon", frame.transform, new Vector2(-86, 0), new Vector2(28, 34), Color.white);
+            icon.sprite = sprite;
+            icon.preserveAspect = true;
+            Label("Egg caption", frame.transform, "EGGS", new Vector2(-27, 0), new Vector2(68, 26), 12, Cream);
+            eggCount = Label("Egg count", frame.transform, "000", new Vector2(60, 0), new Vector2(96, 30), 14,
+                Cream, TextAnchor.MiddleRight);
+            if (minimalPresentation)
+                resultEggs = Label("Collected eggs", panel.transform, "EGGS COLLECTED: 000", new Vector2(0, -12),
+                    new Vector2(384, 20), 12, new Color32(255, 218, 119, 255));
+            eggDisplay.SetActive(false);
+        }
+
+        public void UpdateEggs(int count)
+        {
+            if (eggCount == null) return;
+            string caption = count > 99999 ? "99999+" : count.ToString("D3");
+            if (count > 0) eggPulse = 0.22f;
+            else
+            {
+                eggPulse = 0f;
+                eggCount.transform.localScale = Vector3.one;
+                eggCount.color = Cream;
+            }
+            eggCount.text = caption;
+            if (resultEggs != null) resultEggs.text = "EGGS COLLECTED: " + caption;
         }
 
         private void CreateLifeDisplay()

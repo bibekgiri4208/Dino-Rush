@@ -29,6 +29,7 @@ namespace DinoRush
             Reveal(root.Find("Top left badge"), 0.24f, new Vector2(-10, 0));
             Reveal(root.Find("Scoreboard"), 0.24f, new Vector2(10, 0));
             Reveal(root.Find("Trail stats frame"), 0.24f, new Vector2(0, -8));
+            Reveal(root.Find("Egg counter"), 0.24f, new Vector2(-8, 0));
             Reveal(root.Find("Keyboard controls"), 0.28f, new Vector2(0, -8));
             Reveal(root.Find("Milestone toast"), 0.24f, new Vector2(0, -10), 0.96f);
             Reveal(root.Find("Tap to start"), 0.22f, new Vector2(0, -8));

@@ -93,6 +93,7 @@ namespace DinoRush
         private RunnerPlayer player;
         private readonly RunnerHealth health = new RunnerHealth();
         private RunnerAudio audioCues;
+        private RunnerEggCollectibles eggs;
         private RunnerEncounterDirector encounterDirector;
         private float nextEncounterDistance;
         private int announcedLevel = 1;
@@ -134,6 +135,7 @@ namespace DinoRush
         public int Score => Mathf.FloorToInt(distance);
         public int HighScore => best;
         public int ObstaclesCleared => cleared;
+        public int EggsCollected => eggs != null ? eggs.Collected : 0;
         public int Lives => health.Lives;
         public bool IsInvulnerable => health.IsInvulnerable;
         public int Level => RunnerRules.Level(elapsed);
@@ -194,7 +196,12 @@ namespace DinoRush
                 particle.renderer.gameObject.SetActive(false);
             }
             audioCues = new RunnerAudio(gameObject);
-            hud.Initialize(PrimaryAction, TogglePause, Jump, ToggleMute, RestartRun, ReturnToMenu, SetDuckHeld);
+            eggs = new RunnerEggCollectibles(transform, spriteMaterial, () =>
+            {
+                audioCues.Pickup();
+                hud.UpdateEggs(eggs.Collected);
+            });
+            hud.Initialize(PrimaryAction, TogglePause, Jump, ToggleMute, RestartRun, ReturnToMenu, SetDuckHeld, eggs.EggSprite);
             hud.UpdateLives(Lives);
             hud.InitializeDinos(dinoRoster, SelectedDinoIndex, SelectDino);
             hud.InitializeMaps(mapCatalog, SelectedMapIndex, SelectMap, PrepareRun);
@@ -694,6 +701,7 @@ namespace DinoRush
                 }
             }
 
+            eggs.Step(dt, travel, playerBox);
             dustTimer -= dt;
             if (player.Grounded && dustTimer <= 0f)
             {
@@ -736,6 +744,7 @@ namespace DinoRush
                 if (index == encounter.Obstacles.Length) break;
             }
             nextEncounterDistance = distance + encounter.Spacing;
+            eggs.SpawnEncounter(encounter, 11.7f, RunnerRules.Speed(elapsed + 6f));
         }
 
         private void Scroll(float travel)
@@ -949,6 +958,7 @@ namespace DinoRush
         private void BeginRun()
         {
             State = RunState.Running;
+            eggs.SpawnIntro();
             hud.ShowRunning();
             hud.SetMapName(SelectedMapName);
             hud.UpdateLevel(Level);
@@ -967,7 +977,10 @@ namespace DinoRush
             stageBannerTime = 0f;
             var aspects = new float[obstacleSprites.Count];
             for (int i = 0; i < aspects.Length; i++) aspects[i] = obstacleSprites[i].bounds.size.x / obstacleSprites[i].bounds.size.y;
-            encounterDirector = new RunnerEncounterDirector(Random.Range(1, int.MaxValue), aspects);
+            int seed = Random.Range(1, int.MaxValue);
+            encounterDirector = new RunnerEncounterDirector(seed, aspects);
+            eggs.Reset(seed ^ 0x4e6719);
+            hud.UpdateEggs(0);
             elapsed = distance = accumulator = dustTimer = timeSinceCrash = shake = 0f;
             cleared = milestone = 0;
             bestAtRunStart = best;
@@ -1112,6 +1125,7 @@ namespace DinoRush
         {
             if (initialized) SaveBest();
             audioCues?.Dispose();
+            eggs?.Dispose();
             // Saved subassets belong to the project, not to this play session.
             foreach (Sprite sprite in generatedSprites)
                 if (sprite != null && !IsSavedAsset(sprite)) Destroy(sprite);
