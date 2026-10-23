@@ -93,6 +93,8 @@ namespace DinoRush
         private RunnerEncounterDirector encounterDirector;
         private float nextEncounterDistance;
         private int announcedLevel = 1;
+        private int announcedLap;
+        private float stageBannerTime;
         private Sprite pixel;
         private Transform environmentGroup;
         private Transform playerGroup;
@@ -587,12 +589,27 @@ namespace DinoRush
         {
             health.Step(dt);
             elapsed += dt;
+            hud.UpdateProgress(elapsed);
+            stageBannerTime = Mathf.Max(0f, stageBannerTime - dt);
             bool levelChanged = Level > announcedLevel;
             if (levelChanged)
             {
                 announcedLevel = Level;
                 hud.UpdateLevel(Level);
                 hud.Toast($"LEVEL {Level:00} / {RunnerRules.LevelHint(Level)}");
+                stageBannerTime = 3f;
+                audioCues.Milestone();
+            }
+            int lap = RunnerRules.EndlessLap(elapsed);
+            if (lap > announcedLap)
+            {
+                announcedLap = lap;
+                if (!levelChanged)
+                {
+                    hud.Toast($"LAP {lap - 1:00} COMPLETE / WILD RUN");
+                    stageBannerTime = 3f;
+                    audioCues.Milestone();
+                }
             }
             float speed = RunnerRules.Speed(elapsed);
             float travel = speed * dt;
@@ -654,7 +671,7 @@ namespace DinoRush
             {
                 milestone = nextMilestone;
                 audioCues.Milestone();
-                if (!levelChanged) hud.Toast($"{milestone * 100} METRES  /  KEEP GOING!");
+                if (stageBannerTime <= 0f) hud.Toast($"{milestone * 100} METRES  /  KEEP GOING!");
                 SaveBest();
             }
         }
@@ -861,6 +878,8 @@ namespace DinoRush
             hud.SetMapName(SelectedMapName);
             hud.UpdateLevel(Level);
             hud.UpdateScore(0, best, 0, RunnerRules.Speed(0));
+            hud.Toast($"LEVEL 01 / {RunnerRules.LevelHint(1)}");
+            stageBannerTime = 3f;
         }
 
         private void ResetRun()
@@ -869,6 +888,8 @@ namespace DinoRush
             hud.FeedbackDuck(false);
             nextEncounterDistance = 0f;
             announcedLevel = 1;
+            announcedLap = 0;
+            stageBannerTime = 0f;
             var aspects = new float[obstacleSprites.Count];
             for (int i = 0; i < aspects.Length; i++) aspects[i] = obstacleSprites[i].bounds.size.x / obstacleSprites[i].bounds.size.y;
             encounterDirector = new RunnerEncounterDirector(Random.Range(1, int.MaxValue), aspects);
@@ -892,6 +913,7 @@ namespace DinoRush
             health.Reset();
             hud.UpdateLives(Lives);
             hud.ClearDamage();
+            hud.UpdateProgress(0f);
         }
 
         public void RestartRun()

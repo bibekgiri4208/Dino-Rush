@@ -143,6 +143,50 @@ namespace DinoRush.Tests
             Assert.That(badge.text, Is.EqualTo("ENDLESS"));
         }
 
+        [UnityTest]
+        public IEnumerator ProgressMeterTracksStagesLapsPauseRestartAndResponsiveResizing()
+        {
+            Set("spawnTimer", float.MaxValue);
+            Transform root = game.transform.Find("Forest runner UI/16 by 9 safe content");
+            Transform progress = root.Find("Stage progress");
+            Text title = progress.Find("Stage name").GetComponent<Text>();
+            Text countdown = progress.Find("Next stage").GetComponent<Text>();
+            var fill = (RectTransform)progress.Find("Progress fill");
+            Assert.That(progress.gameObject.activeInHierarchy, Is.True);
+            Assert.That(title.text, Is.EqualTo("01 / FIRST STEPS"));
+            Set("elapsed", 6f);
+            step.Invoke(game, new object[] { RunnerRules.SimulationStep });
+            Assert.That(fill.sizeDelta.x, Is.EqualTo(208f).Within(1f));
+            Assert.That(countdown.text, Is.EqualTo("06s"));
+            game.ApplyScreenLayout(RunnerScreenLayout.Calculate(360, 800, new Rect(0, 24, 360, 752)));
+            Assert.That(fill.sizeDelta.x, Is.EqualTo(208f).Within(1f), "Resizing cannot reset the progress geometry.");
+            game.TogglePause();
+            Assert.That(progress.gameObject.activeInHierarchy, Is.False);
+            float width = fill.sizeDelta.x;
+            game.enabled = true;
+            yield return new WaitForSecondsRealtime(0.15f);
+            game.enabled = false;
+            Assert.That(fill.sizeDelta.x, Is.EqualTo(width));
+            game.TogglePause();
+            Assert.That(progress.gameObject.activeInHierarchy, Is.True);
+            Set("elapsed", 135f);
+            Set("distance", 99.99f); // A distance milestone must not overwrite a stage/lap celebration.
+            step.Invoke(game, new object[] { RunnerRules.SimulationStep });
+            Assert.That(title.text, Is.EqualTo("WILD RUN / LAP 02"));
+            Assert.That(countdown.text, Is.EqualTo("30s"));
+            Assert.That(root.Find("Milestone toast").GetComponent<Text>().text, Does.StartWith("LEVEL 06"));
+            Set("elapsed", 165f);
+            step.Invoke(game, new object[] { RunnerRules.SimulationStep });
+            Assert.That(root.Find("Milestone toast").GetComponent<Text>().text, Is.EqualTo("LAP 02 COMPLETE / WILD RUN"));
+            game.ApplyScreenLayout(RunnerScreenLayout.Calculate(Screen.width, Screen.height, Screen.safeArea));
+            yield return ForestRunTests.Capture("progress-wild-run");
+            game.RestartRun();
+            Assert.That(title.text, Is.EqualTo("01 / FIRST STEPS"));
+            Assert.That(fill.sizeDelta.x, Is.Zero);
+            game.ReturnToMenu();
+            Assert.That(progress.gameObject.activeInHierarchy, Is.False);
+        }
+
         private object Get(string field) => typeof(ForestRunnerGame).GetField(field, Private).GetValue(game);
         private void Set(string field, object value) => typeof(ForestRunnerGame).GetField(field, Private).SetValue(game, value);
     }

@@ -195,6 +195,19 @@ namespace DinoRush.Tests
         private void AssertVisibleUi(RunnerScreenLayout layout)
         {
             Canvas.ForceUpdateCanvases();
+            var stage = (RectTransform)root.Find("Stage progress");
+            if (stage.gameObject.activeInHierarchy)
+            {
+                Rect bounds = Pixels(stage);
+                Assert.That(bounds.xMin, Is.GreaterThanOrEqualTo(layout.SafeArea.xMin - 1f));
+                Assert.That(bounds.xMax, Is.LessThanOrEqualTo(layout.SafeArea.xMax + 1f));
+                Assert.That(bounds.yMin, Is.GreaterThanOrEqualTo(layout.SafeArea.yMin - 1f));
+                Assert.That(bounds.yMax, Is.LessThanOrEqualTo(layout.SafeArea.yMax + 1f));
+                foreach (string name in new[] { "Life hearts", "Scoreboard", "Sound", "Pause" })
+                    Assert.That(bounds.Overlaps(Pixels((RectTransform)root.Find(name))), Is.False, "Progress must not cover " + name);
+                foreach (Graphic graphic in stage.GetComponentsInChildren<Graphic>())
+                    Assert.That(graphic.raycastTarget, Is.False, "Progress must not intercept jump taps.");
+            }
             foreach (Button button in root.GetComponentsInChildren<Button>())
             {
                 Rect pixels = Pixels((RectTransform)button.transform);

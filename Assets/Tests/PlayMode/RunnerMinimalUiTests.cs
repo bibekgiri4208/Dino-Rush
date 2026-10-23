@@ -146,7 +146,7 @@ namespace DinoRush.Tests
         {
             foreach (string name in new[] { "Controls", "Keyboard controls", "Duck/Drop hint", "Top left badge" })
                 Assert.That(root.Find(name).gameObject.activeInHierarchy, Is.False, name);
-            foreach (string name in new[] { "Jump", "Duck", "Pause", "Sound", "Scoreboard", "Life hearts" })
+            foreach (string name in new[] { "Jump", "Duck", "Pause", "Sound", "Scoreboard", "Life hearts", "Stage progress" })
                 Assert.That(root.Find(name).gameObject.activeInHierarchy, Is.True, name);
             foreach (string name in new[] { "Jump", "Duck" })
             {
@@ -157,7 +157,7 @@ namespace DinoRush.Tests
 
         private void AssertFocusedModal(Transform card)
         {
-            foreach (string name in new[] { "Top left badge", "Life hearts", "Scoreboard", "Sound", "Jump", "Duck", "Controls", "Keyboard controls", "Trail stats frame" })
+            foreach (string name in new[] { "Top left badge", "Life hearts", "Stage progress", "Scoreboard", "Sound", "Jump", "Duck", "Controls", "Keyboard controls", "Trail stats frame" })
                 Assert.That(root.Find(name).gameObject.activeInHierarchy, Is.False, name + " crowds the modal");
             Assert.That(root.Find("Menu scrim").GetComponent<Image>().raycastTarget, Is.True);
             Assert.That(card.GetComponent<CanvasGroup>().blocksRaycasts, Is.True);

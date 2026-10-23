@@ -4,6 +4,7 @@ using UnityEngine;
 namespace DinoRush
 {
     public enum RunnerPattern { Single, Double, LongJump, QuickSteps, Triple, Burst }
+    public enum RunnerEncounterPhase { Introduction, Build, Challenge, Recovery }
 
     public readonly struct RunnerObstacleSpawn
     {
@@ -25,9 +26,10 @@ namespace DinoRush
         public RunnerObstacleSpawn[] Obstacles { get; internal set; }
         public float Spacing { get; internal set; }
         public bool Breather { get; internal set; }
+        public RunnerEncounterPhase Phase { get; internal set; }
     }
 
-    /// <summary>Per-run randomness, progressive encounter vocabulary and physics-bounded spacing.</summary>
+    /// <summary>Teach/practice/challenge/recover sections with seeded variation and physics-bounded spacing.</summary>
     public sealed class RunnerEncounterDirector
     {
         private readonly System.Random random;
@@ -37,7 +39,7 @@ namespace DinoRush
         private RunnerPattern previous;
         private int repeats;
         private int hardStreak;
-        private int untilBreather;
+        private int currentLevel, currentLap, stageEncounters;
 
         public RunnerEncounterDirector(int seed, float[] spriteAspectRatios)
         {
@@ -48,7 +50,6 @@ namespace DinoRush
                 if (float.IsNaN(aspect) || float.IsInfinity(aspect) || aspect <= 0f)
                     throw new ArgumentException("Sprite aspect ratios must be finite and positive.", nameof(spriteAspectRatios));
             random = new System.Random(seed);
-            untilBreather = random.Next(4, 8);
         }
 
         public RunnerEncounter Next(float elapsed)
@@ -59,10 +60,28 @@ namespace DinoRush
             // Encounters enter from offscreen. Reserve recovery distance for the
             // faster pace at arrival, not just the speed when they were spawned.
             float arrivalSpeed = RunnerRules.Speed(elapsed + 6f);
-            bool breather = encounters >= 3 && --untilBreather <= 0;
-            RunnerPattern pattern = encounters < 3 ? RunnerPattern.Single : breather ?
-                (previous == RunnerPattern.Single && repeats >= 2 ? RunnerPattern.Double : RunnerPattern.Single) : Pick(level);
-            if (breather) untilBreather = random.Next(4, 8);
+            int lap = RunnerRules.EndlessLap(elapsed);
+            if (level != currentLevel || lap != currentLap)
+            {
+                currentLevel = level;
+                currentLap = lap;
+                stageEncounters = 0;
+            }
+            bool warmup = encounters < 3;
+            int section = Mathf.Max(0, stageEncounters - 4) % 6;
+            bool breather = !warmup && (stageEncounters == 0 || stageEncounters >= 4 && section == 5);
+            RunnerEncounterPhase phase = breather ? RunnerEncounterPhase.Recovery :
+                warmup || stageEncounters < 4 ? RunnerEncounterPhase.Introduction :
+                section == 2 || section == 3 ? RunnerEncounterPhase.Challenge : RunnerEncounterPhase.Build;
+            RunnerPattern pattern;
+            if (warmup) pattern = RunnerPattern.Single;
+            else if (breather) pattern = previous == RunnerPattern.Single && repeats >= 2 ? RunnerPattern.Double : RunnerPattern.Single;
+            else if (stageEncounters == 1 || stageEncounters == 3 || stageEncounters >= 4 && section == 2) pattern = FeaturedPattern(level);
+            else if (stageEncounters == 2) pattern = RunnerPattern.Single;
+            else if (section == 4) pattern = random.Next(2) == 0 ? RunnerPattern.Single : RunnerPattern.Double;
+            else pattern = Pick(section == 3 ? level : Mathf.Max(1, level - 1));
+            if (!warmup && (repeats >= 2 && pattern == previous || hardStreak >= 2 && IsRapid(pattern)))
+                pattern = Pick(level);
             repeats = encounters > 0 && pattern == previous ? repeats + 1 : 1;
             previous = pattern;
             hardStreak = IsRapid(pattern) ? hardStreak + 1 : 0;
@@ -76,6 +95,7 @@ namespace DinoRush
             {
                 int sprite = PickSprite();
                 float height = Range(0.68f + difficulty * 0.18f, 0.96f + difficulty * 0.24f);
+                if (phase == RunnerEncounterPhase.Introduction || breather) height *= 0.9f;
                 float width = aspects[sprite] * height;
                 float widthLimit = count == 1 || rapid ? RunnerRules.MaximumObstacleWidth :
                     pattern == RunnerPattern.LongJump ? 1.8f : 1.35f;
@@ -108,15 +128,19 @@ namespace DinoRush
                 cursor *= scale;
             }
 
-            float recovery = Range(Mathf.Lerp(1.3f, 0.92f, difficulty), Mathf.Lerp(2.0f, 1.25f, difficulty));
+            float recovery = Range(Mathf.Lerp(1.65f, 0.92f, difficulty), Mathf.Lerp(2.35f, 1.25f, difficulty));
             if (breather) recovery += Range(0.35f, 0.7f);
+            else if (phase == RunnerEncounterPhase.Introduction) recovery += 0.25f;
+            else if (phase == RunnerEncounterPhase.Build) recovery += 0.1f;
             encounters++;
+            stageEncounters++;
             return new RunnerEncounter
             {
                 Pattern = pattern,
                 Obstacles = spawns,
                 Spacing = cursor + arrivalSpeed * recovery,
-                Breather = breather
+                Breather = breather,
+                Phase = phase
             };
         }
 
@@ -126,7 +150,8 @@ namespace DinoRush
             // but never three identical patterns or three rapid encounters in a row.
             int single = level >= 4 ? 2 : 4;
             int doubles = level == 1 ? 1 : 3;
-            int total = single + doubles + (level >= 2 ? 4 : 0) + (level >= 3 ? 2 : 0) + (level >= 4 ? 2 : 0);
+            int total = single + doubles + (level >= 2 ? 2 : 0) + (level >= 3 ? 2 : 0) +
+                (level >= 4 ? 2 : 0) + (level >= 5 ? 2 : 0);
             for (int attempt = 0; attempt < 32; attempt++)
             {
                 int choice = random.Next(total);
@@ -134,8 +159,8 @@ namespace DinoRush
                 if (choice < single) pattern = RunnerPattern.Single;
                 else if ((choice -= single) < doubles) pattern = RunnerPattern.Double;
                 else if ((choice -= doubles) < 2) pattern = RunnerPattern.LongJump;
-                else if ((choice -= 2) < 2) pattern = RunnerPattern.QuickSteps;
                 else if ((choice -= 2) < 2) pattern = RunnerPattern.Triple;
+                else if ((choice -= 2) < 2) pattern = RunnerPattern.QuickSteps;
                 else pattern = RunnerPattern.Burst;
                 if (repeats >= 2 && pattern == previous) continue;
                 if (hardStreak >= 2 && IsRapid(pattern)) continue;
@@ -153,6 +178,17 @@ namespace DinoRush
         }
 
         private float Range(float min, float max) => Mathf.Lerp(min, max, (float)random.NextDouble());
+        private static RunnerPattern FeaturedPattern(int level)
+        {
+            switch (level)
+            {
+                case 2: return RunnerPattern.LongJump;
+                case 3: return RunnerPattern.Triple;
+                case 4: return RunnerPattern.QuickSteps;
+                case 5: case 6: return RunnerPattern.Burst;
+                default: return RunnerPattern.Double;
+            }
+        }
         private static bool IsRapid(RunnerPattern pattern) => pattern == RunnerPattern.QuickSteps || pattern == RunnerPattern.Burst;
     }
 }

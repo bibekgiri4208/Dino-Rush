@@ -67,6 +67,12 @@ namespace DinoRush
         private float damageTime;
         private const float DamagePopupDuration = 0.95f;
         private RunnerResponsiveUi responsiveUi;
+        private GameObject stageDisplay;
+        private Text stageTitle, stageCountdown;
+        private RectTransform stageFill;
+        private float progressElapsed;
+        private int progressLevel = -1, progressSeconds = -1, progressLap = -1;
+        private const float StageProgressWidth = 416f;
 
         public bool IsBuilt => root != null;
         public bool MainMenuDialogOpen => mainMenu != null && mainMenu.DialogOpen;
@@ -190,6 +196,7 @@ namespace DinoRush
             Action<bool> duck)
         {
             CreateLifeDisplay();
+            CreateStageDisplay();
             RunnerUiEffects.Install(root);
             responsiveUi = new RunnerResponsiveUi(root);
             levelLabel = root.Find("Top left badge/Map")?.GetComponent<Text>();
@@ -243,6 +250,23 @@ namespace DinoRush
         public void UpdateLevel(int level)
         {
             if (levelLabel != null) levelLabel.text = level > 0 ? $"LEVEL {level:00}" : "ENDLESS";
+        }
+
+        public void UpdateProgress(float elapsed)
+        {
+            progressElapsed = elapsed;
+            int level = RunnerRules.Level(elapsed);
+            int seconds = Mathf.CeilToInt(RunnerRules.SecondsToNextStage(elapsed));
+            int lap = RunnerRules.EndlessLap(elapsed);
+            if (level != progressLevel || seconds != progressSeconds || lap != progressLap)
+            {
+                stageTitle.text = level < 6 ? $"{level:00} / {RunnerRules.LevelHint(level)}" : $"WILD RUN / LAP {lap:00}";
+                stageCountdown.text = $"{seconds:00}s";
+                progressLevel = level;
+                progressSeconds = seconds;
+                progressLap = lap;
+            }
+            stageFill.sizeDelta = new Vector2(StageProgressWidth * RunnerRules.LevelProgress(elapsed), 6f);
         }
 
         public void SetSound(bool muted)
@@ -320,6 +344,7 @@ namespace DinoRush
             if (duckButton != null) duckButton.SetActive(!visible);
             pauseButton.SetActive(!visible);
             if (lifeBar != null) lifeBar.SetActive(!visible);
+            if (stageDisplay != null) stageDisplay.SetActive(!visible);
             stats.gameObject.SetActive(!visible);
             if (statsFrame != null) statsFrame.SetActive(!visible);
             if (controlsGuide != null) controlsGuide.SetActive(!visible && !minimalPresentation);
@@ -387,13 +412,40 @@ namespace DinoRush
             damagePopup.gameObject.SetActive(false);
         }
 
+        private void CreateStageDisplay()
+        {
+            if (stageDisplay != null) return;
+            Image frame = Box("Stage progress", root, new Vector2(-64, 309), new Vector2(448, 52), Ink);
+            Image theme = lifeBar.GetComponent<Image>();
+            if (theme.sprite != null)
+            {
+                frame.sprite = theme.sprite;
+                frame.type = theme.type;
+                frame.color = theme.color;
+            }
+            stageDisplay = frame.gameObject;
+            stageTitle = Label("Stage name", frame.transform, "", new Vector2(-24, 7), new Vector2(368, 22), 16,
+                Cream, TextAnchor.MiddleLeft);
+            stageCountdown = Label("Next stage", frame.transform, "", new Vector2(184, 7), new Vector2(48, 22), 16,
+                Mint, TextAnchor.MiddleRight);
+            Box("Progress track", frame.transform, new Vector2(0, -13), new Vector2(StageProgressWidth, 6), PaceUnlit);
+            stageFill = Box("Progress fill", frame.transform, new Vector2(-StageProgressWidth * 0.5f, -13), new Vector2(0, 6), PaceLit).rectTransform;
+            stageFill.pivot = new Vector2(0, 0.5f);
+            UpdateProgress(0f);
+            stageDisplay.SetActive(false);
+        }
+
         public void UpdateLives(int lives)
         {
             if (hearts == null) return;
             for (int i = 0; i < hearts.Length; i++) hearts[i].Filled = i < lives;
         }
 
-        public void ApplyScreenLayout(RunnerScreenLayout layout) => responsiveUi?.Apply(layout);
+        public void ApplyScreenLayout(RunnerScreenLayout layout)
+        {
+            responsiveUi?.Apply(layout);
+            if (stageFill != null) UpdateProgress(progressElapsed);
+        }
 
         public void ShowDamage(Vector3 worldPosition, Camera camera)
         {

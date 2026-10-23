@@ -13,6 +13,22 @@ namespace DinoRush.Tests
             Assert.That(RunnerRules.Speed(10000), Is.EqualTo(13.2f).Within(0.001f));
         }
 
+        [TestCase(0f, 0f, 12f, 0)]
+        [TestCase(6f, 0.5f, 6f, 0)]
+        [TestCase(12f, 0f, 16f, 0)]
+        [TestCase(20f, 0.5f, 8f, 0)]
+        [TestCase(90f, 0.5f, 15f, 0)]
+        [TestCase(105f, 0f, 30f, 1)]
+        [TestCase(120f, 0.5f, 15f, 1)]
+        [TestCase(135f, 0f, 30f, 2)]
+        [TestCase(180f, 0.5f, 15f, 3)]
+        public void StageProgressAndEndlessLapsHaveClearBoundaries(float elapsed, float progress, float remaining, int lap)
+        {
+            Assert.That(RunnerRules.LevelProgress(elapsed), Is.EqualTo(progress).Within(0.0001f));
+            Assert.That(RunnerRules.SecondsToNextStage(elapsed), Is.EqualTo(remaining).Within(0.0001f));
+            Assert.That(RunnerRules.EndlessLap(elapsed), Is.EqualTo(lap));
+        }
+
         [TestCase(6.8f)]
         [TestCase(10f)]
         [TestCase(13.2f)]

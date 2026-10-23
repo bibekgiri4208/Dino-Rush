@@ -18,28 +18,47 @@ namespace DinoRush
         public const float MaximumObstacleWidth = 2.3f;
         public const float MaximumObstacleHeight = 1.2f;
         public const float SimulationStep = 1f / 120f;
+        public const float EndlessLapSeconds = 30f;
+        private static readonly float[] LevelStarts = { 0f, 12f, 28f, 48f, 75f, 105f };
 
         public static int Level(float elapsed)
         {
-            if (elapsed < 12f) return 1;
-            if (elapsed < 28f) return 2;
-            if (elapsed < 48f) return 3;
-            if (elapsed < 75f) return 4;
-            if (elapsed < 105f) return 5;
-            return 6;
+            for (int i = LevelStarts.Length - 1; i > 0; i--)
+                if (elapsed >= LevelStarts[i]) return i + 1;
+            return 1;
         }
 
         public static string LevelHint(int level)
         {
             switch (level)
             {
-                case 2: return "MIX IT UP";
-                case 3: return "LONGER LEAPS";
-                case 4: return "QUICK STEPS";
-                case 5: return "TIGHTER GAPS";
-                case 6: return "WILD TRAIL";
-                default: return "WARM UP";
+                case 2: return "LONG LEAPS";
+                case 3: return "CLUSTER CROSSING";
+                case 4: return "QUICK RHYTHM";
+                case 5: return "BURST TRAIL";
+                case 6: return "WILD RUN";
+                default: return "FIRST STEPS";
             }
+        }
+
+        public static float LevelStart(int level) => LevelStarts[Mathf.Clamp(level, 1, 6) - 1];
+
+        // The final stage stays endless, with measurable laps instead of a permanently full bar.
+        public static int EndlessLap(float elapsed) => elapsed < LevelStart(6) ? 0 :
+            1 + Mathf.FloorToInt((elapsed - LevelStart(6)) / EndlessLapSeconds);
+
+        public static float LevelProgress(float elapsed)
+        {
+            int level = Level(elapsed);
+            return level == 6 ? Mathf.Repeat(Mathf.Max(0f, elapsed - LevelStart(6)), EndlessLapSeconds) / EndlessLapSeconds :
+                Mathf.InverseLerp(LevelStart(level), LevelStart(level + 1), elapsed);
+        }
+
+        public static float SecondsToNextStage(float elapsed)
+        {
+            int level = Level(elapsed);
+            return level == 6 ? EndlessLapSeconds * (1f - LevelProgress(elapsed)) :
+                LevelStart(level + 1) - Mathf.Max(0f, elapsed);
         }
 
         public static float Speed(float elapsed)

@@ -21,6 +21,62 @@ namespace DinoRush.Tests
             Assert.That(RunnerRules.Level(elapsed), Is.EqualTo(level));
         }
 
+        [TestCase(12f, RunnerPattern.LongJump)]
+        [TestCase(28f, RunnerPattern.Triple)]
+        [TestCase(48f, RunnerPattern.QuickSteps)]
+        [TestCase(75f, RunnerPattern.Burst)]
+        [TestCase(105f, RunnerPattern.Burst)]
+        public void NewStagesIntroduceTheirSignatureBetweenRecoveryAndPractice(float elapsed, RunnerPattern signature)
+        {
+            var director = new RunnerEncounterDirector(42, Aspects);
+            for (int i = 0; i < 3; i++) director.Next(0f);
+            RunnerEncounter entry = director.Next(elapsed);
+            Assert.That(entry.Breather, Is.True);
+            Assert.That(entry.Phase, Is.EqualTo(RunnerEncounterPhase.Recovery));
+            Assert.That(entry.Pattern, Is.EqualTo(RunnerPattern.Single).Or.EqualTo(RunnerPattern.Double));
+            RunnerEncounter introduction = director.Next(elapsed);
+            Assert.That(introduction.Pattern, Is.EqualTo(signature));
+            Assert.That(introduction.Phase, Is.EqualTo(RunnerEncounterPhase.Introduction));
+            Assert.That(director.Next(elapsed).Pattern, Is.EqualTo(RunnerPattern.Single));
+            Assert.That(director.Next(elapsed).Pattern, Is.EqualTo(signature));
+            for (int wave = 0; wave < 8; wave++)
+            {
+                for (int slot = 0; slot < 6; slot++)
+                {
+                    RunnerEncounter encounter = director.Next(elapsed);
+                    Assert.That(encounter.Breather, Is.EqualTo(slot == 5));
+                    if (slot == 2 || slot == 3) Assert.That(encounter.Phase, Is.EqualTo(RunnerEncounterPhase.Challenge));
+                }
+            }
+        }
+
+        [TestCase(0f, 1)]
+        [TestCase(12f, 2)]
+        [TestCase(28f, 3)]
+        [TestCase(48f, 4)]
+        public void AdvancedSkillsNeverAppearBeforeTheirTeachingStage(float elapsed, int level)
+        {
+            var director = new RunnerEncounterDirector(73, Aspects);
+            for (int i = 0; i < 300; i++)
+            {
+                RunnerPattern pattern = director.Next(elapsed).Pattern;
+                if (level < 2) Assert.That(pattern, Is.Not.EqualTo(RunnerPattern.LongJump));
+                if (level < 3) Assert.That(pattern, Is.Not.EqualTo(RunnerPattern.Triple));
+                if (level < 4) Assert.That(pattern, Is.Not.EqualTo(RunnerPattern.QuickSteps));
+                Assert.That(pattern, Is.Not.EqualTo(RunnerPattern.Burst));
+            }
+        }
+
+        [Test]
+        public void EndlessLapsReopenWithRecoveryRatherThanEscalatingWithoutLimit()
+        {
+            var director = new RunnerEncounterDirector(17, Aspects);
+            for (int i = 0; i < 20; i++) director.Next(110f);
+            Assert.That(director.Next(135f).Phase, Is.EqualTo(RunnerEncounterPhase.Recovery));
+            Assert.That(director.Next(135f).Phase, Is.EqualTo(RunnerEncounterPhase.Introduction));
+            Assert.That(RunnerRules.Speed(135f), Is.EqualTo(RunnerRules.Speed(600f)));
+        }
+
         [TestCase(0f)]
         [TestCase(12f)]
         [TestCase(28f)]

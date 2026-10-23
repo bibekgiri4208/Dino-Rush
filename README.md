@@ -18,7 +18,20 @@ Open **Assets/Scenes/ForestRun.unity** (or **Dino Rush → Open Forest Run**) an
 
 Jump over rocks, stumps, and crates. Each run starts with **five hearts**, shown in the top-left corner instead of the former map/level panel. An obstacle hit removes one heart; the run ends only when all five are gone. A short grace period protects against overlapping obstacles, and the same obstacle cannot damage you twice. Hits flash the selected dino's supplied white silhouette and crying pose, with a floating **−1 + heart** above it. Hit obstacles do not count as cleared. Pause freezes damage feedback and grace time; Retry/Restart restores all five hearts and clears the effects. Your distance is your score; speed gradually increases to a cap. There is one jump (no double jump), with a small pre-landing input buffer. Obstacle sizes and spacing allow time to jump and land between obstacles. Switching away from the game automatically pauses it.
 
-The trail advances through **six difficulty levels** at 0, 12, 28, 48, 75, and 105 seconds of active running. A short banner announces each increase; the permanent level indicator stays hidden. After three introductory hurdles, a per-run encounter director mixes singles, double/triple clusters, longer leaps, and rapid two/three-jump follow-ups as they unlock. Obstacle artwork, size, group gaps, and recovery gaps vary; occasional longer breaks prevent nonstop pressure. Later levels favor combinations and tighter recovery windows rather than only speeding up the same pattern. Every retry uses a fresh course.
+The trail advances through **six designed stages** at 0, 12, 28, 48, 75, and 105 seconds of active running:
+
+| Stage | Focus |
+| --- | --- |
+| First Steps | Three small, spaced introductory hurdles, then double clusters |
+| Long Leaps | Wider two-obstacle jumps |
+| Cluster Crossing | Triple clusters cleared in one jump |
+| Quick Rhythm | Separate hurdles requiring two timed jumps |
+| Burst Trail | Three-jump sequences with safe landing windows |
+| Wild Run | Mixed skills at capped speed, with repeatable 30-second laps |
+
+Stage changes open with a lighter recovery encounter, introduce the new signature, offer an easy practice jump, then repeat the signature. Six-encounter sections subsequently build pressure, combine challenges, ease off, and finish with a guaranteed recovery encounter. Teaching/recovery obstacles are smaller and teaching gaps more generous. Advanced patterns never appear before their teaching stage; the first three hurdles stay easy even if a custom run starts at a later stage. Seeded artwork, size, group gaps, and recovery gaps keep sections varied, with repetition/rapid-streak limits. Every retry uses a fresh course.
+
+A compact **stage name, progress bar, and countdown** sit between the hearts and score in landscape, or beneath the hearts in portrait; the retired top-left map/level panel remains hidden. A banner and sound celebrate each new stage. Wild Run counts laps indefinitely without raising the speed cap, and each lap reopens with recovery. Progress uses active simulation time: pause freezes it, resizing preserves it, and Restart starts at First Steps. Stage/lap banners take priority over nearby distance-milestone messages. The progress HUD hides on the title, pause, and results screens to keep the existing modals focused.
 
 `RunnerEncounterDirector.cs` uses its own seeded random stream, so dust effects cannot change the course. Encounters are spaced by distance rather than a fixed repeating timer. Cluster spans are limited by jump clearance, separate jumps reserve landing/recovery time at the predicted arrival pace, and combinations spawn atomically from the existing pool. Difficulty, upcoming spacing, and the course freeze while paused and reset on Restart. Tests simulate thousands of encounters and complete accelerating three-minute courses using the real jump/collision rules.
 
@@ -53,8 +66,8 @@ New maps use individual scenic framing rather than one full-screen frame for eve
 - `RunnerHealth.cs`, `RunnerHeartGraphic.cs`: five-heart health, damage grace time, and pixel-heart UI.
 - `RunnerScreenLayout.cs`, `RunnerResponsiveUi.cs`: safe-area camera fitting, portrait reflow, and resize/rotation layout restoration.
 - `RunnerDuckControl.cs`: mouse/touch hold and release handling for the Duck button.
-- `RunnerRules.cs`: movement constants, hitboxes, capped speed and fair spawn intervals.
-- `RunnerEncounterDirector.cs`: progressive, randomized obstacle combinations and safe encounter spacing.
+- `RunnerRules.cs`: movement constants, hitboxes, stage timing/progress, endless laps, capped speed and fair spawn intervals.
+- `RunnerEncounterDirector.cs`: staged teaching sequences, challenge/recovery sections, randomized obstacle combinations and safe encounter spacing.
 - `RunnerDinoRoster.cs`: the four supplied dino sheets, portraits, and stable selection IDs.
 - `RunnerMapCatalog.cs`: four maps, source/loop sprites, previews, parallax framing, and environment colors.
 - `RunnerUiButtonFeedback.cs`, `RunnerUiReveal.cs`, `RunnerUiEffects.cs`: shared button feedback, panel entrances, and motion styling.
@@ -75,7 +88,7 @@ Pause and game-over screens keep their compact centered layout, generous spacing
 
 The saved `Forest Pause Menu` and `Menu card` objects are under the UI safe-content root; enable either for layout editing after hiding `Forest Main Menu`. **Dino Rush → Match Minimal UI to Game Theme** (also **Apply Minimal Pause and Results UI**) reapplies the focused forest presentation in place, without rebuilding the world or changing the title/map/dino menus. `ForestMinimalUiBuilder.cs` reuses the existing nine-sliced `DialogFrame`, `ButtonPlay`, and `ButtonForest` art and the bundled Press Start 2P font. No source artwork is overwritten. The earlier rounded-surface asset is retained but unused. Gameplay-theme and duck-control authoring preserve this presentation once enabled.
 
-The in-game HUD has top-left hearts, forest-style score/best cards, icon-only sound/pause buttons, and a pace meter. The former Forest Run/map and level panel stays hidden, including after pause/resume and restart. Jump/Duck use matching pixel-cut green controls, with the same large touch hit areas and multitouch support. The permanent keyboard-keycap strip, duplicate controls footer, and FAST DROP caption are hidden; the full controls guide remains available in **Options**. These hints stay hidden through pause/resume/retry/menu transitions. HUD-only forest sprites remain editable under `Assets/UI/ForestHud`; `ForestHudArt.cs` generates missing art without overwriting existing sprites.
+The in-game HUD has top-left hearts, compact stage progress, forest-style score/best cards, icon-only sound/pause buttons, and a pace meter. The former Forest Run/map and level panel stays hidden, including after pause/resume and restart. Jump/Duck use matching pixel-cut green controls, with the same large touch hit areas and multitouch support. The permanent keyboard-keycap strip, duplicate controls footer, and FAST DROP caption are hidden; the full controls guide remains available in **Options**. These hints stay hidden through pause/resume/retry/menu transitions. HUD-only forest sprites remain editable under `Assets/UI/ForestHud`; `ForestHudArt.cs` generates missing art without overwriting existing sprites.
 
 Running kicks up a short brown pixel-dirt trail behind the dino's feet; landing creates a larger outward burst of dirt clods and dust puffs. Emission stops in midair and on menus, pause freezes the particles, and restarting/returning to the title clears them. The effect reuses the saved 36 sprites under `Forest effects/Trail dust pool` without allocating objects for each burst. Tune frequency/counts under **Pixel dirt effects** on `ForestRunnerGame`. The three point-filtered sprites live in `Assets/Generated/ForestDirtSprites.asset`; **Dino Rush → Apply Dirt Effects** assigns them to an older scene without rebuilding the world or overwriting existing dirt art.
 
@@ -104,6 +117,8 @@ The four main-menu buttons share the same size, symmetric pixel-cut frame, mirro
 Open **Window → General → Test Runner**. EditMode tests check pace limits, jump feasibility, obstacle spacing, collision bounds, no double jump, saved scene/UI/dirt references, and frame slicing. PlayMode tests load the actual scene and check start/pause/jump, collision, saved best, retry, and clearing obstacles. They also verify the running dirt trail, no midair emission, larger landing bursts, particle pooling/cleanup, that pause freezes the world, Resume preserves progress, Restart clears the previous run, and both pause/results menus return to the title without losing the best score. UI tests raycast buttons (rather than bypassing them), check fonts, label/icon bounds and multiline spacing, and capture menus at normal, tablet, and wide aspect ratios when `DINO_RUSH_CAPTURE_DIR` is set. Tests restore the prior high score and sound preference when finished.
 
 Health tests check all five hearts, one loss per obstacle, cluster grace time, white/crying frames, floating heart-loss text, pause freezing, final-heart game over, and clean restart/menu state. The clean-course regression also requires keeping all five hearts.
+
+Level-design tests verify signature introductions, skill unlock gates, guaranteed recovery sections, endless-lap resets, repetition limits, jump clearance, and full accelerating courses. Progress tests check boundary/countdown math, live bar geometry, resize/pause/restart preservation, and stage/lap banner priority. Optional captures include `forest-progression-level-4` and `progress-wild-run`.
 
 Display tests cover small portrait phones, tall phones, tablets, standard HD/4K, ultrawide screens, asymmetric cutouts, and minimized-window fallbacks. Scene tests raycast controls, check text and button bounds, verify portrait grids/touch sizes, and rotate/resize without losing health, score, pause state, or the original landscape layout. Optional `responsive-*` captures include the portrait title, dino/map selectors, Options, gameplay, pause, and an ultrawide view.
 
