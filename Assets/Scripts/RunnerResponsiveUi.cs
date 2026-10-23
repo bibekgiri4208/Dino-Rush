@@ -172,6 +172,10 @@ namespace DinoRush
             Place(dialog + "/Options page/Controls help", 0, -90, 520, 144);
             FontSize(dialog + "/Options page/Controls help", 16);
             Place(dialog + "/Quit confirmation page/Confirm quit", 0, -60, 500, 104);
+            const string modes = dialog + "/Mode selection page";
+            Place(modes + "/Story mode", 0, 108, 500, 104);
+            Place(modes + "/Story availability", 0, 34, 500, 30);
+            Place(modes + "/Endless mode", 0, -90, 500, 104);
             const string custom = dialog + "/Customize page";
             string[] dinos = { "Blue", "Red", "Yellow", "Green" };
             for (int i = 0; i < dinos.Length; i++)

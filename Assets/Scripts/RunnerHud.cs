@@ -79,6 +79,7 @@ namespace DinoRush
         public bool IsBuilt => root != null;
         public bool MainMenuDialogOpen => mainMenu != null && mainMenu.DialogOpen;
         public bool HasMapSelector => mainMenu != null && mainMenu.HasMapSelector;
+        public bool HasModeSelector => mainMenu != null && mainMenu.HasModeSelector;
 
         public void SetMainMenu(ForestMainMenu menu) => mainMenu = menu;
 
@@ -102,6 +103,11 @@ namespace DinoRush
         public void OpenMapSelector()
         {
             if (mainMenu != null) mainMenu.OpenMapSelector();
+        }
+
+        public void OpenModeSelector()
+        {
+            if (mainMenu != null) mainMenu.OpenModeSelector();
         }
 
         public void SetMapSelection(int selected)

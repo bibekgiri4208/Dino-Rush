@@ -91,7 +91,7 @@ namespace DinoRush.Editor
             RunnerMapCatalog catalog = Catalog(game);
             ForestMainMenu menu = game.GetComponentInChildren<ForestMainMenu>(true);
             Font font = AssetDatabase.LoadAssetAtPath<Font>("Assets/UI/Fonts/PressStart2P-Regular.ttf");
-            menu.transform.Find("Dino Rush Logo/Forest subtitle plaque/Forest subtitle").GetComponent<Text>().text = catalog.Count + " MAPS / ENDLESS RUNNER";
+            menu.transform.Find("Dino Rush Logo/Forest subtitle plaque/Forest subtitle").GetComponent<Text>().text = "A JOURNEY HOME";
             Transform page = Node("Map selector", menu.transform, 0, 0, 1280, 720);
             Image scrim = Art(Node("Map selector scrim", page, 0, 0, 1280, 720), null, true);
             scrim.color = new Color(0.015f, 0.06f, 0.065f, 0.65f);

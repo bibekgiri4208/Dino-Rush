@@ -35,6 +35,7 @@ namespace DinoRush.Editor
                 // Refresh framing without recreating or replacing any authored UI objects.
                 ForestDinoSelectorBuilder.Apply(game, existing);
                 if (game.MapCatalog != null) ForestMapSelectorBuilder.Apply(game);
+                ApplyModeSelector(existing);
                 ForestMenuThoughtBuilder.Apply(game);
                 ForestUiRepair.Repair(game);
                 ForestUiMotionBuilder.Apply(game);
@@ -55,7 +56,7 @@ namespace DinoRush.Editor
             ImageArt("Mossy stone and amber logo", logo, "DinoRushLogo", new Vector2(0, 177), new Vector2(588, 287));
             Image plaque = ImageArt("Forest subtitle plaque", logo, null, new Vector2(0, 52), new Vector2(378, 32));
             plaque.color = PixelMenuArt.Hex(0x082d36);
-            Label("Forest subtitle", plaque.transform, "- FOREST / ENDLESS RUNNER -", Vector2.zero, new Vector2(366, 24), 12, Sage);
+            Label("Forest subtitle", plaque.transform, "A JOURNEY HOME", Vector2.zero, new Vector2(366, 24), 12, Sage);
 
             RectTransform choices = Rect("Main menu buttons", menuRoot, Vector2.zero, new Vector2(1280, 720));
             Button play = MenuButton("Play", choices, new Vector2(0, -12), "PLAY", "Play", true);
@@ -112,6 +113,7 @@ namespace DinoRush.Editor
             menu.SetSound(false);
             ForestDinoSelectorBuilder.Apply(game, menu);
             if (game.MapCatalog != null) ForestMapSelectorBuilder.Apply(game);
+            ApplyModeSelector(menu);
             game.AssignMainMenu(menu);
             ForestUiRepair.Repair(game);
             ForestUiMotionBuilder.Apply(game);
@@ -123,6 +125,51 @@ namespace DinoRush.Editor
             EditorSceneManager.MarkSceneDirty(scene);
             EditorSceneManager.SaveScene(scene);
             Debug.Log("Reference-inspired pixel-art forest menu saved in ForestRun, with working Play, Customize, Options, Quit and SFX controls.");
+        }
+
+        [MenuItem("Dino Rush/Add Mode Selector")]
+        public static void BuildModeSelector()
+        {
+            if (Application.isPlaying) return;
+            if (!Application.isBatchMode && !EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
+            var scene = EditorSceneManager.OpenScene("Assets/Scenes/ForestRun.unity");
+            ForestMainMenu menu = Object.FindAnyObjectByType<ForestMainMenu>();
+            if (menu == null) throw new System.InvalidOperationException("Add the forest main menu first.");
+            ApplyModeSelector(menu);
+            ForestUiMotionBuilder.Apply(menu.GetComponentInParent<ForestRunnerGame>());
+            EditorSceneManager.MarkSceneDirty(scene);
+            EditorSceneManager.SaveScene(scene);
+        }
+
+        private static void ApplyModeSelector(ForestMainMenu menu)
+        {
+            Transform card = menu.transform.Find("Menu dialog/Moss framed dialog");
+            Transform page = card.Find("Mode selection page");
+            if (page == null)
+            {
+                font = AssetDatabase.LoadAssetAtPath<Font>("Assets/UI/Fonts/PressStart2P-Regular.ttf");
+                page = Rect("Mode selection page", card, Vector2.zero, new Vector2(480, 220));
+                Button story = MenuButton("Story mode", page, new Vector2(0, 58), "STORY MODE", null,
+                    false, new Vector2(400, 64));
+                story.interactable = false; // Reserved for a future story campaign; no action is bound.
+                Label("Story availability", page, "COMING SOON", new Vector2(0, 9), new Vector2(400, 24), 11, Sage);
+                MenuButton("Endless mode", page, new Vector2(0, -51), "ENDLESS MODE", null,
+                    false, new Vector2(400, 64));
+                foreach (Button button in page.GetComponentsInChildren<Button>(true))
+                {
+                    Image frame = button.GetComponent<Image>();
+                    frame.type = Image.Type.Sliced;
+                    frame.pixelsPerUnitMultiplier = 0.5f;
+                    Text label = button.GetComponentInChildren<Text>(true);
+                    label.rectTransform.anchoredPosition = Vector2.zero;
+                    label.horizontalOverflow = HorizontalWrapMode.Wrap;
+                    label.verticalOverflow = VerticalWrapMode.Truncate;
+                }
+                page.gameObject.SetActive(false);
+            }
+            Set(menu, "modePage", page.gameObject);
+            Set(menu, "endlessMode", page.Find("Endless mode").GetComponent<Button>());
+            EditorUtility.SetDirty(menu);
         }
 
         private static void Set(Object target, string field, Object value)

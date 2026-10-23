@@ -320,6 +320,8 @@ namespace DinoRush.Tests
         private IEnumerator StartFromMapSelector()
         {
             Click("Play");
+            yield return null; // Newly enabled dialog graphics register on the next UI frame.
+            Click("Endless mode");
             Assert.That(game.State, Is.EqualTo(ForestRunnerGame.RunState.Ready));
             Assert.That(game.GetComponentInChildren<ForestMainMenu>().DialogOpen, Is.True);
             yield return null;

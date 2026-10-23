@@ -70,6 +70,7 @@ namespace DinoRush.Tests
             {
                 game.SelectMap(map);
                 Click("Forest Main Menu/Main menu buttons/Play");
+                Click("Forest Main Menu/Menu dialog/Moss framed dialog/Mode selection page/Endless mode");
                 Assert.That(root.Find("Forest Main Menu/Map selector/Map selection panel/Start selected map/Label").GetComponent<Text>().text,
                     Is.EqualTo("CONTINUE"));
                 Click("Forest Main Menu/Map selector/Map selection panel/Start selected map");

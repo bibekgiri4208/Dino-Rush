@@ -70,10 +70,18 @@ namespace DinoRush.Tests
                 Assert.That(stagedObstacles, Is.Zero, "The title-screen preview must not show active gameplay obstacles.");
                 ForestMainMenu menu = game.GetComponentInChildren<ForestMainMenu>();
                 Assert.That(menu, Is.Not.Null);
+                var subtitle = menu.transform.Find("Dino Rush Logo/Forest subtitle plaque/Forest subtitle").GetComponent<UnityEngine.UI.Text>();
+                Assert.That(subtitle.text, Is.EqualTo("A JOURNEY HOME"));
                 var menuData = new SerializedObject(menu);
                 Assert.That(((GameObject)menuData.FindProperty("customizePage").objectReferenceValue).activeSelf, Is.False);
                 Assert.That(((GameObject)menuData.FindProperty("optionsPage").objectReferenceValue).activeSelf, Is.True);
                 Assert.That(((GameObject)menuData.FindProperty("quitPage").objectReferenceValue).activeSelf, Is.False);
+                var modes = (GameObject)menuData.FindProperty("modePage").objectReferenceValue;
+                Assert.That(modes, Is.Not.Null);
+                Assert.That(modes.activeSelf, Is.False);
+                Assert.That(modes.transform.Find("Story mode").GetComponent<UnityEngine.UI.Button>().interactable, Is.False);
+                Assert.That(menuData.FindProperty("endlessMode").objectReferenceValue,
+                    Is.EqualTo(modes.transform.Find("Endless mode").GetComponent<UnityEngine.UI.Button>()));
                 Assert.That(game.GetComponentInChildren<Canvas>(true).pixelPerfect, Is.True);
                 SerializedProperty hud = serialized.FindProperty("hud");
                 foreach (string field in new[] { "pausePanel", "resumeControl", "restartControl", "quitRunControl", "resultsMenuControl", "pausedScore", "soundIcon", "statsFrame", "duckButton" })

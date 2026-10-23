@@ -82,6 +82,8 @@ namespace DinoRush.Tests
                 yield return null;
                 Click("Play");
                 yield return null;
+                Click("Endless mode");
+                yield return null;
                 Click("Start selected map");
                 Assert.That(game.State, Is.EqualTo(ForestRunnerGame.RunState.AwaitingStart));
                 game.PrimaryAction();

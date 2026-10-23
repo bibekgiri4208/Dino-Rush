@@ -124,6 +124,8 @@ namespace DinoRush.Tests
 
             Button play = Control("Forest Main Menu/Main menu buttons/Play");
             ExecuteEvents.Execute(play.gameObject, Pointer(-1), ExecuteEvents.pointerClickHandler);
+            ExecuteEvents.Execute(Control("Forest Main Menu/Menu dialog/Moss framed dialog/Mode selection page/Endless mode").gameObject,
+                Pointer(-1), ExecuteEvents.pointerClickHandler);
             Assert.That(game.State, Is.EqualTo(ForestRunnerGame.RunState.Ready));
             yield return null;
             ExecuteEvents.Execute(Control("Forest Main Menu/Map selector/Map selection panel/Start selected map").gameObject,

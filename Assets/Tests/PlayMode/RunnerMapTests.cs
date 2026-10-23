@@ -46,12 +46,31 @@ namespace DinoRush.Tests
         }
 
         [UnityTest]
-        public IEnumerator PlayOpensFivePreviewCardsAndBackOrEscapeCancelsWithoutStarting()
+        public IEnumerator PlayOpensModesAndOnlyEndlessOpensMapsWithoutStarting()
         {
             Click("Play");
             Assert.That(game.State, Is.EqualTo(ForestRunnerGame.RunState.Ready));
             ForestMainMenu menu = game.GetComponentInChildren<ForestMainMenu>();
             Assert.That(menu.DialogOpen, Is.True);
+            Assert.That(GameObject.Find("Map selection panel"), Is.Null);
+            Assert.That(GameObject.Find("Story mode").GetComponent<Button>().interactable, Is.False);
+            yield return null;
+            Click("Story mode");
+            game.PrimaryAction();
+            Assert.That(GameObject.Find("Endless mode"), Is.Not.Null, "Story and Space must leave the mode submenu open.");
+            Assert.That(GameObject.Find("Map selection panel"), Is.Null);
+            Assert.That(game.State, Is.EqualTo(ForestRunnerGame.RunState.Ready));
+            yield return new WaitForSecondsRealtime(0.3f);
+            yield return ForestRunTests.Capture("mode-selector");
+            yield return RunnerDisplayCapture.Capture("mode-selector-portrait", 360, 800);
+            yield return ForestRunTests.Capture("mode-selector-tablet", 1024, 768);
+            Click("Back to main menu");
+            Assert.That(menu.DialogOpen, Is.False);
+            game.PrimaryAction(); // The keyboard shortcut must open the same mode submenu.
+            Assert.That(GameObject.Find("Endless mode"), Is.Not.Null);
+            yield return null;
+            Click("Endless mode");
+            Assert.That(GameObject.Find("Mode selection page"), Is.Null);
             game.PrimaryAction();
             Assert.That(game.State, Is.EqualTo(ForestRunnerGame.RunState.Ready), "Space must not skip map selection.");
             yield return new WaitForSecondsRealtime(0.3f);
@@ -77,6 +96,16 @@ namespace DinoRush.Tests
             yield return ForestRunTests.Capture("map-selector-tablet", 1024, 768);
             yield return ForestRunTests.Capture("map-selector-wide", 1920, 820);
             Click("Map selector back");
+            Assert.That(menu.DialogOpen, Is.True);
+            Assert.That(GameObject.Find("Endless mode"), Is.Not.Null, "Map Back returns to the mode submenu.");
+            Assert.That(GameObject.Find("Map selection panel"), Is.Null);
+            yield return null;
+            Click("Endless mode");
+            Assert.That(GameObject.Find("Map selection panel"), Is.Not.Null);
+            yield return null;
+            Click("Map selector back");
+            yield return null;
+            Click("Back to main menu");
             Assert.That(menu.DialogOpen, Is.False);
             Assert.That(game.State, Is.EqualTo(ForestRunnerGame.RunState.Ready));
             yield return null;
@@ -97,6 +126,8 @@ namespace DinoRush.Tests
             for (int i = 0; i < game.MapCatalog.Count; i++)
             {
                 Click("Play");
+                yield return null;
+                Click("Endless mode");
                 yield return null;
                 Click("Choose " + game.MapCatalog[i].displayName + " map");
                 Click("Start selected map");
@@ -234,6 +265,8 @@ namespace DinoRush.Tests
             Assert.That(game.SelectedMapName, Is.EqualTo("Snow Mountain"));
             Assert.That(game.State, Is.EqualTo(ForestRunnerGame.RunState.Ready));
             Click("Play");
+            yield return null;
+            Click("Endless mode");
             yield return null;
             Assert.That(GameObject.Find("Choose Snow Mountain map").GetComponent<Image>().sprite.name, Is.EqualTo("HudJump"));
             Click("Start selected map");

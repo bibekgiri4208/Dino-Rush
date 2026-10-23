@@ -5,7 +5,7 @@ using UnityEngine.EventSystems;
 
 namespace DinoRush
 {
-    /// <summary>The scene-authored title screen, map/dino selectors, and settings dialogs.</summary>
+    /// <summary>The scene-authored title screen, mode/map/dino selectors, and settings dialogs.</summary>
     public sealed class ForestMainMenu : MonoBehaviour
     {
         [SerializeField] private Button play;
@@ -22,6 +22,8 @@ namespace DinoRush
         [SerializeField] private GameObject customizePage;
         [SerializeField] private GameObject optionsPage;
         [SerializeField] private GameObject quitPage;
+        [SerializeField] private GameObject modePage;
+        [SerializeField] private Button endlessMode;
         [SerializeField] private GameObject[] gameplayChrome;
         [SerializeField] private Image speaker;
         [SerializeField] private Sprite speakerOn;
@@ -51,6 +53,13 @@ namespace DinoRush
 
         public bool DialogOpen => (dialog != null && dialog.activeInHierarchy) || (mapPage != null && mapPage.activeInHierarchy);
         public bool HasMapSelector => mapPage != null;
+        public bool HasModeSelector => modePage != null;
+
+        public void OpenModeSelector()
+        {
+            if (modePage == null) { OpenMapSelector(); return; }
+            OpenDialog("CHOOSE YOUR MODE", modePage);
+        }
 
         public void OpenMapSelector()
         {
@@ -76,7 +85,11 @@ namespace DinoRush
                     Bind(mapChoices[i], () => select(index));
                 }
                 Bind(startMap, start);
-                Bind(mapBack, CloseDialog);
+                Bind(mapBack, () =>
+                {
+                    if (HasModeSelector) OpenModeSelector();
+                    else CloseDialog();
+                });
             }
             SetMapSelection(selected);
         }
@@ -100,6 +113,7 @@ namespace DinoRush
             if (bound) return;
             bound = true;
             Bind(play, start);
+            if (endlessMode != null) Bind(endlessMode, OpenMapSelector);
             Bind(customize, () => OpenDialog("CHOOSE YOUR DINO", customizePage));
             Bind(options, () => OpenDialog("OPTIONS", optionsPage));
             Bind(quit, () => OpenDialog("QUIT GAME?", quitPage));
@@ -175,6 +189,7 @@ namespace DinoRush
             customizePage.SetActive(page == customizePage);
             optionsPage.SetActive(page == optionsPage);
             quitPage.SetActive(page == quitPage);
+            if (modePage != null) modePage.SetActive(page == modePage);
             dialogTitle.text = heading;
         }
 
@@ -187,6 +202,7 @@ namespace DinoRush
             customizePage.SetActive(false);
             optionsPage.SetActive(true);
             quitPage.SetActive(false);
+            if (modePage != null) modePage.SetActive(false);
             dialogTitle.text = "OPTIONS";
         }
 

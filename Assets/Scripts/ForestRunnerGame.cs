@@ -906,7 +906,8 @@ namespace DinoRush
                 case RunState.Ready:
                     if (!hud.MainMenuDialogOpen)
                     {
-                        if (mapCatalog != null && mapCatalog.Count > 0 && hud.HasMapSelector) hud.OpenMapSelector();
+                        if (hud.HasModeSelector) hud.OpenModeSelector();
+                        else if (mapCatalog != null && mapCatalog.Count > 0 && hud.HasMapSelector) hud.OpenMapSelector();
                         else PrepareRun();
                     }
                     break;

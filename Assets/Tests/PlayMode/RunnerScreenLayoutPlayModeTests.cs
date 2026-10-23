@@ -94,6 +94,9 @@ namespace DinoRush.Tests
                 Click(root.Find("Forest Main Menu/Main menu buttons/Play").GetComponent<Button>());
                 yield return new WaitForSecondsRealtime(0.3f);
                 AssertVisibleUi(layout);
+                Click(root.Find("Forest Main Menu/Menu dialog/Moss framed dialog/Mode selection page/Endless mode").GetComponent<Button>());
+                yield return new WaitForSecondsRealtime(0.3f);
+                AssertVisibleUi(layout);
                 const string maps = "Forest Main Menu/Map selector/Map selection panel/";
                 Bounds forest = RectTransformUtility.CalculateRelativeRectTransformBounds(root, root.Find(maps + "Choose Forest map"));
                 Bounds desert = RectTransformUtility.CalculateRelativeRectTransformBounds(root, root.Find(maps + "Choose Desert map"));
