@@ -131,6 +131,7 @@ GameObject:
   - component: {fileID: 1002}
   - component: {fileID: 1003}
   - component: {fileID: 1004}
+  - component: {fileID: 1005}
   m_Layer: 0
   m_Name: Dino Rush - Forest
   m_TagString: Untagged
@@ -804,6 +805,27 @@ MonoBehaviour:
   gustStrength: 0.55
   runScrollInfluence: 1
   seed: 4619
+--- !u!114 &1005
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d2dd6af4de7540e1bf86576545c31048, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: DinoRush::DinoRush.JungleRain
+  game: {fileID: 1002}
+  worldCamera: {fileID: 410601069}
+  spriteMaterial: {fileID: 2100000, guid: 22ae3bfc6c514fe1bed78c2c02ef0db9, type: 2}
+  dropCount: 96
+  fallSpeed: 12
+  windSpeed: 1.8
+  gustStrength: 0.7
+  runScrollInfluence: 1
+  seed: 7351
 --- !u!1 &3740967
 GameObject:
   m_ObjectHideFlags: 0

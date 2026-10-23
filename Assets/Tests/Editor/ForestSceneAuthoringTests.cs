@@ -40,6 +40,13 @@ namespace DinoRush.Tests
                 Assert.That(snowData.FindProperty("worldCamera").objectReferenceValue,
                     Is.EqualTo(windData.FindProperty("worldCamera").objectReferenceValue));
                 Assert.That(snowData.FindProperty("spriteMaterial").objectReferenceValue, Is.Not.Null);
+                JungleRain rain = game.GetComponent<JungleRain>();
+                Assert.That(rain, Is.Not.Null, "Jungle rain must be wired in the saved scene.");
+                var rainData = new SerializedObject(rain);
+                Assert.That(rainData.FindProperty("game").objectReferenceValue, Is.EqualTo(game));
+                Assert.That(rainData.FindProperty("worldCamera").objectReferenceValue,
+                    Is.EqualTo(windData.FindProperty("worldCamera").objectReferenceValue));
+                Assert.That(rainData.FindProperty("spriteMaterial").objectReferenceValue, Is.Not.Null);
                 Assert.That(game.GetComponentsInChildren<Camera>(true).Length, Is.EqualTo(1));
                 Assert.That(game.GetComponentsInChildren<Canvas>(true).Length, Is.EqualTo(1));
                 Assert.That(game.transform.Find("Forest environment"), Is.Not.Null);
