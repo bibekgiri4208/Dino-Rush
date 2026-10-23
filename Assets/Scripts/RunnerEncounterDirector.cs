@@ -3,21 +3,26 @@ using UnityEngine;
 
 namespace DinoRush
 {
-    public enum RunnerPattern { Single, Double, LongJump, QuickSteps, Triple, Burst }
+    public enum RunnerPattern { Single, Double, LongJump, QuickSteps, Triple, Burst, DuckGate, Weave }
     public enum RunnerEncounterPhase { Introduction, Build, Challenge, Recovery }
 
     public readonly struct RunnerObstacleSpawn
     {
         public readonly int SpriteIndex;
         public readonly float Offset, Width, Height;
+        public readonly bool Overhead;
 
-        public RunnerObstacleSpawn(int spriteIndex, float offset, float width, float height)
+        public RunnerObstacleSpawn(int spriteIndex, float offset, float width, float height, bool overhead = false)
         {
             SpriteIndex = spriteIndex;
             Offset = offset;
             Width = width;
             Height = height;
+            Overhead = overhead;
         }
+
+        public Rect Hitbox(float x) => Overhead ? RunnerRules.CanopyHitbox(x, Width) :
+            RunnerRules.ObstacleHitbox(x, Width, Height);
     }
 
     public sealed class RunnerEncounter
@@ -92,13 +97,15 @@ namespace DinoRush
             previous = pattern;
             hardStreak = IsRapid(pattern) ? hardStreak + 1 : 0;
 
-            int count = pattern == RunnerPattern.Single ? 1 :
-                pattern == RunnerPattern.Triple || pattern == RunnerPattern.Burst ? 3 : 2;
-            bool rapid = IsRapid(pattern);
+            int count = pattern == RunnerPattern.Single || pattern == RunnerPattern.DuckGate ? 1 :
+                pattern == RunnerPattern.Triple || pattern == RunnerPattern.Burst || pattern == RunnerPattern.Weave ? 3 : 2;
+            bool rapid = UsesIndividualActions(pattern);
             var spawns = new RunnerObstacleSpawn[count];
             float cursor = 0f;
+            bool duckFirst = pattern == RunnerPattern.Weave && random.Next(2) == 0;
             for (int i = 0; i < count; i++)
             {
+                bool overhead = pattern == RunnerPattern.DuckGate || pattern == RunnerPattern.Weave && (i % 2 == 0) == duckFirst;
                 int sprite = PickSprite();
                 float height = Range(0.68f + difficulty * 0.18f, 0.96f + difficulty * 0.24f);
                 if (phase == RunnerEncounterPhase.Introduction || breather) height *= 0.9f;
@@ -110,12 +117,19 @@ namespace DinoRush
                     height *= widthLimit / width;
                     width = widthLimit;
                 }
+                if (overhead)
+                {
+                    width = Range(1.9f, RunnerRules.MaximumObstacleWidth);
+                    height = RunnerRules.CanopyHeight;
+                }
                 if (i > 0)
-                    cursor += rapid ? arrivalSpeed * Range(0.94f, Mathf.Lerp(1.18f, 1.04f, difficulty)) :
+                    cursor += pattern == RunnerPattern.Weave ? arrivalSpeed *
+                        (spawns[i - 1].Overhead ? Range(0.8f, 0.88f) : Range(0.42f, 0.48f)) :
+                        rapid ? arrivalSpeed * Range(0.94f, Mathf.Lerp(1.18f, 1.04f, difficulty)) :
                         (spawns[i - 1].Width + width) * 0.5f + Range(
                             pattern == RunnerPattern.LongJump ? 0.65f : 0.12f,
                             pattern == RunnerPattern.LongJump ? 1.1f : 0.4f);
-                spawns[i] = new RunnerObstacleSpawn(sprite, cursor, width, height);
+                spawns[i] = new RunnerObstacleSpawn(sprite, cursor, width, height, overhead);
             }
 
             if (!rapid && count > 1)
@@ -160,7 +174,9 @@ namespace DinoRush
             int triples = level >= 3 ? level >= 4 ? 3 : 2 : 0;
             int quickSteps = level >= 4 ? 5 : 0;
             int bursts = level >= 5 ? 6 : 0;
-            int total = single + doubles + longJumps + triples + quickSteps + bursts;
+            int ducks = level >= 3 ? 5 : 0;
+            int weaves = level >= 4 ? 12 : 0;
+            int total = single + doubles + longJumps + triples + quickSteps + bursts + ducks + weaves;
             for (int attempt = 0; attempt < 32; attempt++)
             {
                 int choice = random.Next(total);
@@ -170,7 +186,9 @@ namespace DinoRush
                 else if ((choice -= doubles) < longJumps) pattern = RunnerPattern.LongJump;
                 else if ((choice -= longJumps) < triples) pattern = RunnerPattern.Triple;
                 else if ((choice -= triples) < quickSteps) pattern = RunnerPattern.QuickSteps;
-                else pattern = RunnerPattern.Burst;
+                else if ((choice -= quickSteps) < bursts) pattern = RunnerPattern.Burst;
+                else if ((choice -= bursts) < ducks) pattern = RunnerPattern.DuckGate;
+                else pattern = RunnerPattern.Weave;
                 if (repeats >= 2 && pattern == previous) continue;
                 if (hardStreak >= 2 && IsRapid(pattern)) continue;
                 return pattern;
@@ -192,12 +210,15 @@ namespace DinoRush
             switch (level)
             {
                 case 2: return RunnerPattern.LongJump;
-                case 3: return RunnerPattern.Triple;
-                case 4: return RunnerPattern.QuickSteps;
-                case 5: case 6: return RunnerPattern.Burst;
+                case 3: return RunnerPattern.DuckGate;
+                case 4: case 6: return RunnerPattern.Weave;
+                case 5: return RunnerPattern.Burst;
                 default: return RunnerPattern.Double;
             }
         }
-        private static bool IsRapid(RunnerPattern pattern) => pattern == RunnerPattern.QuickSteps || pattern == RunnerPattern.Burst;
+        public static bool UsesIndividualActions(RunnerPattern pattern) => pattern == RunnerPattern.QuickSteps ||
+            pattern == RunnerPattern.Burst || pattern == RunnerPattern.Weave || pattern == RunnerPattern.DuckGate;
+        private static bool IsRapid(RunnerPattern pattern) => pattern == RunnerPattern.QuickSteps ||
+            pattern == RunnerPattern.Burst || pattern == RunnerPattern.Weave;
     }
 }

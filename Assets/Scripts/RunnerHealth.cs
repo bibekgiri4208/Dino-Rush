@@ -6,7 +6,8 @@ namespace DinoRush
     public sealed class RunnerHealth
     {
         public const int MaximumLives = 5;
-        public const float InvulnerabilityDuration = 1.2f;
+        // Protect overlapping pieces of one cluster, not the next separate decision.
+        public const float InvulnerabilityDuration = 0.55f;
 
         public int Lives { get; private set; } = MaximumLives;
         public float InvulnerabilityRemaining { get; private set; }

@@ -46,6 +46,9 @@ namespace DinoRush
                 throw new ArgumentOutOfRangeException(nameof(speed));
             RunnerObstacleSpawn first = encounter.Obstacles[0];
             RunnerObstacleSpawn last = encounter.Obstacles[encounter.Obstacles.Length - 1];
+            bool canopy = Array.Exists(encounter.Obstacles, obstacle => obstacle.Overhead);
+            // Never tempt a jump into the canopy. Recovery eggs remain optional and safe.
+            if (canopy) kind = RunnerEggTrailKind.Low;
             bool rapid = encounter.Pattern == RunnerPattern.QuickSteps || encounter.Pattern == RunnerPattern.Burst;
             float center = rapid ? first.Offset :
                 (first.Offset - first.Width * 0.5f + last.Offset + last.Width * 0.5f) * 0.5f;

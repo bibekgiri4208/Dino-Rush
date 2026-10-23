@@ -45,6 +45,7 @@ namespace DinoRush
             public bool active;
             public bool passed;
             public bool hitPlayer;
+            public bool overhead;
         }
 
         [System.Serializable]
@@ -95,6 +96,7 @@ namespace DinoRush
         private RunnerAudio audioCues;
         private RunnerEggCollectibles eggs;
         private RunnerEncounterDirector encounterDirector;
+        private Sprite canopySprite;
         private float nextEncounterDistance;
         private int announcedLevel = 1;
         private int announcedLap;
@@ -175,6 +177,7 @@ namespace DinoRush
             best = Mathf.Max(0, PlayerPrefs.GetInt(HighScoreKey, 0));
             // Older, unbaked scenes still work; the saved ForestRun scene takes this path zero times.
             if (!HasAuthoredScene) CreateSceneObjects();
+            canopySprite = RunnerCanopyArt.Create(generatedSprites, generatedTextures);
             forestLayers = layers;
             if (mapCatalog != null && mapCatalog.Count > 0)
                 SelectedMapIndex = mapCatalog.Find(PlayerPrefs.GetString(RunnerMapCatalog.SelectionKey, "forest"));
@@ -637,7 +640,8 @@ namespace DinoRush
             {
                 announcedLevel = Level;
                 hud.UpdateLevel(Level);
-                hud.Toast($"LEVEL {Level:00} / {RunnerRules.LevelHint(Level)}");
+                hud.Toast(Level == 3 ? "LEVEL 03 / HOLD DUCK" : Level == 4 ?
+                    "LEVEL 04 / JUMP, DROP, DUCK" : $"LEVEL {Level:00} / {RunnerRules.LevelHint(Level)}");
                 stageBannerTime = 3f;
                 audioCues.Milestone();
             }
@@ -682,7 +686,9 @@ namespace DinoRush
                 Transform obstacleTransform = obstacle.renderer.transform;
                 obstacleTransform.position += Vector3.left * travel;
                 float x = obstacleTransform.position.x;
-                if (!obstacle.hitPlayer && playerBox.Overlaps(RunnerRules.ObstacleHitbox(x, obstacle.width, obstacle.height)))
+                Rect obstacleBox = obstacle.overhead ? RunnerRules.CanopyHitbox(x, obstacle.width) :
+                    RunnerRules.ObstacleHitbox(x, obstacle.width, obstacle.height);
+                if (!obstacle.hitPlayer && playerBox.Overlaps(obstacleBox))
                 {
                     // Remember the contact even during grace time: one obstacle cannot drain multiple hearts.
                     obstacle.hitPlayer = true;
@@ -731,13 +737,17 @@ namespace DinoRush
             {
                 if (obstacle.active) continue;
                 RunnerObstacleSpawn item = encounter.Obstacles[index++];
-                Sprite sprite = obstacleSprites[item.SpriteIndex];
+                Sprite sprite = item.Overhead ? canopySprite : obstacleSprites[item.SpriteIndex];
                 obstacle.renderer.sprite = sprite;
-                obstacle.renderer.transform.localScale = new Vector3(item.Height, item.Height, 1);
-                obstacle.renderer.transform.position = new Vector3(11.7f + item.Offset, RunnerRules.GroundY, 0);
+                obstacle.renderer.transform.localScale = item.Overhead ?
+                    new Vector3(item.Width / sprite.bounds.size.x, 1f, 1f) :
+                    new Vector3(item.Height, item.Height, 1);
+                obstacle.renderer.transform.position = new Vector3(11.7f + item.Offset,
+                    RunnerRules.GroundY + (item.Overhead ? RunnerRules.CanopyBottom : 0f), 0);
                 obstacle.renderer.gameObject.SetActive(true);
                 obstacle.width = item.Width;
                 obstacle.height = item.Height;
+                obstacle.overhead = item.Overhead;
                 obstacle.active = true;
                 obstacle.passed = false;
                 obstacle.hitPlayer = false;

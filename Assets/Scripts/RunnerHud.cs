@@ -79,6 +79,7 @@ namespace DinoRush
         private Text eggCount, resultEggs;
         private float eggPulse;
         private RunnerEggFlights eggFlights;
+        private int movementLevel;
 
         public bool IsBuilt => root != null;
         public bool MainMenuDialogOpen => mainMenu != null && mainMenu.DialogOpen;
@@ -263,6 +264,8 @@ namespace DinoRush
 
         public void UpdateLevel(int level)
         {
+            movementLevel = level;
+            if (duckButton != null) duckButton.SetActive(level >= 3 && lifeBar != null && lifeBar.activeSelf);
             if (levelLabel != null) levelLabel.text = level > 0 ? $"LEVEL {level:00}" : "ENDLESS";
         }
 
@@ -373,10 +376,10 @@ namespace DinoRush
             if (pausePanel != null) pausePanel.SetActive(false);
             shade.SetActive(visible);
             panel.SetActive(visible);
-            // Retain old scene bindings, but never show the retired on-screen movement controls.
-            // Jump uses the playfield/keyboard; duck and fast drop use Down/S.
+            // Jump stays on the playfield. Duck becomes essential with low canopies,
+            // so expose its existing hold control for touch players from stage three.
             jumpButton.SetActive(false);
-            if (duckButton != null) duckButton.SetActive(false);
+            if (duckButton != null) duckButton.SetActive(!visible && movementLevel >= 3);
             pauseButton.SetActive(!visible);
             if (lifeBar != null) lifeBar.SetActive(!visible);
             if (stageDisplay != null) stageDisplay.SetActive(!visible);

@@ -76,6 +76,49 @@ namespace DinoRush.Tests
                 RunnerRules.ObstacleHitbox(RunnerRules.PlayerX, 1f, 1f)), Is.True);
         }
 
+        [TestCase(0f, true)]
+        [TestCase(1f, true)]
+        [TestCase(2.28f, false)]
+        [TestCase(4.56f, false)]
+        public void BranchHitboxesMatchTheVisibleBandWithoutAnInvisibleWallAbove(float height, bool collides)
+        {
+            Rect canopy = RunnerRules.CanopyHitbox(RunnerRules.PlayerX, 2.1f);
+            Assert.That(RunnerRules.PlayerHitbox(height).Overlaps(canopy), Is.EqualTo(collides));
+            Assert.That(RunnerRules.PlayerHitbox(0f, true).Overlaps(canopy), Is.False);
+            if (height == 1f) Assert.That(RunnerRules.PlayerHitbox(height, true).Overlaps(canopy), Is.True,
+                "Pressing duck inside the branch must still require descending below it.");
+        }
+
+        [Test]
+        public void CanopyArtHasReadableThornsAndOwnedPointFilteredArtwork()
+        {
+            var sprites = new System.Collections.Generic.List<Sprite>();
+            var textures = new System.Collections.Generic.List<Texture2D>();
+            try
+            {
+                Sprite canopy = RunnerCanopyArt.Create(sprites, textures);
+                Assert.That(sprites.Count, Is.EqualTo(1));
+                Assert.That(textures.Count, Is.EqualTo(1));
+                Assert.That(canopy.texture.filterMode, Is.EqualTo(FilterMode.Point));
+                Assert.That(canopy.pivot.y, Is.Zero);
+                Assert.That(RunnerRules.CanopyHeight, Is.EqualTo(16f / canopy.pixelsPerUnit));
+                Assert.That(canopy.texture.GetPixel(0, 0).a, Is.Zero);
+                Assert.That(canopy.texture.GetPixel(5, 0).a, Is.EqualTo(1f));
+                Assert.That(canopy.texture.GetPixel(24, 40).a, Is.Zero, "Clear air must replace the old screen-height plank.");
+                for (int y = 16; y < canopy.texture.height; y++)
+                {
+                    int opaque = 0;
+                    for (int x = 0; x < canopy.texture.width; x++) if (canopy.texture.GetPixel(x, y).a > 0f) opaque++;
+                    Assert.That(opaque, Is.LessThanOrEqualTo(14), "Only thin vines and small leaves may appear above the branch.");
+                }
+            }
+            finally
+            {
+                foreach (Sprite sprite in sprites) Object.DestroyImmediate(sprite);
+                foreach (Texture2D texture in textures) Object.DestroyImmediate(texture);
+            }
+        }
+
         [TestCase(0.1f)]
         [TestCase(0.4f)]
         [TestCase(0.6f)]

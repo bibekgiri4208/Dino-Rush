@@ -21,6 +21,9 @@ namespace DinoRush
         public const float SimulationStep = 1f / 120f;
         public const float EndlessLapSeconds = 30f;
         public const float MaximumSpeed = 16.8f;
+        public const float CanopyBottom = 1f;
+        // Only the compact branch is solid; the thin suspension vines are decorative.
+        public const float CanopyHeight = 0.8f;
         private static readonly float[] LevelStarts = { 0f, 12f, 28f, 48f, 75f, 105f };
         private static readonly float[] StageSpeeds = { 6.8f, 8.8f, 11f, 13.4f, 15.3f, MaximumSpeed };
 
@@ -36,8 +39,8 @@ namespace DinoRush
             switch (level)
             {
                 case 2: return "LONG LEAPS";
-                case 3: return "CLUSTER CROSSING";
-                case 4: return "QUICK RHYTHM";
+                case 3: return "LOW CANOPY";
+                case 4: return "SWITCHBACKS";
                 case 5: return "BURST TRAIL";
                 case 6: return "WILD RUN";
                 default: return "FIRST STEPS";
@@ -89,5 +92,8 @@ namespace DinoRush
             // Inset from the artwork so transparent corners are forgiving.
             return new Rect(x - width * 0.39f, GroundY + 0.04f, width * 0.78f, height * 0.85f);
         }
+
+        public static Rect CanopyHitbox(float x, float width) =>
+            new Rect(x - width * 0.39f, GroundY + CanopyBottom, width * 0.78f, CanopyHeight);
     }
 }

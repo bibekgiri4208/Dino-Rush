@@ -22,10 +22,10 @@ namespace DinoRush.Tests
         }
 
         [TestCase(12f, RunnerPattern.LongJump)]
-        [TestCase(28f, RunnerPattern.Triple)]
-        [TestCase(48f, RunnerPattern.QuickSteps)]
+        [TestCase(28f, RunnerPattern.DuckGate)]
+        [TestCase(48f, RunnerPattern.Weave)]
         [TestCase(75f, RunnerPattern.Burst)]
-        [TestCase(105f, RunnerPattern.Burst)]
+        [TestCase(105f, RunnerPattern.Weave)]
         public void NewStagesIntroduceTheirSignatureBetweenRecoveryAndPractice(float elapsed, RunnerPattern signature)
         {
             var director = new RunnerEncounterDirector(42, Aspects);
@@ -69,7 +69,9 @@ namespace DinoRush.Tests
                 RunnerPattern pattern = director.Next(elapsed).Pattern;
                 if (level < 2) Assert.That(pattern, Is.Not.EqualTo(RunnerPattern.LongJump));
                 if (level < 3) Assert.That(pattern, Is.Not.EqualTo(RunnerPattern.Triple));
+                if (level < 3) Assert.That(pattern, Is.Not.EqualTo(RunnerPattern.DuckGate));
                 if (level < 4) Assert.That(pattern, Is.Not.EqualTo(RunnerPattern.QuickSteps));
+                if (level < 4) Assert.That(pattern, Is.Not.EqualTo(RunnerPattern.Weave));
                 Assert.That(pattern, Is.Not.EqualTo(RunnerPattern.Burst));
             }
         }
@@ -107,21 +109,28 @@ namespace DinoRush.Tests
                     foreach (RunnerObstacleSpawn item in encounter.Obstacles)
                     {
                         Assert.That(item.Offset, Is.GreaterThan(lastOffset));
-                        Assert.That(item.Height, Is.GreaterThan(0).And.LessThanOrEqualTo(RunnerRules.MaximumObstacleHeight));
+                        Assert.That(item.Height, Is.GreaterThan(0).And.LessThanOrEqualTo(
+                            item.Overhead ? RunnerRules.CanopyHeight : RunnerRules.MaximumObstacleHeight));
                         Assert.That(item.Width, Is.GreaterThan(0).And.LessThanOrEqualTo(RunnerRules.MaximumObstacleWidth));
-                        Assert.That(item.Width / item.Height, Is.EqualTo(Aspects[item.SpriteIndex]).Within(0.001f));
+                        if (!item.Overhead) Assert.That(item.Width / item.Height, Is.EqualTo(Aspects[item.SpriteIndex]).Within(0.001f));
                         lastOffset = item.Offset;
                     }
                     Assert.That(encounter.Spacing - lastOffset,
                         Is.GreaterThanOrEqualTo(RunnerRules.Speed(elapsed + 6f) * 0.92f - 0.001f));
-                    bool rapid = encounter.Pattern == RunnerPattern.QuickSteps || encounter.Pattern == RunnerPattern.Burst;
+                    bool rapid = RunnerEncounterDirector.UsesIndividualActions(encounter.Pattern);
                     if (rapid)
                     {
                         for (int i = 1; i < encounter.Obstacles.Length; i++)
                             Assert.That((encounter.Obstacles[i].Offset - encounter.Obstacles[i - 1].Offset) / RunnerRules.Speed(elapsed + 6f),
-                                Is.GreaterThanOrEqualTo(0.939f));
+                                Is.GreaterThanOrEqualTo(encounter.Pattern == RunnerPattern.Weave ?
+                                    encounter.Obstacles[i - 1].Overhead ? 0.799f : 0.419f : 0.939f));
                         foreach (RunnerObstacleSpawn item in encounter.Obstacles)
-                            AssertJumpClearance(new[] { item }, item.Offset, speed, seed, encounter.Pattern);
+                            if (!item.Overhead) AssertJumpClearance(new[] { item }, item.Offset, speed, seed, encounter.Pattern);
+                            else
+                            {
+                                Assert.That(RunnerRules.PlayerHitbox(0).Overlaps(item.Hitbox(RunnerRules.PlayerX)), Is.True);
+                                Assert.That(RunnerRules.PlayerHitbox(0, true).Overlaps(item.Hitbox(RunnerRules.PlayerX)), Is.False);
+                            }
                     }
                     else AssertJumpClearance(encounter.Obstacles, Center(encounter.Obstacles), speed, seed, encounter.Pattern);
                 }
@@ -142,14 +151,15 @@ namespace DinoRush.Tests
                 RunnerEncounter encounter = director.Next(120);
                 streak = encounter.Pattern == previous ? streak + 1 : 1;
                 previous = encounter.Pattern;
-                rapidStreak = encounter.Pattern == RunnerPattern.QuickSteps || encounter.Pattern == RunnerPattern.Burst ? rapidStreak + 1 : 0;
+                rapidStreak = encounter.Pattern == RunnerPattern.QuickSteps || encounter.Pattern == RunnerPattern.Burst ||
+                    encounter.Pattern == RunnerPattern.Weave ? rapidStreak + 1 : 0;
                 Assert.That(streak, Is.LessThanOrEqualTo(2));
                 Assert.That(rapidStreak, Is.LessThanOrEqualTo(2));
                 if (encounter.Breather) breathers++;
                 seen.Add(encounter.Pattern);
                 spacings.Add(Mathf.RoundToInt(encounter.Spacing * 100));
             }
-            Assert.That(seen.Count, Is.EqualTo(6));
+            Assert.That(seen.Count, Is.EqualTo(8));
             Assert.That(spacings.Count, Is.GreaterThan(150));
             Assert.That(breathers, Is.InRange(50, 125));
             var early = new RunnerEncounterDirector(147, Aspects);
@@ -178,7 +188,7 @@ namespace DinoRush.Tests
                 {
                     RunnerEncounter encounter = director.Next(elapsed);
                     if (encounter.Pattern == RunnerPattern.Single) singles++;
-                    if (encounter.Pattern == RunnerPattern.QuickSteps || encounter.Pattern == RunnerPattern.Burst) rapid++;
+                    if (encounter.Pattern == RunnerPattern.QuickSteps || encounter.Pattern == RunnerPattern.Burst || encounter.Pattern == RunnerPattern.Weave) rapid++;
                     if (encounter.Phase == RunnerEncounterPhase.Challenge) challenges++;
                     if (encounter.Breather) recovery++;
                     Assert.That(encounter.Phase, Is.Not.EqualTo(RunnerEncounterPhase.Introduction));
@@ -219,11 +229,11 @@ namespace DinoRush.Tests
         [TestCase(42)]
         [TestCase(73)]
         [TestCase(147)]
-        public void FullAcceleratingCoursesHaveAContinuousPlayableJumpRoute(int seed)
+        public void FullAcceleratingCoursesHaveAContinuousPlayableJumpDuckAndDropRoute(int seed)
         {
             var director = new RunnerEncounterDirector(seed, Aspects);
             var obstacles = new List<RunnerObstacleSpawn>();
-            var targets = new List<float>();
+            var targets = new List<RunnerObstacleSpawn>();
             var dino = new GameObject("Course test dino", typeof(SpriteRenderer));
             var shadow = new GameObject("Course test shadow");
             var texture = new Texture2D(24, 24);
@@ -245,15 +255,24 @@ namespace DinoRush.Tests
                         RunnerEncounter encounter = director.Next(elapsed);
                         float origin = distance + 11.7f - RunnerRules.PlayerX;
                         foreach (RunnerObstacleSpawn item in encounter.Obstacles)
-                            obstacles.Add(new RunnerObstacleSpawn(item.SpriteIndex, origin + item.Offset, item.Width, item.Height));
-                        if (encounter.Pattern == RunnerPattern.QuickSteps || encounter.Pattern == RunnerPattern.Burst)
-                            foreach (RunnerObstacleSpawn item in encounter.Obstacles) targets.Add(origin + item.Offset);
-                        else targets.Add(origin + Center(encounter.Obstacles));
+                            obstacles.Add(new RunnerObstacleSpawn(item.SpriteIndex, origin + item.Offset, item.Width, item.Height, item.Overhead));
+                        if (RunnerEncounterDirector.UsesIndividualActions(encounter.Pattern))
+                            foreach (RunnerObstacleSpawn item in encounter.Obstacles)
+                                targets.Add(new RunnerObstacleSpawn(item.SpriteIndex, origin + item.Offset, item.Width, item.Height, item.Overhead));
+                        else targets.Add(new RunnerObstacleSpawn(0, origin + Center(encounter.Obstacles),
+                            encounter.Obstacles[encounter.Obstacles.Length - 1].Offset +
+                            (encounter.Obstacles[0].Width + encounter.Obstacles[encounter.Obstacles.Length - 1].Width) * 0.5f, 0));
                         nextSpawn = distance + encounter.Spacing;
                     }
                     float apex = RunnerRules.JumpSpeed / RunnerRules.Gravity;
                     float lead = (speed + RunnerRules.Speed(elapsed + apex)) * 0.5f * apex;
-                    if (target < targets.Count && player.Grounded && targets[target] - distance <= lead)
+                    while (target < targets.Count && targets[target].Overhead &&
+                        distance > targets[target].Offset + targets[target].Width * 0.39f + RunnerRules.PlayerWidth * 0.5f + 0.12f) target++;
+                    bool duck = target < targets.Count && targets[target].Overhead && targets[target].Offset - distance <= speed * 0.6f;
+                    if (duck && target > 0 && !targets[target - 1].Overhead)
+                        duck = distance > targets[target - 1].Offset + targets[target - 1].Width * 0.5f + RunnerRules.PlayerWidth * 0.5f + 0.12f;
+                    player.SetDucking(duck);
+                    if (target < targets.Count && !targets[target].Overhead && player.Grounded && targets[target].Offset - distance <= lead)
                     {
                         player.QueueJump();
                         target++;
@@ -263,7 +282,7 @@ namespace DinoRush.Tests
                     {
                         float x = RunnerRules.PlayerX + item.Offset - distance;
                         if (x < RunnerRules.PlayerX - 4f || x > RunnerRules.PlayerX + 4f) continue;
-                        if (player.Hitbox.Overlaps(RunnerRules.ObstacleHitbox(x, item.Width, item.Height)))
+                        if (player.Hitbox.Overlaps(item.Hitbox(x)))
                             Assert.Fail($"No continuous route: seed {seed}, t={elapsed}, obstacle={item.Offset}, target={target}.");
                     }
                     while (cleared < obstacles.Count && obstacles[cleared].Offset + 2f < distance) cleared++;

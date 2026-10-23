@@ -25,7 +25,7 @@ namespace DinoRush.Tests
                     {
                         Rect pickup = RunnerEggTrailDirector.PickupBox(egg + Vector2.up * RunnerRules.GroundY);
                         foreach (RunnerObstacleSpawn obstacle in encounter.Obstacles)
-                            Assert.That(pickup.Overlaps(RunnerRules.ObstacleHitbox(obstacle.Offset, obstacle.Width, obstacle.Height)),
+                            Assert.That(pickup.Overlaps(obstacle.Hitbox(obstacle.Offset)),
                                 Is.False, $"{trail.Kind} egg clips a {encounter.Pattern} obstacle.");
                         Assert.That(egg.y, Is.InRange(0.5f, 5.5f));
                         Assert.That(egg.x, Is.LessThan(encounter.Spacing - 1f));
@@ -47,7 +47,7 @@ namespace DinoRush.Tests
                         foreach (RunnerObstacleSpawn obstacle in encounter.Obstacles)
                         {
                             float x = RunnerRules.PlayerX + obstacle.Offset - trail.TakeoffOffset - speed * t;
-                            Assert.That(player.Overlaps(RunnerRules.ObstacleHitbox(x, obstacle.Width, obstacle.Height)),
+                            Assert.That(player.Overlaps(obstacle.Hitbox(x)),
                                 Is.False, $"{trail.Kind} advertises an unsafe {encounter.Pattern} route at {t}.");
                         }
                     }
