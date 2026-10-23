@@ -18,6 +18,18 @@ namespace DinoRush
         private bool captured, revealing;
 
         public bool IsRevealing => revealing;
+        public Vector2 RestPosition => captured ? position : ((RectTransform)transform).anchoredPosition;
+        public Vector3 RestScale => captured ? scale : transform.localScale;
+
+        public void SetRestLayout(Vector2 restPosition, Vector3 restScale)
+        {
+            Capture();
+            position = restPosition;
+            scale = restScale;
+            if (revealing)
+                Apply(1f - Mathf.Pow(1f - Mathf.Clamp01(elapsed / Mathf.Max(0.01f, duration)), 3f));
+            else Restore();
+        }
 
         public void Configure(float seconds, Vector2 offset, float initialScale = 1f, float floatPixels = 0f)
         {

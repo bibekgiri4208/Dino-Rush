@@ -1,8 +1,6 @@
 using System.Collections;
-using System.IO;
 using NUnit.Framework;
 using UnityEngine;
-using UnityEngine.Rendering;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 using UnityEngine.UI;
@@ -337,7 +335,12 @@ namespace DinoRush.Tests
             for (int i = 0; i < 120 * 60 && game.State == ForestRunnerGame.RunState.Running; i++)
                 step.Invoke(game, parameters);
             Assert.That(game.Lives, Is.Zero);
-            yield return new WaitForSeconds(0.5f); // Let the final pose render and the retry guard expire.
+            var crashTime = typeof(ForestRunnerGame).GetField("timeSinceCrash",
+                System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+            float deadline = Time.realtimeSinceStartup + 5f;
+            // Rendering several resolutions can stall a frame; the retry guard uses capped game time.
+            while ((float)crashTime.GetValue(game) < 0.5f && Time.realtimeSinceStartup < deadline) yield return null;
+            Assert.That((float)crashTime.GetValue(game), Is.GreaterThanOrEqualTo(0.45f));
         }
 
         [UnityTest]
@@ -370,58 +373,7 @@ namespace DinoRush.Tests
 
         internal static IEnumerator Capture(string name, int width = 1280, int height = 720)
         {
-            // Optional screenshots for local CI, never written into the asset folder.
-            string directory = System.Environment.GetEnvironmentVariable("DINO_RUSH_CAPTURE_DIR");
-            if (string.IsNullOrEmpty(directory)) yield break;
-            yield return null;
-            Camera camera = Camera.main;
-            Canvas canvas = Object.FindAnyObjectByType<Canvas>();
-            CanvasScaler scaler = canvas.GetComponent<CanvasScaler>();
-            bool scalerEnabled = scaler.enabled;
-            float previousScale = canvas.scaleFactor;
-            RenderMode previousMode = canvas.renderMode;
-            Camera previousCamera = canvas.worldCamera;
-            RenderTexture target = RenderTexture.GetTemporary(width, height, 24, RenderTextureFormat.ARGB32);
-            RenderTexture previousActive = RenderTexture.active;
-            Rect previousRect = camera.rect;
-            var image = new Texture2D(width, height, TextureFormat.RGB24, false);
-            try
-            {
-                float aspect = (float)width / height / (16f / 9f);
-                camera.rect = aspect > 1f ? new Rect((1f - 1f / aspect) * 0.5f, 0, 1f / aspect, 1)
-                    : new Rect(0, (1f - aspect) * 0.5f, 1, aspect);
-                camera.targetTexture = target;
-                scaler.enabled = false;
-                canvas.scaleFactor = Mathf.Min(width / 1280f, height / 720f);
-                canvas.renderMode = RenderMode.ScreenSpaceCamera;
-                canvas.worldCamera = camera;
-                canvas.planeDistance = 1f;
-                foreach (Text text in canvas.GetComponentsInChildren<Text>())
-                    text.font.RequestCharactersInTexture(text.text, text.fontSize, text.fontStyle);
-                Canvas.ForceUpdateCanvases();
-                RenderTexture.active = target;
-                GL.Clear(true, true, Color.black);
-                // Explicit rendering works even when the batch runner does not draw a Game view.
-                RenderPipeline.SubmitRenderRequest(camera, new RenderPipeline.StandardRequest { destination = target });
-                RenderTexture.active = target;
-                image.ReadPixels(new Rect(0, 0, width, height), 0, 0);
-                image.Apply();
-                File.WriteAllBytes(Path.Combine(directory, name + ".png"), image.EncodeToPNG());
-            }
-            finally
-            {
-                canvas.renderMode = previousMode;
-                canvas.worldCamera = previousCamera;
-                canvas.scaleFactor = previousScale;
-                scaler.enabled = scalerEnabled;
-                camera.targetTexture = null;
-                camera.rect = previousRect;
-                RenderTexture.active = previousActive;
-                RenderTexture.ReleaseTemporary(target);
-                Object.Destroy(image);
-            }
-            Canvas.ForceUpdateCanvases();
-            yield return null;
+            return RunnerDisplayCapture.Capture(name, width, height);
         }
     }
 }

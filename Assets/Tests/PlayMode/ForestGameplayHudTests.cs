@@ -48,7 +48,7 @@ namespace DinoRush.Tests
             Assert.That(root.Find("Top left badge").gameObject.activeInHierarchy, Is.False);
             var hearts = (RectTransform)root.Find("Life hearts");
             Assert.That(hearts.gameObject.activeInHierarchy, Is.True);
-            Assert.That(hearts.anchoredPosition, Is.EqualTo(new Vector2(-492, 309)));
+            Assert.That(hearts.anchoredPosition, Is.EqualTo(new Vector2(-492, ((RectTransform)root).rect.yMax - 51f)));
             Assert.That(hearts.GetComponentsInChildren<RunnerHeartGraphic>().Length, Is.EqualTo(5));
             Transform scoreCard = root.Find("Scoreboard/Score card");
             Transform bestCard = root.Find("Scoreboard/Best card");
@@ -79,8 +79,8 @@ namespace DinoRush.Tests
                 Bounds bounds = RectTransformUtility.CalculateRelativeRectTransformBounds(root, button.transform);
                 Assert.That(bounds.min.x, Is.GreaterThanOrEqualTo(-640));
                 Assert.That(bounds.max.x, Is.LessThanOrEqualTo(640));
-                Assert.That(bounds.min.y, Is.GreaterThanOrEqualTo(-360));
-                Assert.That(bounds.max.y, Is.LessThanOrEqualTo(360));
+                Assert.That(bounds.min.y, Is.GreaterThanOrEqualTo(((RectTransform)root).rect.yMin));
+                Assert.That(bounds.max.y, Is.LessThanOrEqualTo(((RectTransform)root).rect.yMax));
             }
 
             var hud = (RunnerHud)typeof(ForestRunnerGame).GetField("hud", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(game);

@@ -24,7 +24,13 @@ The trail advances through **six difficulty levels** at 0, 12, 28, 48, 75, and 1
 
 Duck uses the dino's crouched running frames and a shorter collision box. In midair it immediately cuts upward momentum and accelerates the descent until landing, even if you release early. Hold to remain crouched on landing; release to stand and jump again. Ducking cancels buffered jumps, so a fast drop never causes an accidental bounce. It does not let you pass through ground obstacles. The on-screen Duck control supports mouse/touch holds and hides with Jump on menus, pause, and results. **Dino Rush → Add Duck Controls** upgrades an older HUD in place.
 
-Your best score, sound preference, chosen dino, and last map are saved locally with PlayerPrefs. Restarting a run does not erase your best or change your dino/map. The game uses a 16:9 viewport with letterboxing for other window shapes.
+Your best score, sound preference, chosen dino, and last map are saved locally with PlayerPrefs. Restarting a run does not erase your best or change your dino/map.
+
+### Screen sizes and orientation
+
+The display adapts automatically to resolution changes, desktop window resizing, portrait/landscape rotation, and phone safe areas (notches and home indicators). Landscape keeps the existing layout; portrait moves the readouts to the top, gives Jump/Duck larger bottom touch targets, and reflows map and dino choices into two columns. Menus and scrims fit the usable area, and returning to landscape restores the authored layout without resetting the run.
+
+The world always retains the complete original course width. Taller landscape ratios, including **16:10 and 4:3**, fill the usable screen with extra sky and soil instead of horizontal letterbox bars; HUD controls stay at the top/bottom edges. Portrait and ultrawide layouts retain a framed world view where necessary, without stretching or cropping. This preserves the same dino size relative to obstacles, reaction distance, jump timing, and difficulty. Heart-loss popups and menu thoughts follow the camera's actual viewport. No resolution is forced at startup; native-resolution/fullscreen behavior is retained, and desktop windows are resizable.
 
 ## Maps
 
@@ -45,6 +51,7 @@ New maps use individual scenic framing rather than one full-screen frame for eve
 - `ForestRunnerGame.cs`: scene setup, game states, pooled obstacles/particles, spawning, scoring, input, persistence.
 - `RunnerPlayer.cs`: jump/fast-drop integration, crouch hitbox, input buffer, sprite animation, landing squash.
 - `RunnerHealth.cs`, `RunnerHeartGraphic.cs`: five-heart health, damage grace time, and pixel-heart UI.
+- `RunnerScreenLayout.cs`, `RunnerResponsiveUi.cs`: safe-area camera fitting, portrait reflow, and resize/rotation layout restoration.
 - `RunnerDuckControl.cs`: mouse/touch hold and release handling for the Duck button.
 - `RunnerRules.cs`: movement constants, hitboxes, capped speed and fair spawn intervals.
 - `RunnerEncounterDirector.cs`: progressive, randomized obstacle combinations and safe encounter spacing.
@@ -97,6 +104,8 @@ The four main-menu buttons share the same size, symmetric pixel-cut frame, mirro
 Open **Window → General → Test Runner**. EditMode tests check pace limits, jump feasibility, obstacle spacing, collision bounds, no double jump, saved scene/UI/dirt references, and frame slicing. PlayMode tests load the actual scene and check start/pause/jump, collision, saved best, retry, and clearing obstacles. They also verify the running dirt trail, no midair emission, larger landing bursts, particle pooling/cleanup, that pause freezes the world, Resume preserves progress, Restart clears the previous run, and both pause/results menus return to the title without losing the best score. UI tests raycast buttons (rather than bypassing them), check fonts, label/icon bounds and multiline spacing, and capture menus at normal, tablet, and wide aspect ratios when `DINO_RUSH_CAPTURE_DIR` is set. Tests restore the prior high score and sound preference when finished.
 
 Health tests check all five hearts, one loss per obstacle, cluster grace time, white/crying frames, floating heart-loss text, pause freezing, final-heart game over, and clean restart/menu state. The clean-course regression also requires keeping all five hearts.
+
+Display tests cover small portrait phones, tall phones, tablets, standard HD/4K, ultrawide screens, asymmetric cutouts, and minimized-window fallbacks. Scene tests raycast controls, check text and button bounds, verify portrait grids/touch sizes, and rotate/resize without losing health, score, pause state, or the original landscape layout. Optional `responsive-*` captures include the portrait title, dino/map selectors, Options, gameplay, pause, and an ultrawide view.
 
 Duck tests cover the crouch animation/hitbox, fast drops during ascent/apex/descent, ground clamping, jump-buffer cancellation, returning to normal jumps, combined Down/S and multitouch holds, pause/focus/reset cleanup, menu/results visibility, and raycastable touch input without accidental jumps. Optional captures include crouched and midair-drop views.
 

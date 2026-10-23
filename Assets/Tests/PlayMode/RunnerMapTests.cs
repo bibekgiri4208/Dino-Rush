@@ -114,7 +114,9 @@ namespace DinoRush.Tests
                         foreach (Transform tile in Tiles(layers[layerIndex]))
                         {
                             Assert.That(tile.position.y, Is.EqualTo(spec.bottom).Within(0.0001f), tile.name);
-                            Assert.That(tile.localScale.y, Is.EqualTo(spec.height).Within(0.0001f), tile.name);
+                            if (layerIndex == 0)
+                                Assert.That(tile.localScale.y, Is.GreaterThanOrEqualTo(spec.height), "Sky may extend to fill taller screens.");
+                            else Assert.That(tile.localScale.y, Is.EqualTo(spec.height).Within(0.0001f), tile.name);
                             if (spec.stationary) Assert.That(tile.position.x, Is.EqualTo(spec.x).Within(0.0001f), tile.name);
                         }
                     }

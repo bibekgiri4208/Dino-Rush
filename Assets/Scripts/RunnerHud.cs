@@ -7,7 +7,7 @@ using UnityEngine.UI;
 
 namespace DinoRush
 {
-    /// <summary>A fixed 1280x720 UI that fits the same letterboxed viewport as the world.</summary>
+    /// <summary>Safe-area UI with the authored landscape layout and a reflowed portrait layout.</summary>
     [Serializable]
     public sealed class RunnerHud
     {
@@ -66,6 +66,7 @@ namespace DinoRush
         private Vector3 damageOrigin;
         private float damageTime;
         private const float DamagePopupDuration = 0.95f;
+        private RunnerResponsiveUi responsiveUi;
 
         public bool IsBuilt => root != null;
         public bool MainMenuDialogOpen => mainMenu != null && mainMenu.DialogOpen;
@@ -190,6 +191,7 @@ namespace DinoRush
         {
             CreateLifeDisplay();
             RunnerUiEffects.Install(root);
+            responsiveUi = new RunnerResponsiveUi(root);
             levelLabel = root.Find("Top left badge/Map")?.GetComponent<Text>();
             Bind(primaryControl, primary);
             Bind(pauseButton.GetComponent<Button>(), pause);
@@ -391,6 +393,8 @@ namespace DinoRush
             for (int i = 0; i < hearts.Length; i++) hearts[i].Filled = i < lives;
         }
 
+        public void ApplyScreenLayout(RunnerScreenLayout layout) => responsiveUi?.Apply(layout);
+
         public void ShowDamage(Vector3 worldPosition, Camera camera)
         {
             damageOrigin = worldPosition;
@@ -418,9 +422,14 @@ namespace DinoRush
 
         private void PositionDamage(Camera camera, float age)
         {
-            Vector3 viewport = camera.WorldToViewportPoint(damageOrigin);
-            damagePopup.anchoredPosition = new Vector2((viewport.x - 0.5f) * root.rect.width,
-                (viewport.y - 0.5f) * root.rect.height + 54f * age);
+            Canvas canvas = root.GetComponentInParent<Canvas>();
+            Camera uiCamera = canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : canvas.worldCamera;
+            if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(root,
+                camera.WorldToScreenPoint(damageOrigin), uiCamera, out Vector2 point)) return;
+            point.y += 54f * age;
+            point.x = Mathf.Clamp(point.x, root.rect.xMin + 60f, root.rect.xMax - 60f);
+            point.y = Mathf.Clamp(point.y, root.rect.yMin + 26f, root.rect.yMax - 26f);
+            damagePopup.anchoredPosition = point;
         }
 
         public void ClearDamage()

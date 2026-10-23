@@ -102,10 +102,14 @@ namespace DinoRush
             if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(parent, worldCamera.WorldToScreenPoint(head), uiCamera, out Vector2 point)) return;
             float halfWidth = rect.rect.width * 0.5f;
             float halfHeight = rect.rect.height * 0.5f;
-            // Reserve the center column for the menu buttons; the tail stays above the dino.
-            point.x = Mathf.Clamp(point.x, parent.rect.xMin + halfWidth + 16f, -204f - halfWidth);
+            RectTransform safe = canvas.transform.Find("16 by 9 safe content") as RectTransform;
+            Vector3 min = safe != null ? parent.InverseTransformPoint(safe.TransformPoint(safe.rect.min)) : (Vector3)parent.rect.min;
+            Vector3 max = safe != null ? parent.InverseTransformPoint(safe.TransformPoint(safe.rect.max)) : (Vector3)parent.rect.max;
+            // Reserve the center column in landscape; portrait uses its whole narrow safe width.
+            float right = safe != null && safe.rect.height > safe.rect.width ? max.x - halfWidth - 16f : -204f - halfWidth;
+            point.x = Mathf.Clamp(point.x, min.x + halfWidth + 16f, right);
             point.y = Mathf.Clamp(point.y + halfHeight + 10f + Mathf.Sin(elapsed * 1.8f) * 2f,
-                parent.rect.yMin + halfHeight + 16f, parent.rect.yMax - halfHeight - 16f);
+                min.y + halfHeight + 16f, max.y - halfHeight - 16f);
             rect.anchoredPosition = point;
         }
     }

@@ -65,6 +65,9 @@ namespace DinoRush
         private readonly List<Texture2D> generatedTextures = new List<Texture2D>();
         private readonly Dictionary<int, Sprite[]> dinoFrameCache = new Dictionary<int, Sprite[]>();
         private readonly Dictionary<int, List<Layer>> mapLayerCache = new Dictionary<int, List<Layer>>();
+        private readonly Dictionary<Transform, Vector3> skyBaseScales = new Dictionary<Transform, Vector3>();
+        private Transform trailSoil;
+        private Vector3 soilBasePosition, soilBaseScale;
         private List<Layer> forestLayers;
         private int activeMapIndex;
         private Color mapDustTint = Color.white;
@@ -110,6 +113,7 @@ namespace DinoRush
         private int lastHudScore = -1;
         private int screenWidth;
         private int screenHeight;
+        private Rect screenSafeArea;
         private bool initialized;
         private bool keyboardDuckHeld;
         private bool pointerDuckHeld;
@@ -165,7 +169,6 @@ namespace DinoRush
             forestLayers = layers;
             if (mapCatalog != null && mapCatalog.Count > 0)
                 SelectedMapIndex = mapCatalog.Find(PlayerPrefs.GetString(RunnerMapCatalog.SelectionKey, "forest"));
-            UpdateViewport();
             ApplyPixelFiltering();
             player = new RunnerPlayer(dinoRenderer, dinoFrames, playerShadow);
             if (dinoRoster != null && dinoRoster.Count > 0)
@@ -192,6 +195,7 @@ namespace DinoRush
             hud.UpdateScore(0, best, 0, RunnerRules.Speed(0));
             hud.ShowReady(best);
             State = RunState.Ready;
+            UpdateViewport();
             initialized = true;
         }
 
@@ -307,6 +311,7 @@ namespace DinoRush
                 mote.color = color;
             }
             Scroll(0f);
+            FitSceneryToViewport();
         }
 
         private void SetSkyFraming(bool mainMenu)
@@ -330,6 +335,7 @@ namespace DinoRush
             CreateSceneObjects();
             gameCamera.rect = new Rect(0, 0, 1, 1);
             gameCamera.aspect = 16f / 9f;
+            gameCamera.orthographicSize = 5.625f;
             hud.UpdateScore(0, 0, 0, RunnerRules.Speed(0));
             hud.ShowReady(0);
 
@@ -381,10 +387,42 @@ namespace DinoRush
         {
             screenWidth = Screen.width;
             screenHeight = Screen.height;
-            float relativeAspect = (float)screenWidth / Mathf.Max(1, screenHeight) / (16f / 9f);
-            gameCamera.rect = relativeAspect > 1f
-                ? new Rect((1f - 1f / relativeAspect) * 0.5f, 0f, 1f / relativeAspect, 1f)
-                : new Rect(0f, (1f - relativeAspect) * 0.5f, 1f, relativeAspect);
+            screenSafeArea = Screen.safeArea;
+            RunnerScreenLayout layout = RunnerScreenLayout.Calculate(screenWidth, screenHeight, screenSafeArea);
+            ApplyScreenLayout(layout);
+        }
+
+        public void ApplyScreenLayout(RunnerScreenLayout layout)
+        {
+            gameCamera.rect = layout.CameraRect;
+            gameCamera.orthographicSize = layout.OrthographicSize;
+            FitSceneryToViewport();
+            hud?.ApplyScreenLayout(layout);
+        }
+
+        private void FitSceneryToViewport()
+        {
+            if (layers.Count == 0) return;
+            float extraSky = Mathf.Max(0f, gameCamera.orthographicSize - 5.625f);
+            foreach (Transform tile in layers[0].tiles)
+            {
+                if (!skyBaseScales.TryGetValue(tile, out Vector3 original))
+                    skyBaseScales[tile] = original = tile.localScale;
+                float spriteHeight = tile.GetComponent<SpriteRenderer>().sprite.bounds.size.y;
+                tile.localScale = new Vector3(original.x, original.y + extraSky / spriteHeight, original.z);
+            }
+            if (trailSoil == null)
+            {
+                trailSoil = transform.Find("Forest environment/Earth below the trail");
+                if (trailSoil == null) return;
+                soilBasePosition = trailSoil.localPosition;
+                soilBaseScale = trailSoil.localScale;
+            }
+            float unitHeight = trailSoil.GetComponent<SpriteRenderer>().sprite.bounds.size.y;
+            float top = soilBasePosition.y + soilBaseScale.y * unitHeight * 0.5f;
+            float height = Mathf.Max(soilBaseScale.y * unitHeight, top + gameCamera.orthographicSize + 1f);
+            trailSoil.localPosition = new Vector3(soilBasePosition.x, top - height * 0.5f, soilBasePosition.z);
+            trailSoil.localScale = new Vector3(soilBaseScale.x, height / unitHeight, soilBaseScale.z);
         }
 
         private void BuildWorld()
@@ -506,7 +544,7 @@ namespace DinoRush
         private void Update()
         {
             if (!initialized) return;
-            if (Screen.width != screenWidth || Screen.height != screenHeight) UpdateViewport();
+            if (Screen.width != screenWidth || Screen.height != screenHeight || Screen.safeArea != screenSafeArea) UpdateViewport();
             ReadInput();
             float dt = Mathf.Min(Time.deltaTime, 0.1f);
             hud.Tick(dt);
