@@ -1,6 +1,6 @@
 {
   "name": "DinoRush.EditModeTests",
-  "references": ["DinoRush"],
+  "references": ["DinoRush", "DinoRush.Editor"],
   "includePlatforms": ["Editor"],
   "optionalUnityReferences": ["TestAssemblies"]
 }

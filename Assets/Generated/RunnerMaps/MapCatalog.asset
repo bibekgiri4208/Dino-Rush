@@ -106,7 +106,7 @@ MonoBehaviour:
     - source: {fileID: 2800000, guid: 4d976efc6e53c544686f2343cc82ae03, type: 3}
       sprite: {fileID: 21300000, guid: d59381af54957d54aba2b65eaae4ad42, type: 3}
       height: 10.4
-      bottom: -4.3
+      bottom: -3.94
       speed: 0.035
       order: -90
       stationary: 0
@@ -114,7 +114,7 @@ MonoBehaviour:
     - source: {fileID: 2800000, guid: 0076f762b1fe66745a6ef694941f64eb, type: 3}
       sprite: {fileID: 21300000, guid: cbddfbe77b750f54b8a47769ce42cae6, type: 3}
       height: 9
-      bottom: -4.35
+      bottom: -3.5
       speed: 0.08
       order: -80
       stationary: 0
@@ -122,7 +122,7 @@ MonoBehaviour:
     - source: {fileID: 2800000, guid: 8df116f363d9ca24d939b900398e99bd, type: 3}
       sprite: {fileID: 21300000, guid: b8bb4fe7634d1bd49b00ff2d0dfafd3b, type: 3}
       height: 9
-      bottom: -3.28
+      bottom: -3.21
       speed: 0.18
       order: -70
       stationary: 0
@@ -325,7 +325,7 @@ MonoBehaviour:
     - source: {fileID: 2800000, guid: 3a6b1d2871dc95f49bac31e12bfd5707, type: 3}
       sprite: {fileID: 21300000, guid: f3841c0de8467eb42bb46b8e59234942, type: 3}
       height: 9.3
-      bottom: -3.7
+      bottom: 0.38320696
       speed: 0.035
       order: -90
       stationary: 0
@@ -333,7 +333,7 @@ MonoBehaviour:
     - source: {fileID: 2800000, guid: 29dde105197f17f4897de6d4bf0c3cb9, type: 3}
       sprite: {fileID: 21300000, guid: e5860385fc154c94e9e20983610c4708, type: 3}
       height: 9.3
-      bottom: -3.5
+      bottom: -2.33
       speed: 0.08
       order: -80
       stationary: 0
@@ -341,7 +341,7 @@ MonoBehaviour:
     - source: {fileID: 2800000, guid: d6987883901b4404586df756ceaa6f1d, type: 3}
       sprite: {fileID: 21300000, guid: e92950acbbb4b1d4fb288c882843bae3, type: 3}
       height: 9.3
-      bottom: -2.4
+      bottom: -2.57
       speed: 0.12
       order: -75
       stationary: 0
@@ -349,7 +349,7 @@ MonoBehaviour:
     - source: {fileID: 2800000, guid: a0779acd10ac0c74d9344b14fe335f8e, type: 3}
       sprite: {fileID: 21300000, guid: 0a64804ccb1f547478e76978bc7ede01, type: 3}
       height: 9
-      bottom: -3.35
+      bottom: -2.44
       speed: 0.2
       order: -70
       stationary: 0
@@ -357,7 +357,7 @@ MonoBehaviour:
     - source: {fileID: 2800000, guid: f31097a8116f7794cb8977c6e6438671, type: 3}
       sprite: {fileID: 21300000, guid: 33f72a8e1fc1f664a91093c0e77d8bd9, type: 3}
       height: 8.8
-      bottom: -3.4
+      bottom: -2.32
       speed: 0.28
       order: -60
       stationary: 0
@@ -365,7 +365,7 @@ MonoBehaviour:
     - source: {fileID: 2800000, guid: 77e1743a7216e2341a338883aedd175e, type: 3}
       sprite: {fileID: 21300000, guid: 29fca5b96c08e4d4fad6a88888d72960, type: 3}
       height: 8.8
-      bottom: -3.4
+      bottom: -3.67
       speed: 0.4
       order: -50
       stationary: 0
