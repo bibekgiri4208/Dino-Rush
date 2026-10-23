@@ -46,7 +46,7 @@ namespace DinoRush.Tests
         }
 
         [UnityTest]
-        public IEnumerator PlayOpensFourPreviewCardsAndBackOrEscapeCancelsWithoutStarting()
+        public IEnumerator PlayOpensFivePreviewCardsAndBackOrEscapeCancelsWithoutStarting()
         {
             Click("Play");
             Assert.That(game.State, Is.EqualTo(ForestRunnerGame.RunState.Ready));
@@ -55,10 +55,13 @@ namespace DinoRush.Tests
             game.PrimaryAction();
             Assert.That(game.State, Is.EqualTo(ForestRunnerGame.RunState.Ready), "Space must not skip map selection.");
             yield return new WaitForSecondsRealtime(0.3f);
-            for (int i = 0; i < 4; i++)
+            for (int i = 0; i < game.MapCatalog.Count; i++)
             {
                 Click("Choose " + game.MapCatalog[i].displayName + " map");
                 Assert.That(game.SelectedMapIndex, Is.EqualTo(i));
+                foreach (string control in new[] { "Jump", "Duck" })
+                    Assert.That(game.transform.Find("Forest runner UI/16 by 9 safe content/" + control).gameObject.activeInHierarchy,
+                        Is.False, "Movement buttons must stay removed on every map.");
                 Assert.That(game.State, Is.EqualTo(ForestRunnerGame.RunState.Ready));
                 Assert.That(PlayerPrefs.GetString(RunnerMapCatalog.SelectionKey), Is.EqualTo(game.MapCatalog[i].id));
                 Image card = GameObject.Find("Choose " + game.MapCatalog[i].displayName + " map").GetComponent<Image>();
@@ -91,7 +94,7 @@ namespace DinoRush.Tests
             game.SelectDino(2);
             var player = (RunnerPlayer)Get("player");
             Rect hitbox = player.Hitbox;
-            for (int i = 0; i < 4; i++)
+            for (int i = 0; i < game.MapCatalog.Count; i++)
             {
                 Click("Play");
                 yield return null;
@@ -140,10 +143,10 @@ namespace DinoRush.Tests
                 for (int frame = 0; frame < 45; frame++) Step();
                 Assert.That(player.Grounded, Is.True, "Fast drops must land identically on every map.");
                 game.SetDuckHeld(false);
-                game.SelectMap((i + 1) % 4);
+                game.SelectMap((i + 1) % game.MapCatalog.Count);
                 Assert.That(game.SelectedMapIndex, Is.EqualTo(i), "Maps cannot change during a run.");
                 game.TogglePause();
-                game.SelectMap((i + 1) % 4);
+                game.SelectMap((i + 1) % game.MapCatalog.Count);
                 Assert.That(game.SelectedMapIndex, Is.EqualTo(i));
                 yield return new WaitForSecondsRealtime(0.04f);
                 game.TogglePause();
@@ -154,6 +157,12 @@ namespace DinoRush.Tests
                 yield return ForestRunTests.Capture("map-" + game.MapCatalog[i].id + "-running");
                 if (i == 1) yield return ForestRunTests.Capture("map-desert-tablet", 1024, 768);
                 if (i == 3) yield return ForestRunTests.Capture("map-rural-wide", 1920, 820);
+                if (game.MapCatalog[i].id == "snow")
+                {
+                    yield return RunnerDisplayCapture.Capture("map-snow-16-by-10", 1280, 800);
+                    yield return RunnerDisplayCapture.Capture("map-snow-tablet", 1024, 768);
+                    yield return RunnerDisplayCapture.Capture("map-snow-portrait", 360, 800);
+                }
                 typeof(ForestRunnerGame).GetMethod("EndRun", Private).Invoke(game, null);
                 Assert.That(game.State, Is.EqualTo(ForestRunnerGame.RunState.GameOver));
                 Assert.That(game.SelectedMapIndex, Is.EqualTo(i));
@@ -168,7 +177,7 @@ namespace DinoRush.Tests
                 yield return null;
             }
             int total = game.GetComponentsInChildren<SpriteRenderer>(true).Length;
-            for (int i = 3; i >= 0; i--) { game.SelectMap(i); game.StartRun(); game.ReturnToMenu(); }
+            for (int i = game.MapCatalog.Count - 1; i >= 0; i--) { game.SelectMap(i); game.StartRun(); game.ReturnToMenu(); }
             Assert.That(game.GetComponentsInChildren<SpriteRenderer>(true).Length, Is.EqualTo(total));
         }
 
@@ -176,7 +185,7 @@ namespace DinoRush.Tests
         public IEnumerator NewMapLayersStaySeamlessAndCoverTheViewportAcrossRepeatedWraps()
         {
             MethodInfo scroll = typeof(ForestRunnerGame).GetMethod("Scroll", Private);
-            for (int map = 1; map < 4; map++)
+            for (int map = 1; map < game.MapCatalog.Count; map++)
             {
                 game.SelectMap(map);
                 game.StartRun();
@@ -220,13 +229,13 @@ namespace DinoRush.Tests
         [UnityTest]
         public IEnumerator MapChoiceSurvivesReloadAndUnknownIdsFallBackToForest()
         {
-            game.SelectMap(2);
+            game.SelectMap(game.MapCatalog.Find("snow"));
             yield return Reload();
-            Assert.That(game.SelectedMapName, Is.EqualTo("Jungle"));
+            Assert.That(game.SelectedMapName, Is.EqualTo("Snow Mountain"));
             Assert.That(game.State, Is.EqualTo(ForestRunnerGame.RunState.Ready));
             Click("Play");
             yield return null;
-            Assert.That(GameObject.Find("Choose Jungle map").GetComponent<Image>().sprite.name, Is.EqualTo("HudJump"));
+            Assert.That(GameObject.Find("Choose Snow Mountain map").GetComponent<Image>().sprite.name, Is.EqualTo("HudJump"));
             Click("Start selected map");
             Assert.That(game.State, Is.EqualTo(ForestRunnerGame.RunState.AwaitingStart));
             game.PrimaryAction();
@@ -236,7 +245,7 @@ namespace DinoRush.Tests
             yield return Reload();
             Assert.That(game.SelectedMapIndex, Is.Zero);
             game.SelectMap(-1);
-            game.SelectMap(4);
+            game.SelectMap(game.MapCatalog.Count);
             Assert.That(game.SelectedMapName, Is.EqualTo("Forest"));
         }
 

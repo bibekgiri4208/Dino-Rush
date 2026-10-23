@@ -10,7 +10,7 @@ namespace DinoRush.Tests
         [Test]
         public void SavedSoilArtIsOpaqueTexturedAndUsesUncompressedFullRectPixelSprites()
         {
-            foreach (string map in new[] { "forest", "desert", "jungle", "rural" })
+            foreach (string map in new[] { "forest", "desert", "jungle", "rural", "snow" })
             {
                 string path = $"Assets/Generated/TrailSoil/{map}_soil.png";
                 var importer = (TextureImporter)AssetImporter.GetAtPath(path);

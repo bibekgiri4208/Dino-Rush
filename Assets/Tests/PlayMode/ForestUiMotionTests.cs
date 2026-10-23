@@ -135,30 +135,23 @@ namespace DinoRush.Tests
         }
 
         [UnityTest]
-        public IEnumerator MultiTouchDuckAndKeyboardFeedbackResetOnPauseAndMenu()
+        public IEnumerator RetiredMovementControlsStayHiddenAndDoNotAnimateOnKeyboardInput()
         {
             game.StartRun();
             Button duck = Control("Duck");
             var feedback = duck.GetComponent<RunnerUiButtonFeedback>();
-            PointerEventData first = Pointer(10), second = Pointer(11);
-            ExecuteEvents.Execute(duck.gameObject, first, ExecuteEvents.pointerEnterHandler);
-            Assert.That(feedback.IsHovered, Is.False, "Touch must not leave a sticky mouse hover.");
-            ExecuteEvents.Execute(duck.gameObject, first, ExecuteEvents.pointerDownHandler);
-            ExecuteEvents.Execute(duck.gameObject, second, ExecuteEvents.pointerDownHandler);
-            Assert.That(feedback.IsPressed, Is.True);
-            ExecuteEvents.Execute(duck.gameObject, first, ExecuteEvents.pointerUpHandler);
-            Assert.That(feedback.IsPressed, Is.True);
-            ExecuteEvents.Execute(duck.gameObject, second, ExecuteEvents.pointerUpHandler);
+            Assert.That(duck.gameObject.activeInHierarchy, Is.False);
             Assert.That(feedback.IsPressed, Is.False);
             game.SetDuckHeld(true);
-            Assert.That(feedback.IsPressed, Is.True, "Non-pointer inputs should use the same held feedback.");
+            Assert.That(feedback.IsPressed, Is.False, "Retired controls must not react to gameplay input.");
             game.TogglePause();
             Assert.That(feedback.IsHovered || feedback.IsPressed, Is.False);
             game.TogglePause();
             Assert.That(feedback.IsPressed, Is.False);
             game.Jump();
             yield return new WaitForSecondsRealtime(0.08f);
-            Assert.That(Control("Jump").GetComponent<Outline>().enabled, Is.True);
+            Assert.That(Control("Jump").gameObject.activeInHierarchy, Is.False);
+            Assert.That(duck.gameObject.activeInHierarchy, Is.False);
             game.ReturnToMenu();
             game.StartRun();
             Assert.That(feedback.IsPressed, Is.False);

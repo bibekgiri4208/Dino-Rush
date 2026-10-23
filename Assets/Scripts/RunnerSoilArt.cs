@@ -13,7 +13,8 @@ namespace DinoRush
         public static Texture2D CreateTexture(Color surface, string mapId)
         {
             var pixels = new Color32[Width * Height];
-            Color earth = Color.Lerp(surface, new Color(0.23f, 0.20f, 0.13f), 0.30f);
+            Color earth = Color.Lerp(surface, mapId == "snow" ? new Color(0.24f, 0.34f, 0.48f)
+                : new Color(0.23f, 0.20f, 0.13f), 0.30f);
             for (int depth = 0; depth < Height; depth++)
             for (int x = 0; x < Width; x++)
             {
@@ -55,7 +56,8 @@ namespace DinoRush
                 }
             }
             Color root = Color.Lerp(earth, new Color(0.32f, 0.29f, 0.16f), 0.35f);
-            for (int i = 0; i < (mapId == "desert" ? 8 : 20); i++)
+            int rootCount = mapId == "snow" ? 0 : (mapId == "desert" ? 8 : 20);
+            for (int i = 0; i < rootCount; i++)
             {
                 int x = random.Next(Width), depth = random.Next(28, 52);
                 int length = random.Next(18, 68), direction = i % 2 == 0 ? 1 : -1;

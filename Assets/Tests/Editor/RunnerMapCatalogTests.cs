@@ -12,13 +12,13 @@ namespace DinoRush.Tests
         private const string Directory = "Assets/Generated/RunnerMaps";
 
         [Test]
-        public void FourMapsReferenceTheirSuppliedArtAndShareTheSameRunningSurface()
+        public void FiveMapsReferenceTheirSuppliedArtAndShareTheSameRunningSurface()
         {
             RunnerMapCatalog catalog = AssetDatabase.LoadAssetAtPath<RunnerMapCatalog>(Directory + "/MapCatalog.asset");
             Assert.That(catalog, Is.Not.Null);
-            Assert.That(catalog.Count, Is.EqualTo(4));
-            string[] ids = { "forest", "desert", "jungle", "rural" };
-            string[] folders = { "forest bg", "desert bg", "jungle bg", "rural area bg" };
+            Assert.That(catalog.Count, Is.EqualTo(5));
+            string[] ids = { "forest", "desert", "jungle", "rural", "snow" };
+            string[] folders = { "forest bg", "desert bg", "jungle bg", "rural area bg", "skies bg" };
             for (int i = 0; i < catalog.Count; i++)
             {
                 RunnerMapCatalog.Map map = catalog[i];
@@ -62,7 +62,8 @@ namespace DinoRush.Tests
                         Assert.That(pixels[y * texture.width], Is.EqualTo(pixels[(y + 1) * texture.width - 1]), path + " row " + y);
                     var importer = (TextureImporter)AssetImporter.GetAtPath(path.Replace('\\', '/'));
                     bool smooth = !path.EndsWith("_ground_loop.png")
-                        && (Path.GetFileName(path).StartsWith("desert_") || Path.GetFileName(path).StartsWith("rural_"));
+                        && (Path.GetFileName(path).StartsWith("desert_") || Path.GetFileName(path).StartsWith("rural_")
+                            || Path.GetFileName(path).StartsWith("snow_"));
                     Assert.That(importer.filterMode, Is.EqualTo(smooth ? FilterMode.Bilinear : FilterMode.Point));
                     Assert.That(importer.mipmapEnabled, Is.False);
                     Assert.That(importer.textureCompression, Is.EqualTo(TextureImporterCompression.Uncompressed));
@@ -75,6 +76,7 @@ namespace DinoRush.Tests
         [TestCase(1)]
         [TestCase(2)]
         [TestCase(3)]
+        [TestCase(4)]
         public void NewSceneryRetainsNativeSourcePixelsAndImportsWithoutDownscaling(int mapIndex)
         {
             RunnerMapCatalog catalog = AssetDatabase.LoadAssetAtPath<RunnerMapCatalog>(Directory + "/MapCatalog.asset");
@@ -142,7 +144,7 @@ namespace DinoRush.Tests
         }
 
         [Test]
-        public void SceneSavesTheCatalogFourCardsAndStartBackBindings()
+        public void SceneSavesTheCatalogFiveCardsAndStartBackBindings()
         {
             Scene previous = SceneManager.GetActiveScene();
             Scene scene = SceneManager.GetSceneByPath("Assets/Scenes/ForestRun.unity");
@@ -158,8 +160,8 @@ namespace DinoRush.Tests
                 foreach (string name in new[] { "mapChoices", "mapPreviews", "mapCaptions" })
                 {
                     SerializedProperty list = data.FindProperty(name);
-                    Assert.That(list.arraySize, Is.EqualTo(4));
-                    for (int i = 0; i < 4; i++) Assert.That(list.GetArrayElementAtIndex(i).objectReferenceValue, Is.Not.Null);
+                    Assert.That(list.arraySize, Is.EqualTo(game.MapCatalog.Count));
+                    for (int i = 0; i < list.arraySize; i++) Assert.That(list.GetArrayElementAtIndex(i).objectReferenceValue, Is.Not.Null);
                 }
                 foreach (string name in new[] { "mapPage", "mapStatus", "customizeMapLabel", "startMap", "mapBack" })
                     Assert.That(data.FindProperty(name).objectReferenceValue, Is.Not.Null);
@@ -175,6 +177,7 @@ namespace DinoRush.Tests
         [TestCase(1, "desert_dunemid.png")]
         [TestCase(2, "plx-5.png")]
         [TestCase(3, "ruralparallaxriverfront.png")]
+        [TestCase(4, "sky_cloud_floor_2.png")]
         public void ForegroundIsAnchoredToTheTrailWithoutTransparentGapsAndSkyCoversTheView(int index, string foregroundSource)
         {
             RunnerMapCatalog catalog = AssetDatabase.LoadAssetAtPath<RunnerMapCatalog>(Directory + "/MapCatalog.asset");

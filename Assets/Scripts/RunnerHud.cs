@@ -359,8 +359,10 @@ namespace DinoRush
             if (pausePanel != null) pausePanel.SetActive(false);
             shade.SetActive(visible);
             panel.SetActive(visible);
-            jumpButton.SetActive(!visible);
-            if (duckButton != null) duckButton.SetActive(!visible);
+            // Retain old scene bindings, but never show the retired on-screen movement controls.
+            // Jump uses the playfield/keyboard; duck and fast drop use Down/S.
+            jumpButton.SetActive(false);
+            if (duckButton != null) duckButton.SetActive(false);
             pauseButton.SetActive(!visible);
             if (lifeBar != null) lifeBar.SetActive(!visible);
             if (stageDisplay != null) stageDisplay.SetActive(!visible);

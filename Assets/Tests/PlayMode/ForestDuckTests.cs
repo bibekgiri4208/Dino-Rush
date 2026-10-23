@@ -1,14 +1,11 @@
 using System.Collections;
-using System.Collections.Generic;
 using System.Reflection;
 using NUnit.Framework;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.LowLevel;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
-using UnityEngine.UI;
 
 namespace DinoRush.Tests
 {
@@ -16,7 +13,6 @@ namespace DinoRush.Tests
     {
         private ForestRunnerGame game;
         private RunnerPlayer player;
-        private GameObject duck;
         private bool hadBest, hadSound;
         private int previousBest, previousSound;
         private const BindingFlags Private = BindingFlags.Instance | BindingFlags.NonPublic;
@@ -33,7 +29,6 @@ namespace DinoRush.Tests
             game.StartRun();
             game.enabled = false; // Exercise the real simulation without wall-clock/shader timing.
             player = (RunnerPlayer)typeof(ForestRunnerGame).GetField("player", Private).GetValue(game);
-            duck = game.transform.Find("Forest runner UI/16 by 9 safe content/Duck").gameObject;
             typeof(ForestRunnerGame).GetField("spawnTimer", Private).SetValue(game, float.MaxValue);
             yield return null;
         }
@@ -51,41 +46,36 @@ namespace DinoRush.Tests
         }
 
         [UnityTest]
-        public IEnumerator TouchDuckFastDropsAndDoesNotTriggerTheWorldJumpShortcut()
+        public IEnumerator DuckFastDropsAndTheFormerButtonAreaNowAllowsWorldJumps()
         {
             game.Jump();
             Step(30);
             Assert.That(player.Grounded, Is.False);
             float before = player.Feet.y;
-            PointerEventData pointer = Pointer(4);
-            Press(pointer);
+            game.SetDuckHeld(true);
             Assert.That(player.IsDucking, Is.True);
             player.Render(0f, true, false, 1f);
             yield return ForestRunTests.Capture("forest-duck-midair");
-            Release(pointer);
-            Invoke("PointerAction", pointer.position);
+            game.SetDuckHeld(false);
             Step(1);
             Assert.That(player.Feet.y, Is.LessThan(before));
             Step(24);
             Assert.That(player.Grounded, Is.True);
             Assert.That(player.IsDucking, Is.False);
-            Invoke("PointerAction", pointer.position);
+            Canvas.ForceUpdateCanvases();
+            var formerButton = (RectTransform)game.transform.Find("Forest runner UI/16 by 9 safe content/Duck");
+            Vector2 point = RectTransformUtility.WorldToScreenPoint(null, formerButton.TransformPoint(formerButton.rect.center));
+            Invoke("PointerAction", point);
             Step(1);
-            Assert.That(player.Grounded, Is.True, "Pressing Duck must not also queue the tap-anywhere jump.");
-            game.Jump();
-            Step(1);
-            Assert.That(player.Grounded, Is.False);
+            Assert.That(player.Grounded, Is.False, "The removed Duck button must not intercept tap-to-jump.");
             Assert.That(game.State, Is.EqualTo(ForestRunnerGame.RunState.Running));
         }
 
         [UnityTest]
-        public IEnumerator GroundDuckSupportsMultipleTouchesAndHidesAndReleasesOnPauseMenusAndResults()
+        public IEnumerator GroundDuckReleasesOnPauseFocusMenusAndResultsWithoutVisibleControls()
         {
-            PointerEventData first = Pointer(4), second = Pointer(5);
-            Press(first);
-            Press(second);
-            Release(first);
-            Assert.That(player.IsDucking, Is.True, "The other finger is still holding Duck.");
+            game.SetDuckHeld(true);
+            Assert.That(player.IsDucking, Is.True);
             player.Render(0.1f, true, false, 1f);
             Assert.That(player.Hitbox.height, Is.EqualTo(RunnerRules.DuckHeight));
             Assert.That(game.transform.Find("Player/Blue dino player").GetComponent<SpriteRenderer>().sprite.name,
@@ -94,35 +84,35 @@ namespace DinoRush.Tests
             yield return ForestRunTests.Capture("forest-duck-tablet", 1024, 768);
             yield return ForestRunTests.Capture("forest-duck-wide", 1920, 820);
             game.TogglePause();
-            Assert.That(duck.activeInHierarchy, Is.False);
+            AssertMovementButtonsHidden();
             Assert.That(player.IsDucking, Is.False);
             game.SetDuckHeld(true);
             Assert.That(player.IsDucking, Is.False);
             game.TogglePause();
-            Assert.That(duck.activeInHierarchy, Is.True);
-            Press(first);
+            AssertMovementButtonsHidden();
+            game.SetDuckHeld(true);
             Assert.That(player.IsDucking, Is.True);
-            Release(first);
-            Assert.That(player.IsDucking, Is.False, "Hiding the control must clear every old pointer.");
-            Press(first);
+            game.SetDuckHeld(false);
+            Assert.That(player.IsDucking, Is.False);
+            game.SetDuckHeld(true);
             Invoke("OnApplicationFocus", false);
             Assert.That(game.State, Is.EqualTo(ForestRunnerGame.RunState.Paused));
             Assert.That(player.IsDucking, Is.False);
             game.RestartRun();
             Assert.That(player.IsDucking, Is.False);
-            Press(first);
+            game.SetDuckHeld(true);
             game.ReturnToMenu();
-            Assert.That(duck.activeInHierarchy, Is.False);
+            AssertMovementButtonsHidden();
             Assert.That(player.IsDucking, Is.False);
             game.StartRun();
-            Press(first);
+            game.SetDuckHeld(true);
             Invoke("EndRun");
-            Assert.That(duck.activeInHierarchy, Is.False);
+            AssertMovementButtonsHidden();
             Assert.That(player.IsDucking, Is.False);
         }
 
         [UnityTest]
-        public IEnumerator DownAndSCombineWithTouchAndPausePreservesAnInProgressDrop()
+        public IEnumerator DownAndSDuckAndPausePreservesAnInProgressDrop()
         {
             Keyboard original = Keyboard.current;
             Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
@@ -130,13 +120,8 @@ namespace DinoRush.Tests
             {
                 SetKeys(keyboard, Key.DownArrow);
                 Assert.That(player.IsDucking, Is.True);
-                PointerEventData pointer = Pointer(8);
-                Press(pointer);
-                SetKeys(keyboard);
-                Assert.That(player.IsDucking, Is.True, "Touch remains held after releasing the keyboard.");
                 SetKeys(keyboard, Key.S);
-                Release(pointer);
-                Assert.That(player.IsDucking, Is.True, "Keyboard remains held after releasing touch.");
+                Assert.That(player.IsDucking, Is.True);
                 SetKeys(keyboard, Key.S, Key.DownArrow);
                 SetKeys(keyboard, Key.DownArrow);
                 Assert.That(player.IsDucking, Is.True);
@@ -178,24 +163,11 @@ namespace DinoRush.Tests
         private void Invoke(string method, params object[] args) =>
             typeof(ForestRunnerGame).GetMethod(method, Private).Invoke(game, args);
 
-        private PointerEventData Pointer(int id)
+        private void AssertMovementButtonsHidden()
         {
-            Canvas.ForceUpdateCanvases();
-            var rect = (RectTransform)duck.transform;
-            var pointer = new PointerEventData(EventSystem.current)
-            {
-                pointerId = id,
-                position = RectTransformUtility.WorldToScreenPoint(null, rect.TransformPoint(rect.rect.center)),
-                button = PointerEventData.InputButton.Left
-            };
-            var hits = new List<RaycastResult>();
-            EventSystem.current.RaycastAll(pointer, hits);
-            Assert.That(hits.Count, Is.GreaterThan(0));
-            Assert.That(hits[0].gameObject, Is.EqualTo(duck), "Duck must not be blocked by decorative UI.");
-            return pointer;
+            Transform root = game.transform.Find("Forest runner UI/16 by 9 safe content");
+            Assert.That(root.Find("Jump").gameObject.activeInHierarchy, Is.False);
+            Assert.That(root.Find("Duck").gameObject.activeInHierarchy, Is.False);
         }
-
-        private void Press(PointerEventData pointer) => ExecuteEvents.Execute(duck, pointer, ExecuteEvents.pointerDownHandler);
-        private void Release(PointerEventData pointer) => ExecuteEvents.Execute(duck, pointer, ExecuteEvents.pointerUpHandler);
     }
 }

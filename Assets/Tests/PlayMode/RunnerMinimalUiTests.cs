@@ -144,15 +144,10 @@ namespace DinoRush.Tests
 
         private void AssertRunningWithoutHints()
         {
-            foreach (string name in new[] { "Controls", "Keyboard controls", "Duck/Drop hint", "Top left badge" })
+            foreach (string name in new[] { "Jump", "Duck", "Controls", "Keyboard controls", "Duck/Drop hint", "Top left badge" })
                 Assert.That(root.Find(name).gameObject.activeInHierarchy, Is.False, name);
-            foreach (string name in new[] { "Jump", "Duck", "Pause", "Sound", "Scoreboard", "Life hearts", "Stage progress" })
+            foreach (string name in new[] { "Pause", "Sound", "Scoreboard", "Life hearts", "Stage progress" })
                 Assert.That(root.Find(name).gameObject.activeInHierarchy, Is.True, name);
-            foreach (string name in new[] { "Jump", "Duck" })
-            {
-                Assert.That(root.Find(name).GetComponent<Image>().sprite.name, Is.EqualTo("HudJump"));
-                Assert.That(root.Find(name).GetComponentInChildren<Text>().font.fontNames, Does.Contain("Press Start 2P"));
-            }
         }
 
         private void AssertFocusedModal(Transform card)

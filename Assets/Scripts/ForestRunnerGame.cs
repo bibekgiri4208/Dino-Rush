@@ -21,7 +21,7 @@ namespace DinoRush
         [SerializeField] private Texture2D tallTrees;
         [SerializeField] private Texture2D nearForest;
         [SerializeField] private Texture2D ground;
-        [Tooltip("Forest, Desert, Jungle, Rural: seamless subsoil below the original grass strip.")]
+        [Tooltip("Map catalog order: seamless subsoil below each running surface.")]
         [SerializeField] private Sprite[] soilSprites;
         [SerializeField] private Texture2D[] obstacleTextures;
         [SerializeField] private Material spriteMaterial;

@@ -55,15 +55,10 @@ namespace DinoRush.Tests
             Assert.That(((RectTransform)scoreCard).anchoredPosition.y, Is.GreaterThan(((RectTransform)bestCard).anchoredPosition.y));
             Assert.That(root.Find("Sound").GetComponent<RectTransform>().anchoredPosition.x,
                 Is.EqualTo(root.Find("Pause").GetComponent<RectTransform>().anchoredPosition.x));
-            Assert.That(root.Find("Jump").GetComponent<RectTransform>().sizeDelta, Is.EqualTo(new Vector2(248, 88)));
-            Assert.That(root.Find("Duck").gameObject.activeInHierarchy, Is.True);
+            Assert.That(root.Find("Jump").gameObject.activeInHierarchy, Is.False);
+            Assert.That(root.Find("Duck").gameObject.activeInHierarchy, Is.False);
             Assert.That(root.Find("Keyboard controls/Down key"), Is.Not.Null);
             Assert.That(root.Find("Keyboard controls/S key"), Is.Not.Null);
-            Bounds duckBounds = RectTransformUtility.CalculateRelativeRectTransformBounds(root, root.Find("Duck"));
-            Bounds jumpBounds = RectTransformUtility.CalculateRelativeRectTransformBounds(root, root.Find("Jump"));
-            Bounds guideBounds = RectTransformUtility.CalculateRelativeRectTransformBounds(root, root.Find("Keyboard controls"));
-            Assert.That(guideBounds.max.x, Is.LessThan(duckBounds.min.x));
-            Assert.That(duckBounds.max.x, Is.LessThan(jumpBounds.min.x));
             Assert.That(root.Find("Keyboard controls").gameObject.activeInHierarchy, Is.False, "Full controls help belongs in Options, not over the playfield.");
             Assert.That(root.Find("Duck/Drop hint").gameObject.activeInHierarchy, Is.False);
             Assert.That(root.Find("Gameplay bottom fade").gameObject.activeInHierarchy, Is.True);
@@ -105,7 +100,10 @@ namespace DinoRush.Tests
             Assert.That(root.Find("Sound/Sound icon").GetComponent<Image>().sprite.name,
                 Is.EqualTo(muted == 0 ? "HudMuted" : "HudSpeaker"));
             float ground = game.transform.Find("Player/Blue dino player").position.y;
-            Click("Jump");
+            var formerJump = (RectTransform)root.Find("Jump");
+            Vector2 tap = RectTransformUtility.WorldToScreenPoint(null, formerJump.TransformPoint(formerJump.rect.center));
+            typeof(ForestRunnerGame).GetMethod("PointerAction", BindingFlags.NonPublic | BindingFlags.Instance)
+                .Invoke(game, new object[] { tap });
             yield return new WaitForSeconds(0.1f);
             Assert.That(game.transform.Find("Player/Blue dino player").position.y, Is.GreaterThan(ground));
             Click("Pause");

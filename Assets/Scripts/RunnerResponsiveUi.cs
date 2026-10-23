@@ -38,6 +38,7 @@ namespace DinoRush
         private readonly CanvasScaler scaler;
         private readonly Dictionary<string, Placement> placements = new Dictionary<string, Placement>();
         private readonly RectTransform[] mattes = new RectTransform[4];
+        private readonly List<string> mapCards = new List<string>();
 
         public RunnerResponsiveUi(RectTransform root)
         {
@@ -45,6 +46,10 @@ namespace DinoRush
             canvas = root.GetComponentInParent<Canvas>();
             canvas.gameObject.layer = 5;
             scaler = canvas.GetComponent<CanvasScaler>();
+            Transform maps = root.Find("Forest Main Menu/Map selector/Map selection panel");
+            if (maps != null)
+                foreach (Transform child in maps)
+                    if (child.name.StartsWith("Choose ", System.StringComparison.Ordinal)) mapCards.Add(child.name);
             foreach (RectTransform rect in root.GetComponentsInChildren<RectTransform>(true))
             {
                 rect.gameObject.layer = 5; // Also supports rendering the UI independently for resolution tests.
@@ -182,17 +187,21 @@ namespace DinoRush
             FontSize(custom + "/Map selection", 14);
 
             const string maps = "Forest Main Menu/Map selector/Map selection panel";
-            Place(maps, 0, 0, 620, 720);
-            Place(maps + "/Map heading", 0, 306, 560, 48);
-            Place(maps + "/Map hint", 0, 262, 560, 30);
-            string[] names = { "Forest", "Desert", "Jungle", "Rural" };
-            for (int i = 0; i < names.Length; i++)
-                Place(maps + "/Choose " + names[i] + " map", i % 2 == 0 ? -142 : 142,
-                    i < 2 ? 124 : -104, 248, 208);
-            Place(maps + "/Selected map status", 0, -238, 560, 30);
-            Place(maps + "/Map selector back", -146, -306, 244, 72);
+            int rows = Mathf.CeilToInt(mapCards.Count / 2f);
+            float extra = Mathf.Max(0, rows - 2) * 228f;
+            Place(maps, 0, 0, 620, 720 + extra);
+            Place(maps + "/Map heading", 0, 306 + extra * 0.5f, 560, 48);
+            Place(maps + "/Map hint", 0, 262 + extra * 0.5f, 560, 30);
+            for (int i = 0; i < mapCards.Count; i++)
+            {
+                bool lastSingle = i == mapCards.Count - 1 && mapCards.Count % 2 == 1;
+                Place(maps + "/" + mapCards[i], lastSingle ? 0 : (i % 2 == 0 ? -142 : 142),
+                    124 + extra * 0.5f - i / 2 * 228, 248, 208);
+            }
+            Place(maps + "/Selected map status", 0, -238 - extra * 0.5f, 560, 30);
+            Place(maps + "/Map selector back", -146, -306 - extra * 0.5f, 244, 72);
             Place(maps + "/Map selector back/Label", 0, 0, 220, 40);
-            Place(maps + "/Start selected map", 126, -306, 268, 72);
+            Place(maps + "/Start selected map", 126, -306 - extra * 0.5f, 268, 72);
             Place(maps + "/Start selected map/Label", 0, 0, 244, 40);
 
             Place("Forest Pause Menu", 0, 0, 600, 520);

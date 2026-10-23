@@ -48,7 +48,7 @@ namespace DinoRush.Tests
 
                 var serialized = new SerializedObject(game);
                 SerializedProperty soilArt = serialized.FindProperty("soilSprites");
-                Assert.That(soilArt.arraySize, Is.EqualTo(4));
+                Assert.That(soilArt.arraySize, Is.EqualTo(game.MapCatalog.Count));
                 for (int i = 0; i < soilArt.arraySize; i++)
                     Assert.That(EditorUtility.IsPersistent(soilArt.GetArrayElementAtIndex(i).objectReferenceValue), Is.True);
                 var soil = game.transform.Find("Forest environment/Earth below the trail").GetComponent<SpriteRenderer>();

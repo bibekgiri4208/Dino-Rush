@@ -29,6 +29,10 @@ namespace DinoRush.Editor
                         for (int y = height - 1; y >= 0; y--)
                         {
                             Color32 color = raw[y * source.width + x];
+                            // The snow sheets have a one-pixel transparent right gutter. Pad the
+                            // derived edge before mirroring so the cloud bank never exposes a slit of sky.
+                            if (name.StartsWith("snow_", System.StringComparison.Ordinal) && x == halfWidth - 1 && color.a == 0)
+                                color = raw[y * source.width + x - 1];
                             if (sky && color.a == 0) color = below; // Sky fills below its supplied transparent horizon.
                             if (color.a > 0) below = color;
                             pixels[y * halfWidth * 2 + x] = color;
@@ -57,7 +61,8 @@ namespace DinoRush.Editor
                     {
                         Color color = pixels[i];
                         float alpha = color.a;
-                        color = Color.Lerp(dark, light, Mathf.Clamp01(color.grayscale * 1.55f));
+                        float frost = id == "snow" && i / source.width > source.height * 0.65f ? 0.22f : 0f;
+                        color = Color.Lerp(dark, light, Mathf.Clamp01(color.grayscale * (id == "snow" ? 2f : 1.55f) + frost));
                         color.a = alpha;
                         pixels[i] = color;
                     }

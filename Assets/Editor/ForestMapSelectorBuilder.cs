@@ -26,7 +26,7 @@ namespace DinoRush.Editor
             }
             EditorUtility.SetDirty(catalog);
             AssetDatabase.SaveAssets();
-            Debug.Log("Refined Desert / Jungle / Rural layer framing. Forest, native artwork, running surface, and gameplay unchanged.");
+            Debug.Log("Refined map layer framing. Forest, native artwork, running surface, and gameplay unchanged.");
         }
 
         [MenuItem("Dino Rush/Restore Map Background Source Resolution")]
@@ -82,7 +82,7 @@ namespace DinoRush.Editor
             AssetDatabase.SaveAssets();
             EditorSceneManager.MarkSceneDirty(scene);
             EditorSceneManager.SaveScene(scene);
-            Debug.Log("Saved Forest / Desert / Jungle / Rural maps and the Play map-selector submenu. Source artwork was preserved.");
+            Debug.Log("Saved the map catalog and Play map-selector submenu, including Snow Mountain. Source artwork was preserved.");
         }
 
         internal static void Apply(ForestRunnerGame game)
@@ -91,11 +91,11 @@ namespace DinoRush.Editor
             RunnerMapCatalog catalog = Catalog(game);
             ForestMainMenu menu = game.GetComponentInChildren<ForestMainMenu>(true);
             Font font = AssetDatabase.LoadAssetAtPath<Font>("Assets/UI/Fonts/PressStart2P-Regular.ttf");
-            menu.transform.Find("Dino Rush Logo/Forest subtitle plaque/Forest subtitle").GetComponent<Text>().text = "4 MAPS / ENDLESS RUNNER";
+            menu.transform.Find("Dino Rush Logo/Forest subtitle plaque/Forest subtitle").GetComponent<Text>().text = catalog.Count + " MAPS / ENDLESS RUNNER";
             Transform page = Node("Map selector", menu.transform, 0, 0, 1280, 720);
             Image scrim = Art(Node("Map selector scrim", page, 0, 0, 1280, 720), null, true);
             scrim.color = new Color(0.015f, 0.06f, 0.065f, 0.65f);
-            Transform panel = Node("Map selection panel", page, 0, 0, 1000, 512);
+            Transform panel = Node("Map selection panel", page, 0, 0, Mathf.Max(1000, catalog.Count * 234 + 30), 512);
             Art(panel, PixelMenuArt.Load("DialogFrame"));
             Label(Node("Map heading", panel, 0, 198, 920, 56), "CHOOSE YOUR MAP", font, 28, Cream);
             Label(Node("Map hint", panel, 0, 150, 920, 26), "PICK A TRAIL. SAME DINO. NEW ADVENTURE.", font, 12, Sage);
@@ -105,10 +105,11 @@ namespace DinoRush.Editor
             for (int i = 0; i < catalog.Count; i++)
             {
                 RunnerMapCatalog.Map map = catalog[i];
-                Transform card = Node("Choose " + map.displayName + " map", panel, -351 + i * 234, 12, 216, 220);
+                Transform card = Node("Choose " + map.displayName + " map", panel, (i - (catalog.Count - 1) * 0.5f) * 234, 12, 216, 220);
                 buttons[i] = Button(card, ForestHudArt.Load(i == 0 ? "HudJump" : "HudPanel"));
                 previews[i] = Art(Node("Map preview", card, 0, 28, 192, 108), map.preview);
-                captions[i] = Label(Node("Map name", card, 0, -46, 200, 30), map.displayName.ToUpperInvariant(), font, 20, Cream);
+                captions[i] = Label(Node("Map name", card, 0, -46, 200, 30), map.displayName.ToUpperInvariant(), font,
+                    Mathf.Min(20, 196 / map.displayName.Length), Cream);
                 Label(Node("Map description", card, 0, -78, 200, 24), map.description, font, 10, Sage);
             }
             Text status = Label(Node("Selected map status", panel, 0, -126, 940, 30), "FOREST SELECTED / READY TO RUN", font, 12, Cream);
@@ -122,6 +123,13 @@ namespace DinoRush.Editor
 
             var gameData = new SerializedObject(game);
             gameData.FindProperty("mapCatalog").objectReferenceValue = catalog;
+            SerializedProperty soilArt = gameData.FindProperty("soilSprites");
+            soilArt.arraySize = catalog.Count;
+            int snowIndex = catalog.Find("snow");
+            string soilPath = RunnerSoilArtBuilder.Directory + "/snow_soil.png";
+            Sprite snowSoil = AssetDatabase.LoadAssetAtPath<Sprite>(soilPath);
+            if (snowSoil == null) snowSoil = RunnerSoilArtBuilder.GenerateMap("snow", catalog[snowIndex].soilColor);
+            soilArt.GetArrayElementAtIndex(snowIndex).objectReferenceValue = snowSoil;
             gameData.ApplyModifiedPropertiesWithoutUndo();
             var menuData = new SerializedObject(menu);
             menuData.FindProperty("mapPage").objectReferenceValue = page.gameObject;
@@ -141,7 +149,22 @@ namespace DinoRush.Editor
         private static RunnerMapCatalog Catalog(ForestRunnerGame game)
         {
             RunnerMapCatalog catalog = AssetDatabase.LoadAssetAtPath<RunnerMapCatalog>(CatalogPath);
-            if (catalog != null) return catalog; // Preserve authored catalog edits on reapplication.
+            if (catalog != null)
+            {
+                // Append only the missing map; never overwrite the player's authored maps/framing.
+                if (catalog.Find("snow") == 0)
+                {
+                    RunnerMapCatalog.Map snow = SnowMap();
+                    snow.preview = RunnerMapArt.Preview(snow);
+                    var existing = new SerializedObject(catalog);
+                    SerializedProperty savedEntries = existing.FindProperty("maps");
+                    int index = savedEntries.arraySize++;
+                    WriteMap(savedEntries.GetArrayElementAtIndex(index), snow);
+                    existing.ApplyModifiedPropertiesWithoutUndo();
+                    EditorUtility.SetDirty(catalog);
+                }
+                return catalog;
+            }
             var maps = new List<RunnerMapCatalog.Map>();
             var data = new SerializedObject(game);
             SerializedProperty forestLayers = data.FindProperty("layers");
@@ -195,6 +218,7 @@ namespace DinoRush.Editor
                 Layer("rural area bg/ruralparallaxriverfront.png", "rural_river_front", 0.4f, -45),
                 Ground("rural", 0x35452f, 0xc4d077) };
             maps.Add(rural);
+            maps.Add(SnowMap());
 
             catalog = ScriptableObject.CreateInstance<RunnerMapCatalog>();
             var serialized = new SerializedObject(catalog);
@@ -205,34 +229,57 @@ namespace DinoRush.Editor
                 RunnerMapCatalog.Map map = maps[i];
                 RefineFraming(map);
                 map.preview = RunnerMapArt.Preview(map);
-                SerializedProperty entry = entries.GetArrayElementAtIndex(i);
-                entry.FindPropertyRelative("id").stringValue = map.id;
-                entry.FindPropertyRelative("displayName").stringValue = map.displayName;
-                entry.FindPropertyRelative("description").stringValue = map.description;
-                entry.FindPropertyRelative("preview").objectReferenceValue = map.preview;
-                entry.FindPropertyRelative("skyColor").colorValue = map.skyColor;
-                entry.FindPropertyRelative("soilColor").colorValue = map.soilColor;
-                entry.FindPropertyRelative("dustTint").colorValue = map.dustTint;
-                entry.FindPropertyRelative("moteColor").colorValue = map.moteColor;
-                SerializedProperty layers = entry.FindPropertyRelative("layers");
-                layers.arraySize = map.layers.Length;
-                for (int j = 0; j < map.layers.Length; j++)
-                {
-                    RunnerMapCatalog.MapLayer layer = map.layers[j];
-                    SerializedProperty saved = layers.GetArrayElementAtIndex(j);
-                    saved.FindPropertyRelative("source").objectReferenceValue = layer.source;
-                    saved.FindPropertyRelative("sprite").objectReferenceValue = layer.sprite;
-                    saved.FindPropertyRelative("height").floatValue = layer.height;
-                    saved.FindPropertyRelative("bottom").floatValue = layer.bottom;
-                    saved.FindPropertyRelative("speed").floatValue = layer.speed;
-                    saved.FindPropertyRelative("order").intValue = layer.order;
-                    saved.FindPropertyRelative("stationary").boolValue = layer.stationary;
-                    saved.FindPropertyRelative("x").floatValue = layer.x;
-                }
+                WriteMap(entries.GetArrayElementAtIndex(i), map);
             }
             serialized.ApplyModifiedPropertiesWithoutUndo();
             AssetDatabase.CreateAsset(catalog, CatalogPath);
             return catalog;
+        }
+
+        private static void WriteMap(SerializedProperty entry, RunnerMapCatalog.Map map)
+        {
+            entry.FindPropertyRelative("id").stringValue = map.id;
+            entry.FindPropertyRelative("displayName").stringValue = map.displayName;
+            entry.FindPropertyRelative("description").stringValue = map.description;
+            entry.FindPropertyRelative("preview").objectReferenceValue = map.preview;
+            entry.FindPropertyRelative("skyColor").colorValue = map.skyColor;
+            entry.FindPropertyRelative("soilColor").colorValue = map.soilColor;
+            entry.FindPropertyRelative("dustTint").colorValue = map.dustTint;
+            entry.FindPropertyRelative("moteColor").colorValue = map.moteColor;
+            SerializedProperty layers = entry.FindPropertyRelative("layers");
+            layers.arraySize = map.layers.Length;
+            for (int j = 0; j < map.layers.Length; j++)
+            {
+                RunnerMapCatalog.MapLayer layer = map.layers[j];
+                SerializedProperty saved = layers.GetArrayElementAtIndex(j);
+                saved.FindPropertyRelative("source").objectReferenceValue = layer.source;
+                saved.FindPropertyRelative("sprite").objectReferenceValue = layer.sprite;
+                saved.FindPropertyRelative("height").floatValue = layer.height;
+                saved.FindPropertyRelative("bottom").floatValue = layer.bottom;
+                saved.FindPropertyRelative("speed").floatValue = layer.speed;
+                saved.FindPropertyRelative("order").intValue = layer.order;
+                saved.FindPropertyRelative("stationary").boolValue = layer.stationary;
+                saved.FindPropertyRelative("x").floatValue = layer.x;
+            }
+        }
+
+        private static RunnerMapCatalog.Map SnowMap()
+        {
+            var map = new RunnerMapCatalog.Map { id = "snow", displayName = "Snow Mountain", description = "FROSTED SUMMITS",
+                skyColor = PixelMenuArt.Hex(0x91bfe5), soilColor = PixelMenuArt.Hex(0x405a79),
+                dustTint = new Color(1.9f, 2.7f, 4f), moteColor = PixelMenuArt.Hex(0xeaf8ff) };
+            map.layers = new[] {
+                Layer("skies bg/Sky_sky.png", "snow_sky", 0.015f, -100, true),
+                Moon("skies bg/sky_moon.png", "snow"),
+                Layer("skies bg/sky_clouds.png", "snow_clouds", 0.035f, -90),
+                Layer("skies bg/Sky_back_mountain.png", "snow_mountains_back", 0.08f, -80),
+                Layer("skies bg/Sky_cloud_single.png", "snow_cloud_single", 0.12f, -75),
+                Layer("skies bg/sky_front_mountain.png", "snow_mountains_front", 0.20f, -70),
+                Layer("skies bg/sky_cloud_floor.png", "snow_cloud_floor", 0.28f, -60),
+                Layer("skies bg/sky_cloud_floor_2.png", "snow_cloud_floor_near", 0.40f, -50),
+                Ground("snow", 0x405a79, 0xf3fcff) };
+            RefineFraming(map);
+            return map;
         }
 
         private static void RefineFraming(RunnerMapCatalog.Map map)
@@ -269,6 +316,17 @@ namespace DinoRush.Editor
                 Frame(map, "ruralparallaxriverskyredlex.png", 8.4f, -3.7f);
                 Frame(map, "ruralparallaxriverfront.png", 8.4f, -3.7f);
                 Frame(map, "ruralparalaxmoon.png", 0.85f, 3.7f, -1.8f);
+            }
+            else if (map.id == "snow")
+            {
+                Frame(map, "Sky_sky.png", 12f, -5.625f);
+                Frame(map, "sky_moon.png", 0.85f, 3.8f, 1.5f);
+                Frame(map, "sky_clouds.png", 9.3f, -3.7f);
+                Frame(map, "Sky_back_mountain.png", 9.3f, -3.5f);
+                Frame(map, "Sky_cloud_single.png", 9.3f, -2.4f);
+                Frame(map, "sky_front_mountain.png", 9f, -3.35f);
+                Frame(map, "sky_cloud_floor.png", 8.8f, -3.4f);
+                Frame(map, "sky_cloud_floor_2.png", 8.8f, -3.4f);
             }
         }
 

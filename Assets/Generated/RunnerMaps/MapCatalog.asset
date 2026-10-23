@@ -297,3 +297,84 @@ MonoBehaviour:
       order: 0
       stationary: 0
       x: 0
+  - id: snow
+    displayName: Snow Mountain
+    description: FROSTED SUMMITS
+    preview: {fileID: 21300000, guid: 0ca4157e7590f4a429e3b839400ad65d, type: 3}
+    skyColor: {r: 0.5686275, g: 0.7490196, b: 0.8980392, a: 1}
+    soilColor: {r: 0.2509804, g: 0.3529412, b: 0.4745098, a: 1}
+    dustTint: {r: 1.9, g: 2.7, b: 4, a: 1}
+    moteColor: {r: 0.91764706, g: 0.972549, b: 1, a: 1}
+    layers:
+    - source: {fileID: 2800000, guid: 109422480dd68e842bf91b01c71946dd, type: 3}
+      sprite: {fileID: 21300000, guid: 3128de995973ad6469c7b79e364eed65, type: 3}
+      height: 12
+      bottom: -5.625
+      speed: 0.015
+      order: -100
+      stationary: 0
+      x: 0
+    - source: {fileID: 2800000, guid: 52bf65539f16a014eaf913bb77983d4b, type: 3}
+      sprite: {fileID: 21300000, guid: c1ea825b14d0f8c4d898e83f869bb053, type: 3}
+      height: 0.85
+      bottom: 3.8
+      speed: 0
+      order: -95
+      stationary: 1
+      x: 1.5
+    - source: {fileID: 2800000, guid: 3a6b1d2871dc95f49bac31e12bfd5707, type: 3}
+      sprite: {fileID: 21300000, guid: f3841c0de8467eb42bb46b8e59234942, type: 3}
+      height: 9.3
+      bottom: -3.7
+      speed: 0.035
+      order: -90
+      stationary: 0
+      x: 0
+    - source: {fileID: 2800000, guid: 29dde105197f17f4897de6d4bf0c3cb9, type: 3}
+      sprite: {fileID: 21300000, guid: e5860385fc154c94e9e20983610c4708, type: 3}
+      height: 9.3
+      bottom: -3.5
+      speed: 0.08
+      order: -80
+      stationary: 0
+      x: 0
+    - source: {fileID: 2800000, guid: d6987883901b4404586df756ceaa6f1d, type: 3}
+      sprite: {fileID: 21300000, guid: e92950acbbb4b1d4fb288c882843bae3, type: 3}
+      height: 9.3
+      bottom: -2.4
+      speed: 0.12
+      order: -75
+      stationary: 0
+      x: 0
+    - source: {fileID: 2800000, guid: a0779acd10ac0c74d9344b14fe335f8e, type: 3}
+      sprite: {fileID: 21300000, guid: 0a64804ccb1f547478e76978bc7ede01, type: 3}
+      height: 9
+      bottom: -3.35
+      speed: 0.2
+      order: -70
+      stationary: 0
+      x: 0
+    - source: {fileID: 2800000, guid: f31097a8116f7794cb8977c6e6438671, type: 3}
+      sprite: {fileID: 21300000, guid: 33f72a8e1fc1f664a91093c0e77d8bd9, type: 3}
+      height: 8.8
+      bottom: -3.4
+      speed: 0.28
+      order: -60
+      stationary: 0
+      x: 0
+    - source: {fileID: 2800000, guid: 77e1743a7216e2341a338883aedd175e, type: 3}
+      sprite: {fileID: 21300000, guid: 29fca5b96c08e4d4fad6a88888d72960, type: 3}
+      height: 8.8
+      bottom: -3.4
+      speed: 0.4
+      order: -50
+      stationary: 0
+      x: 0
+    - source: {fileID: 2800000, guid: 3193a80facdb2d94ba8b4460d5f33a92, type: 3}
+      sprite: {fileID: 21300000, guid: add99de83fd6e34489d51653bbb9f127, type: 3}
+      height: 1
+      bottom: -3.96
+      speed: 1
+      order: 0
+      stationary: 0
+      x: 0

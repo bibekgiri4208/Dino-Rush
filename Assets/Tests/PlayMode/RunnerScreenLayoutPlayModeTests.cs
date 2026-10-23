@@ -98,8 +98,11 @@ namespace DinoRush.Tests
                 Bounds forest = RectTransformUtility.CalculateRelativeRectTransformBounds(root, root.Find(maps + "Choose Forest map"));
                 Bounds desert = RectTransformUtility.CalculateRelativeRectTransformBounds(root, root.Find(maps + "Choose Desert map"));
                 Bounds jungle = RectTransformUtility.CalculateRelativeRectTransformBounds(root, root.Find(maps + "Choose Jungle map"));
+                Bounds snow = RectTransformUtility.CalculateRelativeRectTransformBounds(root, root.Find(maps + "Choose Snow Mountain map"));
                 Assert.That(forest.max.x, Is.LessThan(desert.min.x));
                 Assert.That(jungle.max.y, Is.LessThan(forest.min.y));
+                Assert.That(snow.max.y, Is.LessThan(jungle.min.y));
+                Assert.That(snow.center.x, Is.EqualTo(0f).Within(1f), "The fifth map centers on its own row.");
                 if (i == 1) yield return RunnerDisplayCapture.Capture("responsive-portrait-map-selector", 360, 800, cases[i]);
                 layout = Apply(resolutions[i].x, resolutions[i].y, cases[i]);
                 Click(root.Find(maps + "Start selected map").GetComponent<Button>());
@@ -110,9 +113,9 @@ namespace DinoRush.Tests
                 yield return new WaitForSecondsRealtime(0.3f);
                 Assert.That(game.State, Is.EqualTo(ForestRunnerGame.RunState.Running));
                 AssertVisibleUi(layout);
-                Rect jump = Pixels((RectTransform)root.Find("Jump"));
-                Assert.That(jump.height, Is.GreaterThanOrEqualTo(44f), "Small-phone controls must remain tappable.");
-                Click(root.Find("Jump").GetComponent<Button>());
+                Assert.That(root.Find("Jump").gameObject.activeInHierarchy, Is.False);
+                Assert.That(root.Find("Duck").gameObject.activeInHierarchy, Is.False);
+                game.Jump();
                 typeof(ForestRunnerGame).GetMethod("Step", Private).Invoke(game, new object[] { RunnerRules.SimulationStep });
                 Assert.That(((RunnerPlayer)Get("player")).Grounded, Is.False);
                 game.TogglePause();
@@ -155,7 +158,8 @@ namespace DinoRush.Tests
             game.TogglePause();
             yield return new WaitForSecondsRealtime(0.3f);
             Assert.That(((RectTransform)root.Find("Life hearts")).anchoredPosition, Is.EqualTo(new Vector2(-492, 309)));
-            Assert.That(((RectTransform)root.Find("Jump")).anchoredPosition, Is.EqualTo(new Vector2(476, -276)));
+            Assert.That(root.Find("Jump").gameObject.activeInHierarchy, Is.False);
+            Assert.That(root.Find("Duck").gameObject.activeInHierarchy, Is.False);
             Assert.That(root.Find("Top left badge").gameObject.activeInHierarchy, Is.False);
             Assert.That(game.Lives, Is.EqualTo(4));
             yield return RunnerDisplayCapture.Capture("responsive-ultrawide", 2560, 1080);
@@ -172,7 +176,8 @@ namespace DinoRush.Tests
             Assert.That(world.orthographicSize, Is.EqualTo(6.25f).Within(0.0001f));
             Assert.That(world.orthographicSize * world.aspect, Is.EqualTo(10f).Within(0.0001f));
             Assert.That(((RectTransform)root.Find("Life hearts")).anchoredPosition.y, Is.EqualTo(349f));
-            Assert.That(((RectTransform)root.Find("Jump")).anchoredPosition.y, Is.EqualTo(-316f));
+            Assert.That(root.Find("Jump").gameObject.activeInHierarchy, Is.False);
+            Assert.That(root.Find("Duck").gameObject.activeInHierarchy, Is.False);
             foreach (Transform border in canvas.transform.Find("Viewport borders"))
                 Assert.That(border.gameObject.activeSelf, Is.False, "16:10 must not have letterbox borders.");
             foreach (SpriteRenderer sprite in game.transform.Find("Forest environment").GetComponentsInChildren<SpriteRenderer>())
