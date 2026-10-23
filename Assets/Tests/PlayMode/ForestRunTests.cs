@@ -324,6 +324,9 @@ namespace DinoRush.Tests
             Assert.That(game.GetComponentInChildren<ForestMainMenu>().DialogOpen, Is.True);
             yield return null;
             Click("Start selected map");
+            Assert.That(game.State, Is.EqualTo(ForestRunnerGame.RunState.AwaitingStart));
+            yield return null;
+            game.PrimaryAction();
         }
 
         private IEnumerator RunToGameOver()

@@ -4,11 +4,13 @@ A single-player endless runner with four selectable dinos and Forest, Desert, Ju
 
 ## Play
 
-Open **Assets/Scenes/ForestRun.unity** (or **Dino Rush → Open Forest Run**) and enter Play mode. In the main menu, click **Play**, choose a map preview, then click **Start Run**. ForestRun is also the first scene in Build Settings; all four maps use this shared scene. The original SampleScene and supplied artwork are left intact.
+Open **Assets/Scenes/ForestRun.unity** (or **Dino Rush → Open Forest Run**) and enter Play mode. In the main menu, click **Play**, choose a map preview, then click **Continue**. The selected map opens with an idle dino and **TAP TO START**. Tap/click anywhere in the game window (including portrait borders), or press Space/Enter, to begin running. ForestRun is also the first scene in Build Settings; all four maps use this shared scene. The original SampleScene and supplied artwork are left intact.
 
 | Action | Controls |
 | --- | --- |
-| Choose map / start | Play, Space, or Enter opens the map selector; choose a card, then Start Run |
+| Choose map / prepare | Play, Space, or Enter opens the map selector; choose a card, then Continue |
+| Start the prepared run | Tap/click anywhere, Space, Enter, Up, or W; the starting press does not also jump |
+| Cancel before starting | Esc or P returns to the main menu, keeping the chosen map/dino |
 | Retry | Space, Enter, click/tap the playfield, or Run Again |
 | Jump | Space, Up, W, click/tap the playfield, or JUMP |
 | Duck / fast drop | Hold Down, S, or DUCK; tap in midair to drop quickly |
@@ -31,7 +33,7 @@ The trail advances through **six designed stages** at 0, 12, 28, 48, 75, and 105
 
 Stage changes open with a lighter recovery encounter, introduce the new signature, offer an easy practice jump, then repeat the signature. Six-encounter sections subsequently build pressure, combine challenges, ease off, and finish with a guaranteed recovery encounter. Teaching/recovery obstacles are smaller and teaching gaps more generous. Advanced patterns never appear before their teaching stage; the first three hurdles stay easy even if a custom run starts at a later stage. Seeded artwork, size, group gaps, and recovery gaps keep sections varied, with repetition/rapid-streak limits. Every retry uses a fresh course.
 
-A compact **stage name, progress bar, and countdown** sit between the hearts and score in landscape, or beneath the hearts in portrait; the retired top-left map/level panel remains hidden. A banner and sound celebrate each new stage. Wild Run counts laps indefinitely without raising the speed cap, and each lap reopens with recovery. Progress uses active simulation time: pause freezes it, resizing preserves it, and Restart starts at First Steps. Stage/lap banners take priority over nearby distance-milestone messages. The progress HUD hides on the title, pause, and results screens to keep the existing modals focused.
+A compact **stage name, progress bar, and countdown** sit between the hearts and score in landscape, or beneath the hearts in portrait; the retired top-left map/level panel remains hidden. A banner and sound celebrate each new stage. Wild Run counts laps indefinitely without raising the speed cap, and each lap reopens with recovery. Progress uses active simulation time: pause freezes it, resizing preserves it, and Restart starts at First Steps. Stage/lap banners take priority over nearby distance-milestone messages. The progress HUD hides on the title, tap-to-start, pause, and results screens to keep them focused.
 
 `RunnerEncounterDirector.cs` uses its own seeded random stream, so dust effects cannot change the course. Encounters are spaced by distance rather than a fixed repeating timer. Cluster spans are limited by jump clearance, separate jumps reserve landing/recovery time at the predicted arrival pace, and combinations spawn atomically from the existing pool. Difficulty, upcoming spacing, and the course freeze while paused and reset on Restart. Tests simulate thousands of encounters and complete accelerating three-minute courses using the real jump/collision rules.
 
@@ -47,7 +49,7 @@ The world always retains the complete original course width. Taller landscape ra
 
 ## Maps
 
-**Play → Choose Your Map → Start Run** offers four preview cards: **Forest**, **Desert**, **Jungle**, and **Rural** (the riverside village). Selecting a card highlights and remembers it but does not start gameplay. Back or Esc/P returns to the title without starting a run. Customize also shows the selected map, and the pause heading uses its name. Retry/Restart retains the same map and chosen dino. Returning to the title restores its original forest backdrop while remembering your choice. Invalid saved map IDs fall back to Forest.
+**Play → Choose Your Map → Continue → Tap to Start** offers four preview cards: **Forest**, **Desert**, **Jungle**, and **Rural** (the riverside village). Selecting a card highlights and remembers it but does not start gameplay. Continue loads the selected map and dino into a waiting state: the course stays still, no obstacles or running dirt spawn, and score/stage timers stay at zero until a fresh tap or keyboard start. The confirmation click cannot dismiss the prompt, and the starting tap cannot also jump. Only ambient leaves/motes and the dino's idle animation continue. Gameplay controls/readouts stay hidden until running. Back or Esc/P returns to the title without starting a run; Esc/P also cancels the waiting screen without losing your choices. Customize also shows the selected map, and the pause heading uses its name. Retry/Restart retains the same map and chosen dino and still starts immediately. Returning to the title restores its original forest backdrop while remembering your choice. Invalid saved map IDs fall back to Forest.
 
 Desert uses `Assets/2D Sprites/desert bg`, Jungle uses `Assets/2D Sprites/jungle bg`, and Rural uses `Assets/2D Sprites/rural area bg`. Each has layered parallax, a matching running surface/soil, and themed dust/ambient colors. They share the same movement, collision bounds, obstacle pool, difficulty progression, and personal best; the existing forest high-score preference is retained.
 
@@ -58,6 +60,12 @@ Desert uses `Assets/2D Sprites/desert bg`, Jungle uses `Assets/2D Sprites/jungle
 **Dino Rush → Restore Map Background Source Resolution** explicitly replaces the generated Desert/Jungle/Rural scenery and refreshes their previews from the original sources, keeping their asset GUIDs and catalog framing. Use this to upgrade older 256-pixel-high generated backgrounds. It leaves the forest, shared running surfaces, custom artwork references, and original source files unchanged. Full-resolution backgrounds use more texture memory than the old reduced-resolution versions.
 
 New maps use individual scenic framing rather than one full-screen frame for every layer. Desert dunes sit just behind the trail with the mesas farther back; Jungle's five registered layers place the roots behind the running surface and keep the canopy overhead. Rural's smaller distant mountain leaves open sky, and the village/river/reflection/near bank share a canvas so the bank meets the trail instead of hiding below it. Moons sit in the open area between the HUD cards. **Dino Rush → Refine New Map Layer Placement** explicitly reapplies these defaults and refreshes the three map previews; normal map-selector rebuilding preserves manual catalog framing edits. The forest and gameplay collision height are unchanged.
+
+### Soil beneath the trail
+
+The flat fill below the grass is replaced with layered pixel-art earth: subtle sediment bands, branching roots, and small shaded stones, darkening with depth. All four maps have matching palettes in `Assets/Generated/TrailSoil`; the supplied grass and background artwork are unchanged. The saved **Forest environment/Earth below the trail** renderer uses a tiled sprite at the grass strip's native pixel density, extending to the bottom on 16:10 and 4:3 without stretching. It scrolls with the trail and stays still during Tap to Start, pause, and game over. The title retains its gentle scenery scroll. No colliders or gameplay changes are involved.
+
+**Dino Rush → Regenerate Trail Soil Textures** rebuilds only these derived textures. `RunnerSoilArt.cs` uses a fixed private seed; older scenes without saved soil bindings generate and cache the same artwork at runtime.
 
 ## Structure
 
@@ -128,6 +136,10 @@ Health tests check all five hearts, one loss per obstacle, cluster grace time, w
 Level-design tests verify signature introductions, skill unlock gates, guaranteed recovery sections, endless-lap resets, repetition limits, jump clearance, and full accelerating courses. Progress tests check boundary/countdown math, live bar geometry, resize/pause/restart preservation, and stage/lap banner priority. Optional captures include `forest-progression-level-4` and `progress-wild-run`.
 
 Leaf-wind tests verify the saved source-texture binding, drift/rotation/flutter, grass clearance, long-running pool reuse, repeated backward travel past the player, acceleration with the course, pause/game-over freezing, restart/map isolation, random-stream independence, and runtime cleanup. Optional `forest-wind-*` captures include gameplay, recycled leaves, 16:10, the title preview, and a consecutive `forest-wind-sweep-*` motion sequence.
+
+Tap-to-start tests confirm all four maps/dino choices, idle waiting without simulation or spawns, confirmation-click isolation, mouse/touch/keyboard starts, taps outside the world viewport, no jump on the first press, Escape cancellation, and responsive prompt captures (`tap-to-start-*`).
+
+Soil tests cover saved sprite bindings, opaque textured pixels, deterministic generation independent of gameplay randomness, map palettes/reuse, non-stretching screen coverage, scrolling/wraparound, and waiting/pause/game-over freezing. Optional `soil-*` captures show all maps plus 16:10 and tablet views.
 
 Display tests cover small portrait phones, tall phones, tablets, standard HD/4K, ultrawide screens, asymmetric cutouts, and minimized-window fallbacks. Scene tests raycast controls, check text and button bounds, verify portrait grids/touch sizes, and rotate/resize without losing health, score, pause state, or the original landscape layout. Optional `responsive-*` captures include the portrait title, dino/map selectors, Options, gameplay, pause, and an ultrawide view.
 

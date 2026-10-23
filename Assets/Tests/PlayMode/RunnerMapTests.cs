@@ -97,6 +97,8 @@ namespace DinoRush.Tests
                 yield return null;
                 Click("Choose " + game.MapCatalog[i].displayName + " map");
                 Click("Start selected map");
+                Assert.That(game.State, Is.EqualTo(ForestRunnerGame.RunState.AwaitingStart));
+                game.PrimaryAction();
                 Assert.That(game.State, Is.EqualTo(ForestRunnerGame.RunState.Running));
                 Assert.That(game.SelectedMapIndex, Is.EqualTo(i));
                 Assert.That(player.Hitbox, Is.EqualTo(hitbox));
@@ -121,8 +123,9 @@ namespace DinoRush.Tests
                         }
                     }
                 }
-                Assert.That(game.transform.Find("Forest environment/Earth below the trail").GetComponent<SpriteRenderer>().color,
-                    Is.EqualTo(game.MapCatalog[i].soilColor));
+                var soil = game.transform.Find("Forest environment/Earth below the trail").GetComponent<SpriteRenderer>();
+                Assert.That(soil.color, Is.EqualTo(Color.white), "The authored soil texture already contains the map palette.");
+                Assert.That(soil.sprite.texture.name, Does.StartWith(game.MapCatalog[i].id + "_soil"));
                 int rendererCount = game.GetComponentsInChildren<SpriteRenderer>(true).Length;
                 object last = layers[layers.Count - 1];
                 Transform[] tiles = Tiles(last);
@@ -225,6 +228,8 @@ namespace DinoRush.Tests
             yield return null;
             Assert.That(GameObject.Find("Choose Jungle map").GetComponent<Image>().sprite.name, Is.EqualTo("HudJump"));
             Click("Start selected map");
+            Assert.That(game.State, Is.EqualTo(ForestRunnerGame.RunState.AwaitingStart));
+            game.PrimaryAction();
             Assert.That(game.State, Is.EqualTo(ForestRunnerGame.RunState.Running));
             game.ReturnToMenu();
             PlayerPrefs.SetString(RunnerMapCatalog.SelectionKey, "unknown-map");

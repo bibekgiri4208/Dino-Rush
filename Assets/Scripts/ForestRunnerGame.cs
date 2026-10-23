@@ -7,7 +7,7 @@ namespace DinoRush
     [DisallowMultipleComponent]
     public sealed class ForestRunnerGame : MonoBehaviour
     {
-        public enum RunState { Ready, Running, Paused, GameOver }
+        public enum RunState { Ready, Running, Paused, GameOver, AwaitingStart }
         private const string HighScoreKey = "DinoRush.Forest.HighScore";
 
         [Header("Player and original forest artwork")]
@@ -21,6 +21,8 @@ namespace DinoRush
         [SerializeField] private Texture2D tallTrees;
         [SerializeField] private Texture2D nearForest;
         [SerializeField] private Texture2D ground;
+        [Tooltip("Forest, Desert, Jungle, Rural: seamless subsoil below the original grass strip.")]
+        [SerializeField] private Sprite[] soilSprites;
         [SerializeField] private Texture2D[] obstacleTextures;
         [SerializeField] private Material spriteMaterial;
 
@@ -67,7 +69,8 @@ namespace DinoRush
         private readonly Dictionary<int, List<Layer>> mapLayerCache = new Dictionary<int, List<Layer>>();
         private readonly Dictionary<Transform, Vector3> skyBaseScales = new Dictionary<Transform, Vector3>();
         private Transform trailSoil;
-        private Vector3 soilBasePosition, soilBaseScale;
+        private readonly Dictionary<int, Sprite> soilSpriteCache = new Dictionary<int, Sprite>();
+        private float soilOffset;
         private List<Layer> forestLayers;
         private int activeMapIndex;
         private Color mapDustTint = Color.white;
@@ -117,6 +120,7 @@ namespace DinoRush
         private int screenHeight;
         private Rect screenSafeArea;
         private bool initialized;
+        private int preparedInputFrame;
         private bool keyboardDuckHeld;
         private bool pointerDuckHeld;
         private int nextDirtParticle;
@@ -193,11 +197,12 @@ namespace DinoRush
             hud.Initialize(PrimaryAction, TogglePause, Jump, ToggleMute, RestartRun, ReturnToMenu, SetDuckHeld);
             hud.UpdateLives(Lives);
             hud.InitializeDinos(dinoRoster, SelectedDinoIndex, SelectDino);
-            hud.InitializeMaps(mapCatalog, SelectedMapIndex, SelectMap, StartRun);
+            hud.InitializeMaps(mapCatalog, SelectedMapIndex, SelectMap, PrepareRun);
             hud.SetSound(audioCues.Muted);
             hud.UpdateScore(0, best, 0, RunnerRules.Speed(0));
             hud.ShowReady(best);
             State = RunState.Ready;
+            SetSoil(0);
             UpdateViewport();
             initialized = true;
         }
@@ -306,7 +311,7 @@ namespace DinoRush
             RunnerMapCatalog.Map map = mapCatalog[index];
             mapDustTint = map.dustTint;
             gameCamera.backgroundColor = map.skyColor;
-            transform.Find("Forest environment/Earth below the trail").GetComponent<SpriteRenderer>().color = map.soilColor;
+            SetSoil(index);
             foreach (SpriteRenderer mote in motes)
             {
                 Color color = map.moteColor;
@@ -414,18 +419,44 @@ namespace DinoRush
                 float spriteHeight = tile.GetComponent<SpriteRenderer>().sprite.bounds.size.y;
                 tile.localScale = new Vector3(original.x, original.y + extraSky / spriteHeight, original.z);
             }
-            if (trailSoil == null)
+            FitSoil();
+        }
+
+        private void SetSoil(int index)
+        {
+            if (trailSoil == null) trailSoil = transform.Find("Forest environment/Earth below the trail");
+            if (trailSoil == null) return;
+            Sprite sprite = soilSprites != null && index < soilSprites.Length ? soilSprites[index] : null;
+            if (sprite == null && !soilSpriteCache.TryGetValue(index, out sprite))
             {
-                trailSoil = transform.Find("Forest environment/Earth below the trail");
-                if (trailSoil == null) return;
-                soilBasePosition = trailSoil.localPosition;
-                soilBaseScale = trailSoil.localScale;
+                Color color = mapCatalog != null && index < mapCatalog.Count ? mapCatalog[index].soilColor : new Color32(19, 48, 49, 255);
+                string id = mapCatalog != null && index < mapCatalog.Count ? mapCatalog[index].id : "forest";
+                Texture2D texture = RunnerSoilArt.CreateTexture(color, id);
+                sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height),
+                    new Vector2(0.5f, 1f), RunnerSoilArt.PixelsPerUnit, 0, SpriteMeshType.FullRect);
+                generatedTextures.Add(texture);
+                generatedSprites.Add(sprite);
+                soilSpriteCache[index] = sprite;
             }
-            float unitHeight = trailSoil.GetComponent<SpriteRenderer>().sprite.bounds.size.y;
-            float top = soilBasePosition.y + soilBaseScale.y * unitHeight * 0.5f;
-            float height = Mathf.Max(soilBaseScale.y * unitHeight, top + gameCamera.orthographicSize + 1f);
-            trailSoil.localPosition = new Vector3(soilBasePosition.x, top - height * 0.5f, soilBasePosition.z);
-            trailSoil.localScale = new Vector3(soilBaseScale.x, height / unitHeight, soilBaseScale.z);
+            var renderer = trailSoil.GetComponent<SpriteRenderer>();
+            renderer.sprite = sprite;
+            renderer.color = Color.white;
+            renderer.drawMode = SpriteDrawMode.Tiled;
+            renderer.tileMode = SpriteTileMode.Continuous;
+            trailSoil.localScale = Vector3.one;
+            soilOffset = 0f;
+            FitSoil();
+        }
+
+        private void FitSoil()
+        {
+            if (trailSoil == null) return;
+            var renderer = trailSoil.GetComponent<SpriteRenderer>();
+            float width = renderer.sprite.bounds.size.x;
+            // Extend the canvas, not the pixels. Overscan keeps both edges covered while scrolling/shaking.
+            renderer.size = new Vector2(24f + width * 2f,
+                Mathf.Max(6f, RunnerSoilArt.Top + gameCamera.orthographicSize + 1f));
+            trailSoil.localPosition = new Vector3(-soilOffset, RunnerSoilArt.Top, 0f);
         }
 
         private void BuildWorld()
@@ -447,6 +478,7 @@ namespace DinoRush
             soil.color = new Color32(19, 48, 49, 255);
             soil.transform.position = new Vector3(0, -6.5f, 0);
             soil.transform.localScale = new Vector3(24, 6, 1);
+            SetSoil(0);
             AddLayer(ground, 1f, -3.96f, 1f, 0);
 
             var shadowTexture = new Texture2D(32, 8) { name = "Dino shadow", filterMode = FilterMode.Bilinear };
@@ -571,7 +603,7 @@ namespace DinoRush
             {
                 Scroll(dt * 1.4f);
             }
-            else
+            else if (State == RunState.GameOver)
             {
                 timeSinceCrash += dt;
             }
@@ -588,6 +620,7 @@ namespace DinoRush
 
         private void Step(float dt)
         {
+            if (State != RunState.Running) return;
             health.Step(dt);
             elapsed += dt;
             hud.UpdateProgress(elapsed);
@@ -706,6 +739,12 @@ namespace DinoRush
 
         private void Scroll(float travel)
         {
+            if (trailSoil != null)
+            {
+                float width = trailSoil.GetComponent<SpriteRenderer>().sprite.bounds.size.x;
+                soilOffset = Mathf.Repeat(soilOffset + travel, width);
+                trailSoil.localPosition = new Vector3(-soilOffset, RunnerSoilArt.Top, 0f);
+            }
             foreach (Layer layer in layers)
             {
                 if (layer.stationary) continue;
@@ -806,6 +845,9 @@ namespace DinoRush
 
         private void ReadInput()
         {
+            // A map-confirmation click must never also dismiss the newly opened start prompt.
+            if (State == RunState.AwaitingStart && Time.frameCount <= preparedInputFrame) return;
+            bool waitingForStart = State == RunState.AwaitingStart;
             Keyboard keyboard = Keyboard.current;
             bool duckKey = State == RunState.Running && keyboard != null &&
                 (keyboard.downArrowKey.isPressed || keyboard.sKey.isPressed);
@@ -819,6 +861,7 @@ namespace DinoRush
                 if (keyboard.escapeKey.wasPressedThisFrame || keyboard.pKey.wasPressedThisFrame)
                 {
                     if (State == RunState.Ready) hud.CloseMainMenuDialog();
+                    else if (State == RunState.AwaitingStart) ReturnToMenu();
                     else TogglePause();
                     return;
                 }
@@ -828,6 +871,7 @@ namespace DinoRush
                 if (keyboard.rKey.wasPressedThisFrame && State == RunState.GameOver) PrimaryAction();
                 if (keyboard.mKey.wasPressedThisFrame) ToggleMute();
             }
+            if (waitingForStart && State == RunState.Running) return; // Starting must not also queue a jump.
 
             Touchscreen touchscreen = Touchscreen.current;
             if (touchscreen != null && touchscreen.primaryTouch.press.wasPressedThisFrame)
@@ -842,6 +886,13 @@ namespace DinoRush
 
         private void PointerAction(Vector2 screenPoint)
         {
+            if (State == RunState.AwaitingStart)
+            {
+                // Include portrait/ultrawide margins: the waiting screen really accepts a tap anywhere.
+                if (Time.frameCount > preparedInputFrame && new Rect(0, 0, Screen.width, Screen.height).Contains(screenPoint))
+                    PrimaryAction();
+                return;
+            }
             if (State == RunState.Ready || State == RunState.Paused) return; // Menus use explicit buttons.
             if (hud.IsOverButton(screenPoint) || !gameCamera.pixelRect.Contains(screenPoint)) return;
             PrimaryAction();
@@ -856,9 +907,10 @@ namespace DinoRush
                     if (!hud.MainMenuDialogOpen)
                     {
                         if (mapCatalog != null && mapCatalog.Count > 0 && hud.HasMapSelector) hud.OpenMapSelector();
-                        else StartRun();
+                        else PrepareRun();
                     }
                     break;
+                case RunState.AwaitingStart: BeginRun(); break;
                 case RunState.Running: Jump(); break;
                 case RunState.Paused: TogglePause(); break;
                 case RunState.GameOver:
@@ -867,14 +919,34 @@ namespace DinoRush
             }
         }
 
+        public void PrepareRun()
+        {
+            if (!initialized || State != RunState.Ready) return;
+            ApplyMap(SelectedMapIndex);
+            ResetRun();
+            State = RunState.AwaitingStart;
+            preparedInputFrame = Time.frameCount;
+            SetSkyFraming(false);
+            gameCamera.transform.position = new Vector3(0, 0, -10);
+            hud.SetMapName(SelectedMapName);
+            hud.UpdateLevel(Level);
+            hud.UpdateScore(0, best, 0, RunnerRules.Speed(0));
+            hud.ShowAwaitingStart(SelectedMapName);
+        }
+
         public void StartRun()
         {
             if (!initialized) return;
             ApplyMap(SelectedMapIndex);
             ResetRun();
-            State = RunState.Running;
             SetSkyFraming(false);
             gameCamera.transform.position = new Vector3(0, 0, -10);
+            BeginRun();
+        }
+
+        private void BeginRun()
+        {
+            State = RunState.Running;
             hud.ShowRunning();
             hud.SetMapName(SelectedMapName);
             hud.UpdateLevel(Level);
@@ -919,7 +991,7 @@ namespace DinoRush
 
         public void RestartRun()
         {
-            if (!initialized || State == RunState.Ready) return;
+            if (!initialized || State == RunState.Ready || State == RunState.AwaitingStart) return;
             SaveBest();
             StartRun();
         }

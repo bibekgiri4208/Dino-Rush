@@ -128,6 +128,8 @@ namespace DinoRush.Tests
             yield return null;
             ExecuteEvents.Execute(Control("Forest Main Menu/Map selector/Map selection panel/Start selected map").gameObject,
                 Pointer(-1), ExecuteEvents.pointerClickHandler);
+            Assert.That(game.State, Is.EqualTo(ForestRunnerGame.RunState.AwaitingStart));
+            game.PrimaryAction();
             Assert.That(game.State, Is.EqualTo(ForestRunnerGame.RunState.Running));
             Assert.That(play.GetComponent<RunnerUiButtonFeedback>().IsPressed, Is.False);
         }

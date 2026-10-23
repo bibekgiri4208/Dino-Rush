@@ -47,6 +47,14 @@ namespace DinoRush.Tests
                         Is.EqualTo(RunnerRules.GroundY).Within(0.0001f));
 
                 var serialized = new SerializedObject(game);
+                SerializedProperty soilArt = serialized.FindProperty("soilSprites");
+                Assert.That(soilArt.arraySize, Is.EqualTo(4));
+                for (int i = 0; i < soilArt.arraySize; i++)
+                    Assert.That(EditorUtility.IsPersistent(soilArt.GetArrayElementAtIndex(i).objectReferenceValue), Is.True);
+                var soil = game.transform.Find("Forest environment/Earth below the trail").GetComponent<SpriteRenderer>();
+                Assert.That(soil.sprite, Is.EqualTo(soilArt.GetArrayElementAtIndex(0).objectReferenceValue));
+                Assert.That(soil.drawMode, Is.EqualTo(SpriteDrawMode.Tiled));
+                Assert.That(soil.transform.localScale, Is.EqualTo(Vector3.one));
                 SerializedProperty frames = serialized.FindProperty("dinoFrames");
                 Assert.That(frames.arraySize, Is.EqualTo(24));
                 for (int i = 0; i < frames.arraySize; i++)

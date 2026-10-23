@@ -65,6 +65,8 @@ namespace DinoRush
         {
             mapCatalog = catalog;
             if (catalog == null || catalog.Count == 0 || mapChoices.Length != catalog.Count) return;
+            Text startLabel = startMap != null ? startMap.GetComponentInChildren<Text>(true) : null;
+            if (startLabel != null) startLabel.text = "CONTINUE";
             if (!mapsBound)
             {
                 mapsBound = true;

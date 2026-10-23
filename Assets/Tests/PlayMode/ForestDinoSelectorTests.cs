@@ -83,6 +83,8 @@ namespace DinoRush.Tests
                 Click("Play");
                 yield return null;
                 Click("Start selected map");
+                Assert.That(game.State, Is.EqualTo(ForestRunnerGame.RunState.AwaitingStart));
+                game.PrimaryAction();
                 player.Render(0.1f, true, false, 1f);
                 Assert.That(renderer.sprite.name, Does.Match(dino.DisplayName + " dino frame [4-9]$"));
                 game.Jump();

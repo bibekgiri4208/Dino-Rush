@@ -104,6 +104,10 @@ namespace DinoRush.Tests
                 layout = Apply(resolutions[i].x, resolutions[i].y, cases[i]);
                 Click(root.Find(maps + "Start selected map").GetComponent<Button>());
                 yield return new WaitForSecondsRealtime(0.3f);
+                Assert.That(game.State, Is.EqualTo(ForestRunnerGame.RunState.AwaitingStart));
+                AssertVisibleUi(layout);
+                game.PrimaryAction();
+                yield return new WaitForSecondsRealtime(0.3f);
                 Assert.That(game.State, Is.EqualTo(ForestRunnerGame.RunState.Running));
                 AssertVisibleUi(layout);
                 Rect jump = Pixels((RectTransform)root.Find("Jump"));

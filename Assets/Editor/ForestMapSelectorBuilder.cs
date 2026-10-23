@@ -117,7 +117,7 @@ namespace DinoRush.Editor
             Button backControl = Button(back, PixelMenuArt.Load("ButtonForest"));
             Button startControl = Button(start, PixelMenuArt.Load("ButtonPlay"));
             Label(Node("Label", back, 0, 0, 276, 40), "BACK", font, 24, Cream);
-            Label(Node("Label", start, 0, 0, 316, 40), "START RUN", font, 24, Cream);
+            Label(Node("Label", start, 0, 0, 316, 40), "CONTINUE", font, 24, Cream);
             page.gameObject.SetActive(false);
 
             var gameData = new SerializedObject(game);

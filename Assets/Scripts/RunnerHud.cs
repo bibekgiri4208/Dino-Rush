@@ -73,6 +73,8 @@ namespace DinoRush
         private float progressElapsed;
         private int progressLevel = -1, progressSeconds = -1, progressLap = -1;
         private const float StageProgressWidth = 416f;
+        private GameObject startPrompt;
+        private Text startMapName;
 
         public bool IsBuilt => root != null;
         public bool MainMenuDialogOpen => mainMenu != null && mainMenu.DialogOpen;
@@ -197,6 +199,7 @@ namespace DinoRush
         {
             CreateLifeDisplay();
             CreateStageDisplay();
+            CreateStartPrompt();
             RunnerUiEffects.Install(root);
             responsiveUi = new RunnerResponsiveUi(root);
             levelLabel = root.Find("Top left badge/Map")?.GetComponent<Text>();
@@ -291,8 +294,23 @@ namespace DinoRush
         public void ShowRunning()
         {
             Menu(false);
+            root.Find("Scoreboard")?.gameObject.SetActive(true);
+            root.Find("Sound")?.gameObject.SetActive(true);
             if (damagePopup != null) damagePopup.gameObject.SetActive(damageTime > 0f);
             footer.text = "SPACE / UP / W : JUMP    DOWN / S : DUCK / FAST DROP    ESC / P : PAUSE";
+        }
+
+        public void ShowAwaitingStart(string mapName)
+        {
+            Menu(true);
+            panel.SetActive(false);
+            shade.SetActive(false);
+            footer.gameObject.SetActive(false);
+            root.Find("Scoreboard")?.gameObject.SetActive(false);
+            root.Find("Sound")?.gameObject.SetActive(false);
+            if (damagePopup != null) damagePopup.gameObject.SetActive(false);
+            startMapName.text = mapName.ToUpperInvariant();
+            startPrompt.SetActive(true);
         }
 
         public void ShowPaused()
@@ -336,6 +354,7 @@ namespace DinoRush
 
         private void Menu(bool visible)
         {
+            if (startPrompt != null) startPrompt.SetActive(false);
             if (mainMenu != null) mainMenu.Hide();
             if (pausePanel != null) pausePanel.SetActive(false);
             shade.SetActive(visible);
@@ -433,6 +452,24 @@ namespace DinoRush
             stageFill.pivot = new Vector2(0, 0.5f);
             UpdateProgress(0f);
             stageDisplay.SetActive(false);
+        }
+
+        private void CreateStartPrompt()
+        {
+            if (startPrompt != null) return;
+            Image frame = Box("Tap to start", root, new Vector2(0, 70), new Vector2(600, 144), Ink);
+            Image theme = lifeBar.GetComponent<Image>();
+            if (theme.sprite != null)
+            {
+                frame.sprite = theme.sprite;
+                frame.type = theme.type;
+                frame.color = theme.color;
+            }
+            startPrompt = frame.gameObject;
+            startMapName = Label("Selected map", frame.transform, "", new Vector2(0, 42), new Vector2(560, 24), 12, Mint);
+            Label("Start title", frame.transform, "TAP TO START", Vector2.zero, new Vector2(560, 48), 32, Cream);
+            Label("Start hint", frame.transform, "TAP ANYWHERE / OR PRESS SPACE", new Vector2(0, -42), new Vector2(560, 24), 12, Muted);
+            startPrompt.SetActive(false);
         }
 
         public void UpdateLives(int lives)

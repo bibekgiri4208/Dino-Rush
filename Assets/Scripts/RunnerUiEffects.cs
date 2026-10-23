@@ -31,6 +31,7 @@ namespace DinoRush
             Reveal(root.Find("Trail stats frame"), 0.24f, new Vector2(0, -8));
             Reveal(root.Find("Keyboard controls"), 0.28f, new Vector2(0, -8));
             Reveal(root.Find("Milestone toast"), 0.24f, new Vector2(0, -10), 0.96f);
+            Reveal(root.Find("Tap to start"), 0.22f, new Vector2(0, -8));
             foreach (string name in new[] { "Jump", "Duck", "Sound", "Pause" })
                 Reveal(root.Find(name), 0.18f, Vector2.zero); // Only fade interactive HUD roots; don't move their hitboxes.
         }

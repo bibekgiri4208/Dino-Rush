@@ -203,6 +203,11 @@ MonoBehaviour:
   tallTrees: {fileID: 2800000, guid: 0fddf7f431f3d9545a628aea37afc9cd, type: 3}
   nearForest: {fileID: 2800000, guid: 518b4bd6e96957e418cfa8d4c228440a, type: 3}
   ground: {fileID: 2800000, guid: 3193a80facdb2d94ba8b4460d5f33a92, type: 3}
+  soilSprites:
+  - {fileID: 21300000, guid: 82bb9e61f89a0d64991c2a4366c69c18, type: 3}
+  - {fileID: 21300000, guid: 993efb1c8316a5e46a426489bac34110, type: 3}
+  - {fileID: 21300000, guid: 762804b1a6e703e48a457c620d83eb2b, type: 3}
+  - {fileID: 21300000, guid: fca6a29184d0f5441b4d43d75a387d85, type: 3}
   obstacleTextures:
   - {fileID: 2800000, guid: 4f5fe1c791b86c748b21d6bca968b17f, type: 3}
   - {fileID: 2800000, guid: d3852682446148c4ebcf9395da74693c, type: 3}
@@ -3945,7 +3950,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1.65
-  m_Text: START RUN
+  m_Text: CONTINUE
 --- !u!222 &237036120
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -6592,8 +6597,8 @@ Transform:
   m_GameObject: {fileID: 408557859}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -6.5, z: 0}
-  m_LocalScale: {x: 24, y: 6, z: 1}
+  m_LocalPosition: {x: 0, y: -3.5, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1473528966}
@@ -6647,12 +6652,12 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: -5
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 4785245637966359161, guid: 246bb94c9a8d9514d9b7ae76d14303a6, type: 2}
-  m_Color: {r: 0.07450981, g: 0.1882353, b: 0.19215687, a: 1}
+  m_Sprite: {fileID: 21300000, guid: 82bb9e61f89a0d64991c2a4366c69c18, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
-  m_DrawMode: 0
-  m_Size: {x: 1, y: 1}
+  m_DrawMode: 2
+  m_Size: {x: 48.094116, y: 6}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
