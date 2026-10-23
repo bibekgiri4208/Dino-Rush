@@ -25,6 +25,14 @@ namespace DinoRush.Tests
                 }
                 Assert.That(game, Is.Not.Null);
                 Assert.That(game.HasAuthoredScene, Is.True);
+                ForestLeafWind wind = game.GetComponent<ForestLeafWind>();
+                Assert.That(wind, Is.Not.Null, "The forest breeze must be wired in the saved scene.");
+                var windData = new SerializedObject(wind);
+                Assert.That(windData.FindProperty("game").objectReferenceValue, Is.EqualTo(game));
+                Assert.That(windData.FindProperty("worldCamera").objectReferenceValue, Is.Not.Null);
+                Assert.That(windData.FindProperty("spriteMaterial").objectReferenceValue, Is.Not.Null);
+                Assert.That(AssetDatabase.GetAssetPath(windData.FindProperty("leafTexture").objectReferenceValue),
+                    Is.EqualTo("Assets/2D Sprites/leaf.png"), "Use the supplied leaf artwork, not a generated replacement.");
                 Assert.That(game.GetComponentsInChildren<Camera>(true).Length, Is.EqualTo(1));
                 Assert.That(game.GetComponentsInChildren<Canvas>(true).Length, Is.EqualTo(1));
                 Assert.That(game.transform.Find("Forest environment"), Is.Not.Null);

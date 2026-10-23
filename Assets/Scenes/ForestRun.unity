@@ -129,6 +129,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1001}
   - component: {fileID: 1002}
+  - component: {fileID: 1003}
   m_Layer: 0
   m_Name: Dino Rush - Forest
   m_TagString: Untagged
@@ -158,6 +159,28 @@ Transform:
   - {fileID: 1245141762}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1003
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d5aa73ec5eb4eb180089a0175361b80, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: DinoRush::DinoRush.ForestLeafWind
+  game: {fileID: 1002}
+  worldCamera: {fileID: 410601069}
+  leafTexture: {fileID: 2800000, guid: 95961076bce00d74780d213ab280fc47, type: 3}
+  spriteMaterial: {fileID: 2100000, guid: 22ae3bfc6c514fe1bed78c2c02ef0db9, type: 2}
+  leafCount: 24
+  driftSpeed: 1.25
+  gustStrength: 0.9
+  fallSpeed: 0.26
+  runScrollInfluence: 1
+  seed: 8127
 --- !u!114 &1002
 MonoBehaviour:
   m_ObjectHideFlags: 0

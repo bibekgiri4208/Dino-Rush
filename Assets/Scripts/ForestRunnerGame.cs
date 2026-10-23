@@ -133,6 +133,7 @@ namespace DinoRush
         public int Lives => health.Lives;
         public bool IsInvulnerable => health.IsInvulnerable;
         public int Level => RunnerRules.Level(elapsed);
+        public float CurrentSpeed => RunnerRules.Speed(elapsed);
         public RunnerDinoRoster DinoRoster => dinoRoster;
         public RunnerMapCatalog MapCatalog => mapCatalog;
         public int SelectedMapIndex { get; private set; }
