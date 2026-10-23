@@ -59,6 +59,13 @@ namespace DinoRush
         private float toastTime;
         private Text levelLabel;
         private string activeMapName = "Forest";
+        private GameObject lifeBar;
+        private RunnerHeartGraphic[] hearts;
+        private RectTransform damagePopup;
+        private CanvasGroup damageOpacity;
+        private Vector3 damageOrigin;
+        private float damageTime;
+        private const float DamagePopupDuration = 0.95f;
 
         public bool IsBuilt => root != null;
         public bool MainMenuDialogOpen => mainMenu != null && mainMenu.DialogOpen;
@@ -181,6 +188,7 @@ namespace DinoRush
         public void Initialize(Action primary, Action pause, Action jump, Action mute, Action restart, Action quitRun,
             Action<bool> duck)
         {
+            CreateLifeDisplay();
             RunnerUiEffects.Install(root);
             levelLabel = root.Find("Top left badge/Map")?.GetComponent<Text>();
             Bind(primaryControl, primary);
@@ -245,6 +253,7 @@ namespace DinoRush
         public void ShowReady(int highScore)
         {
             Menu(true);
+            ClearDamage();
             eyebrow.text = "THE FOREST IS CALLING";
             title.text = "DINO RUSH";
             description.text = "One little dino. One endless forest.\nLeap over trouble. Go a little further.";
@@ -256,12 +265,14 @@ namespace DinoRush
         public void ShowRunning()
         {
             Menu(false);
+            if (damagePopup != null) damagePopup.gameObject.SetActive(damageTime > 0f);
             footer.text = "SPACE / UP / W : JUMP    DOWN / S : DUCK / FAST DROP    ESC / P : PAUSE";
         }
 
         public void ShowPaused()
         {
             Menu(true);
+            if (damagePopup != null) damagePopup.gameObject.SetActive(false);
             if (pausePanel != null)
             {
                 panel.SetActive(false);
@@ -306,6 +317,7 @@ namespace DinoRush
             jumpButton.SetActive(!visible);
             if (duckButton != null) duckButton.SetActive(!visible);
             pauseButton.SetActive(!visible);
+            if (lifeBar != null) lifeBar.SetActive(!visible);
             stats.gameObject.SetActive(!visible);
             if (statsFrame != null) statsFrame.SetActive(!visible);
             if (controlsGuide != null) controlsGuide.SetActive(!visible && !minimalPresentation);
@@ -313,9 +325,11 @@ namespace DinoRush
             footer.gameObject.SetActive(!minimalPresentation && (visible || controlsGuide == null));
             if (minimalPresentation)
             {
-                foreach (string name in new[] { "Top left badge", "Scoreboard", "Sound" })
+                foreach (string name in new[] { "Scoreboard", "Sound" })
                     root.Find(name)?.gameObject.SetActive(!visible);
             }
+            // Keep legacy scene bindings, but never restore the retired map/level panel on resume.
+            root.Find("Top left badge")?.gameObject.SetActive(false);
             toast.text = "";
             toastTime = 0f;
             footer.text = "SPACE / UP / W : JUMP    CLICK / TAP : JUMP";
@@ -334,6 +348,85 @@ namespace DinoRush
             Color color = Cream;
             color.a = Mathf.Clamp01(toastTime);
             toast.color = color;
+        }
+
+        private void CreateLifeDisplay()
+        {
+            if (lifeBar != null) return;
+            Image frame = Box("Life hearts", root, new Vector2(-492, 309), new Vector2(224, 46), Ink);
+            Image themedFrame = root.Find("Trail stats frame")?.GetComponent<Image>();
+            if (themedFrame != null && themedFrame.sprite != null)
+            {
+                frame.sprite = themedFrame.sprite;
+                frame.type = themedFrame.type;
+                frame.color = themedFrame.color;
+            }
+            lifeBar = frame.gameObject;
+            Label("Life caption", frame.transform, "LIFE", new Vector2(-79, 0), new Vector2(52, 26), 12, Cream);
+            hearts = new RunnerHeartGraphic[RunnerHealth.MaximumLives];
+            for (int i = 0; i < hearts.Length; i++)
+            {
+                hearts[i] = Rect("Heart " + (i + 1), frame.transform,
+                    new Vector2(-36 + i * 32, 0), new Vector2(28, 28)).gameObject.AddComponent<RunnerHeartGraphic>();
+                hearts[i].raycastTarget = false;
+            }
+            lifeBar.SetActive(false);
+
+            damagePopup = Rect("Damage popup", root, Vector2.zero, new Vector2(104, 44));
+            damageOpacity = damagePopup.gameObject.AddComponent<CanvasGroup>();
+            damageOpacity.interactable = damageOpacity.blocksRaycasts = false;
+            Text amount = Label("Lost life", damagePopup, "-1", new Vector2(-16, 0), new Vector2(60, 36), 24, Cream);
+            Shadow shadow = amount.gameObject.AddComponent<Shadow>();
+            shadow.effectColor = new Color32(42, 24, 35, 255);
+            shadow.effectDistance = new Vector2(2, -2);
+            RunnerHeartGraphic heart = Rect("Lost heart", damagePopup, new Vector2(32, 0), new Vector2(30, 30))
+                .gameObject.AddComponent<RunnerHeartGraphic>();
+            heart.raycastTarget = false;
+            damagePopup.gameObject.SetActive(false);
+        }
+
+        public void UpdateLives(int lives)
+        {
+            if (hearts == null) return;
+            for (int i = 0; i < hearts.Length; i++) hearts[i].Filled = i < lives;
+        }
+
+        public void ShowDamage(Vector3 worldPosition, Camera camera)
+        {
+            damageOrigin = worldPosition;
+            damageTime = DamagePopupDuration;
+            damageOpacity.alpha = 1f;
+            damagePopup.localScale = Vector3.one * 1.18f;
+            damagePopup.gameObject.SetActive(true);
+            PositionDamage(camera, 0f);
+        }
+
+        public void TickDamage(float dt, Camera camera)
+        {
+            if (damageTime <= 0f) return;
+            damageTime = Mathf.Max(0f, damageTime - dt);
+            if (damageTime == 0f)
+            {
+                damagePopup.gameObject.SetActive(false);
+                return;
+            }
+            float age = 1f - damageTime / DamagePopupDuration;
+            PositionDamage(camera, age);
+            damageOpacity.alpha = 1f - Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(0.45f, 1f, age));
+            damagePopup.localScale = Vector3.one * Mathf.Lerp(1.18f, 1f, Mathf.Clamp01(age * 6f));
+        }
+
+        private void PositionDamage(Camera camera, float age)
+        {
+            Vector3 viewport = camera.WorldToViewportPoint(damageOrigin);
+            damagePopup.anchoredPosition = new Vector2((viewport.x - 0.5f) * root.rect.width,
+                (viewport.y - 0.5f) * root.rect.height + 54f * age);
+        }
+
+        public void ClearDamage()
+        {
+            damageTime = 0f;
+            if (damagePopup != null) damagePopup.gameObject.SetActive(false);
         }
 
         public bool IsOverButton(Vector2 screenPoint)

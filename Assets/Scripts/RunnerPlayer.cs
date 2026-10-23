@@ -14,6 +14,8 @@ namespace DinoRush
         private float jumpBuffer;
         private float animationTime;
         private float squash;
+        private float hurtTime;
+        public const float HurtDuration = 0.64f;
         private bool duckHeld;
         private bool fastFalling;
 
@@ -32,7 +34,7 @@ namespace DinoRush
 
         public void Reset()
         {
-            height = velocity = jumpBuffer = animationTime = squash = 0f;
+            height = velocity = jumpBuffer = animationTime = squash = hurtTime = 0f;
             duckHeld = fastFalling = false;
             renderer.color = Color.white;
             renderer.transform.rotation = Quaternion.identity;
@@ -43,6 +45,11 @@ namespace DinoRush
         {
             if (IsDucking) return;
             jumpBuffer = 0.13f;
+        }
+
+        public void Hurt()
+        {
+            hurtTime = HurtDuration;
         }
 
         public void SetFrames(Sprite[] replacement)
@@ -101,8 +108,12 @@ namespace DinoRush
             int frame = dead ? 14 : IsDucking ? 18 + (int)animationTime % 6
                 : !Grounded ? (velocity > 0f ? 11 : 12)
                 : running ? 4 + (int)animationTime % 6 : (int)animationTime % 4;
+            // The supplied sheets contain a crying pose (14) and its white hit silhouette (15).
+            if (hurtTime > 0f)
+                frame = (int)((HurtDuration - hurtTime) / 0.08f) % 2 == 0 ? 15 : 14;
             renderer.sprite = frames[frame];
             renderedFrame = frame;
+            hurtTime = Mathf.Max(0f, hurtTime - dt);
             renderer.transform.position = Feet;
             squash = Mathf.MoveTowards(squash, 0f, dt * 1.8f);
             renderer.transform.localScale = new Vector3(2f * (1f + squash), 2f * (1f - squash), 1f);

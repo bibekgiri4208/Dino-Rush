@@ -45,8 +45,11 @@ namespace DinoRush.Tests
         public IEnumerator ReferenceHudHasLiveReadoutsPaceMeterAndWorkingControls()
         {
             Transform root = game.transform.Find("Forest runner UI/16 by 9 safe content");
-            Assert.That(root.Find("Top left badge/Brand").GetComponent<Text>().text, Is.EqualTo("FOREST RUN"));
-            Assert.That(root.Find("Top left badge/Map").GetComponent<Text>().text, Is.EqualTo("LEVEL 01"));
+            Assert.That(root.Find("Top left badge").gameObject.activeInHierarchy, Is.False);
+            var hearts = (RectTransform)root.Find("Life hearts");
+            Assert.That(hearts.gameObject.activeInHierarchy, Is.True);
+            Assert.That(hearts.anchoredPosition, Is.EqualTo(new Vector2(-492, 309)));
+            Assert.That(hearts.GetComponentsInChildren<RunnerHeartGraphic>().Length, Is.EqualTo(5));
             Transform scoreCard = root.Find("Scoreboard/Score card");
             Transform bestCard = root.Find("Scoreboard/Best card");
             Assert.That(((RectTransform)scoreCard).anchoredPosition.y, Is.GreaterThan(((RectTransform)bestCard).anchoredPosition.y));

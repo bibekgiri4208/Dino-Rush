@@ -42,6 +42,7 @@ namespace DinoRush
             public float height;
             public bool active;
             public bool passed;
+            public bool hitPlayer;
         }
 
         [System.Serializable]
@@ -84,6 +85,7 @@ namespace DinoRush
         [SerializeField, Range(1, 6)] private int runningDirtCount = 3;
         [SerializeField, Range(8, 24)] private int landingDirtCount = 18;
         private RunnerPlayer player;
+        private readonly RunnerHealth health = new RunnerHealth();
         private RunnerAudio audioCues;
         private RunnerEncounterDirector encounterDirector;
         private float nextEncounterDistance;
@@ -122,6 +124,8 @@ namespace DinoRush
         public int Score => Mathf.FloorToInt(distance);
         public int HighScore => best;
         public int ObstaclesCleared => cleared;
+        public int Lives => health.Lives;
+        public bool IsInvulnerable => health.IsInvulnerable;
         public int Level => RunnerRules.Level(elapsed);
         public RunnerDinoRoster DinoRoster => dinoRoster;
         public RunnerMapCatalog MapCatalog => mapCatalog;
@@ -181,6 +185,7 @@ namespace DinoRush
             }
             audioCues = new RunnerAudio(gameObject);
             hud.Initialize(PrimaryAction, TogglePause, Jump, ToggleMute, RestartRun, ReturnToMenu, SetDuckHeld);
+            hud.UpdateLives(Lives);
             hud.InitializeDinos(dinoRoster, SelectedDinoIndex, SelectDino);
             hud.InitializeMaps(mapCatalog, SelectedMapIndex, SelectMap, StartRun);
             hud.SetSound(audioCues.Muted);
@@ -537,10 +542,12 @@ namespace DinoRush
             shake = Mathf.MoveTowards(shake, 0f, dt * 0.75f);
             gameCamera.transform.position = new Vector3(Mathf.Sin(Time.unscaledTime * 81f) * shake,
                 (State == RunState.Ready ? 1.4f : 0f) + Mathf.Cos(Time.unscaledTime * 67f) * shake * 0.55f, -10);
+            hud.TickDamage(dt, gameCamera);
         }
 
         private void Step(float dt)
         {
+            health.Step(dt);
             elapsed += dt;
             bool levelChanged = Level > announcedLevel;
             if (levelChanged)
@@ -578,15 +585,17 @@ namespace DinoRush
                 Transform obstacleTransform = obstacle.renderer.transform;
                 obstacleTransform.position += Vector3.left * travel;
                 float x = obstacleTransform.position.x;
-                if (playerBox.Overlaps(RunnerRules.ObstacleHitbox(x, obstacle.width, obstacle.height)))
+                if (!obstacle.hitPlayer && playerBox.Overlaps(RunnerRules.ObstacleHitbox(x, obstacle.width, obstacle.height)))
                 {
-                    EndRun();
-                    return;
+                    // Remember the contact even during grace time: one obstacle cannot drain multiple hearts.
+                    obstacle.hitPlayer = true;
+                    TakeDamage();
+                    if (State == RunState.GameOver) return;
                 }
                 if (!obstacle.passed && x + obstacle.width * 0.5f < RunnerRules.PlayerX - RunnerRules.PlayerWidth * 0.5f)
                 {
                     obstacle.passed = true;
-                    cleared++;
+                    if (!obstacle.hitPlayer) cleared++;
                 }
                 if (x < -12f)
                 {
@@ -633,6 +642,7 @@ namespace DinoRush
                 obstacle.height = item.Height;
                 obstacle.active = true;
                 obstacle.passed = false;
+                obstacle.hitPlayer = false;
                 if (index == encounter.Obstacles.Length) break;
             }
             nextEncounterDistance = distance + encounter.Spacing;
@@ -841,6 +851,9 @@ namespace DinoRush
                 particle.renderer.gameObject.SetActive(false);
             }
             player.Reset();
+            health.Reset();
+            hud.UpdateLives(Lives);
+            hud.ClearDamage();
         }
 
         public void RestartRun()
@@ -913,6 +926,18 @@ namespace DinoRush
             hud.SetSound(audioCues.Muted);
         }
 
+        private void TakeDamage()
+        {
+            if (State != RunState.Running || !health.TryTakeHit()) return;
+            player.Hurt();
+            hud.UpdateLives(Lives);
+            hud.ShowDamage(player.Feet + new Vector3(0.35f, 2f, 0f), gameCamera);
+            shake = 0.10f;
+            audioCues.Crash();
+            EmitDirt(player.Feet, 18, DirtEmission.Crash);
+            if (Lives == 0) EndRun();
+        }
+
         private void EndRun()
         {
             bool record = Score > bestAtRunStart;
@@ -920,8 +945,6 @@ namespace DinoRush
             ReleaseDuckInput();
             timeSinceCrash = 0f;
             shake = 0.14f;
-            audioCues.Crash();
-            EmitDirt(player.Feet, 18, DirtEmission.Crash);
             SaveBest();
             hud.UpdateScore(Score, best, cleared, RunnerRules.Speed(elapsed));
             hud.ShowGameOver(Score, best, record);

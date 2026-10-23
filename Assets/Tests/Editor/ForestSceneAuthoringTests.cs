@@ -28,7 +28,15 @@ namespace DinoRush.Tests
                 Assert.That(game.GetComponentsInChildren<Camera>(true).Length, Is.EqualTo(1));
                 Assert.That(game.GetComponentsInChildren<Canvas>(true).Length, Is.EqualTo(1));
                 Assert.That(game.transform.Find("Forest environment"), Is.Not.Null);
-                Assert.That(game.transform.Find("Player/Blue dino player").GetComponent<SpriteRenderer>().sprite, Is.Not.Null);
+                Transform dino = game.transform.Find("Player/Blue dino player");
+                Assert.That(dino.GetComponent<SpriteRenderer>().sprite, Is.Not.Null);
+                Assert.That(dino.position.y, Is.EqualTo(RunnerRules.GroundY).Within(0.0001f),
+                    "The saved dino preview must use the same grass-contact height as gameplay.");
+                Assert.That(game.transform.Find("Player/Dino ground shadow").position.y,
+                    Is.EqualTo(RunnerRules.GroundY - 0.025f).Within(0.0001f));
+                for (int i = 0; i < 3; i++)
+                    Assert.That(game.transform.Find("Obstacle pool/Pooled obstacle " + i).position.y,
+                        Is.EqualTo(RunnerRules.GroundY).Within(0.0001f));
 
                 var serialized = new SerializedObject(game);
                 SerializedProperty frames = serialized.FindProperty("dinoFrames");

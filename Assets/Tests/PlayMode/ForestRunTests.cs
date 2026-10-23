@@ -71,7 +71,7 @@ namespace DinoRush.Tests
             yield return new WaitForSeconds(0.16f);
             Assert.That(GameObject.Find("Blue dino player").transform.position.y, Is.GreaterThan(RunnerRules.GroundY + 0.5f));
             yield return Capture("forest-running");
-            yield return new WaitForSeconds(5f);
+            yield return RunToGameOver();
             Assert.That(game.State, Is.EqualTo(ForestRunnerGame.RunState.GameOver));
             Assert.That(PlayerPrefs.GetInt(ScoreKey), Is.EqualTo(game.Score));
             Assert.That(game.HighScore, Is.GreaterThan(0));
@@ -243,8 +243,7 @@ namespace DinoRush.Tests
         public IEnumerator ResultsMenuButtonReturnsToTitle()
         {
             yield return StartFromMapSelector();
-            float deadline = Time.realtimeSinceStartup + 10f;
-            while (game.State == ForestRunnerGame.RunState.Running && Time.realtimeSinceStartup < deadline) yield return null;
+            yield return RunToGameOver();
             Assert.That(game.State, Is.EqualTo(ForestRunnerGame.RunState.GameOver));
             int best = game.HighScore;
             yield return null;
@@ -327,6 +326,18 @@ namespace DinoRush.Tests
             Assert.That(game.GetComponentInChildren<ForestMainMenu>().DialogOpen, Is.True);
             yield return null;
             Click("Start selected map");
+        }
+
+        private IEnumerator RunToGameOver()
+        {
+            // Simulate the longer five-heart run without adding half a minute to UI regressions.
+            var step = typeof(ForestRunnerGame).GetMethod("Step",
+                System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+            var parameters = new object[] { RunnerRules.SimulationStep };
+            for (int i = 0; i < 120 * 60 && game.State == ForestRunnerGame.RunState.Running; i++)
+                step.Invoke(game, parameters);
+            Assert.That(game.Lives, Is.Zero);
+            yield return new WaitForSeconds(0.5f); // Let the final pose render and the retry guard expire.
         }
 
         [UnityTest]

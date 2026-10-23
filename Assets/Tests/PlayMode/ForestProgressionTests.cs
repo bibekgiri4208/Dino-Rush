@@ -100,6 +100,7 @@ namespace DinoRush.Tests
                 }
             }
             Assert.That(game.Level, Is.EqualTo(6));
+            Assert.That(game.Lives, Is.EqualTo(5), "A clean course must not consume any hearts.");
             Assert.That(game.transform.Find("Forest runner UI/16 by 9 safe content/Top left badge/Map").GetComponent<Text>().text,
                 Is.EqualTo("LEVEL 06"));
             Assert.That(patterns.Count, Is.EqualTo(6));

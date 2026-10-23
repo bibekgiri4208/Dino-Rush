@@ -5,7 +5,8 @@ namespace DinoRush
     /// <summary>Shared, testable rules for the single-lane forest run.</summary>
     public static class RunnerRules
     {
-        public const float GroundY = -3f;
+        // Seat feet and obstacle bases slightly inside the grass, not on its top edge.
+        public const float GroundY = -3.12f;
         public const float PlayerX = -5.8f;
         public const float JumpSpeed = 11.5f;
         public const float Gravity = 29f;
