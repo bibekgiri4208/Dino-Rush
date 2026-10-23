@@ -64,7 +64,7 @@ The world always retains the complete original course width. Taller landscape ra
 
 ## Maps
 
-**Play → Endless Mode → Choose Your Map → Continue → Tap to Start** offers five preview cards: **Forest**, **Desert**, **Jungle**, **Rural** (the riverside village), and **Snow Mountain**. Selecting a card highlights and remembers it but does not start gameplay. Continue loads the selected map and dino into a waiting state: the course stays still, no obstacles or running dirt spawn, and score/stage timers stay at zero until a fresh tap or keyboard start. The confirmation click cannot dismiss the prompt, and the starting tap cannot also jump. Only ambient leaves/motes and the dino's idle animation continue. Gameplay controls/readouts stay hidden until running. Map Back returns to mode selection; its Back button or Esc/P returns to the title without starting a run. Esc/P also cancels the waiting screen without losing your choices. Customize also shows the selected map, and the pause heading uses its name. Retry/Restart retains the same map and chosen dino and still starts immediately. Returning to the title restores its original forest backdrop while remembering your choice. Invalid saved map IDs fall back to Forest.
+**Play → Endless Mode → Choose Your Map → Continue → Tap to Start** offers five preview cards: **Forest**, **Desert**, **Jungle**, **Rural** (the riverside village), and **Snow Mountain**. Selecting a card highlights and remembers it but does not start gameplay. Continue loads the selected map and dino into a waiting state: the course stays still, no obstacles or running dirt spawn, and score/stage timers stay at zero until a fresh tap or keyboard start. The confirmation click cannot dismiss the prompt, and the starting tap cannot also jump. Only ambient leaves/motes/snow and the dino's idle animation continue. Gameplay controls/readouts stay hidden until running. Map Back returns to mode selection; its Back button or Esc/P returns to the title without starting a run. Esc/P also cancels the waiting screen without losing your choices. Customize also shows the selected map, and the pause heading uses its name. Retry/Restart retains the same map and chosen dino and still starts immediately. Returning to the title restores its original forest backdrop while remembering your choice. Invalid saved map IDs fall back to Forest.
 
 Desert uses `Assets/2D Sprites/desert bg`, Jungle uses `Assets/2D Sprites/jungle bg`, Rural uses `Assets/2D Sprites/rural area bg`, and Snow Mountain uses `Assets/2D Sprites/skies bg`. Each has layered parallax, a matching running surface/soil, and themed dust/ambient colors. They share the same movement, collision bounds, obstacle pool, difficulty progression, and personal best; the existing forest high-score preference is retained.
 
@@ -90,6 +90,7 @@ The flat fill below the grass is replaced with layered pixel-art earth: subtle s
 - `RunnerPlayer.cs`: jump/fast-drop integration, crouch hitbox, input buffer, sprite animation, landing squash.
 - `RunnerHealth.cs`, `RunnerHeartGraphic.cs`: five-heart health, damage grace time, and pixel-heart UI.
 - `ForestLeafWind.cs`: forest-only pooled windblown leaves using the supplied leaf texture.
+- `SnowMountainSnowfall.cs`: Snow Mountain-only pooled, windblown pixel snowfall.
 - `RunnerScreenLayout.cs`, `RunnerResponsiveUi.cs`: safe-area camera fitting, portrait reflow, and resize/rotation layout restoration.
 - `RunnerDuckControl.cs`: legacy hold/release handling retained for inactive scene bindings.
 - `RunnerRules.cs`: movement constants, hitboxes, stage timing/progress, endless laps, capped speed and fair spawn intervals.
@@ -117,6 +118,12 @@ The saved `Forest Pause Menu` and `Menu card` objects are under the UI safe-cont
 The in-game HUD has top-left hearts, compact stage progress, forest-style score/best cards, icon-only sound/pause buttons, and a pace meter. The former Forest Run/map and level panel stays hidden, including after pause/resume and restart. Jump stays on the playfield, while the Duck button unlocks with canopy hazards in stage three. The permanent keyboard-keycap strip, duplicate controls footer, and FAST DROP caption are hidden; the full controls guide remains available in **Options**. HUD-only forest sprites remain editable under `Assets/UI/ForestHud`; `ForestHudArt.cs` generates missing art without overwriting existing sprites.
 
 Running kicks up a short brown pixel-dirt trail behind the dino's feet; landing creates a larger outward burst of dirt clods and dust puffs. Emission stops in midair and on menus, pause freezes the particles, and restarting/returning to the title clears them. The effect reuses the saved 36 sprites under `Forest effects/Trail dust pool` without allocating objects for each burst. Tune frequency/counts under **Pixel dirt effects** on `ForestRunnerGame`. The three point-filtered sprites live in `Assets/Generated/ForestDirtSprites.asset`; **Dino Rush → Apply Dirt Effects** assigns them to an older scene without rebuilding the world or overwriting existing dirt art.
+
+### Mountain snowfall
+
+Snow Mountain has **72 windblown pixel snowflakes** in two depth layers. Snow falls gently on Tap to Start, then sweeps backward with the accelerating course. Flakes stay behind obstacles and the dino, fade above the ground and at view edges, and recycle from the top/right without spawning extra objects. Snow hides on other maps and the forest title, freezes during pause/results, and reuses its pool on retry. The effect uses a private random seed and cleans up its generated sprite/texture on scene exit.
+
+Tune count, drift, fall, gusts, and course influence on **Dino Rush - Forest → Snow Mountain Snowfall**. The saved scene is already wired; the runtime pool is under `Forest effects/Windblown snow`. Original artwork and gameplay are unchanged.
 
 ### Forest leaf breeze
 
@@ -155,6 +162,8 @@ Egg tests check safe placement and playable routes across stages/speeds, high ar
 Level-design tests verify signature introductions, skill unlock gates, sustained late-stage challenge/rapid-pattern frequency, guaranteed recovery sections, endless-lap recovery without tutorial resets, repetition limits, jump clearance, continuous stage speed ramps, and full accelerating courses. Progress tests check boundary/countdown math, live bar geometry, resize/pause/restart preservation, and stage/lap banner priority. Optional captures include `forest-progression-level-4` and `progress-wild-run`.
 
 Leaf-wind tests verify the saved source-texture binding, drift/rotation/flutter, grass clearance, long-running pool reuse, repeated backward travel past the player, acceleration with the course, pause/game-over freezing, restart/map isolation, random-stream independence, and runtime cleanup. Optional `forest-wind-*` captures include gameplay, recycled leaves, 16:10, the title preview, and a consecutive `forest-wind-sweep-*` motion sequence.
+
+Snowfall tests verify saved camera/material bindings, idle falling, backward course-speed acceleration, long-running recycling, obstacle readability, pause/results freezing, retry/map isolation, cosmetic random-stream independence, and runtime sprite/texture cleanup. Optional `mountain-snowfall*` captures show standard and 16:10 gameplay.
 
 Tap-to-start tests confirm all five maps/dino choices, idle waiting without simulation or spawns, confirmation-click isolation, mouse/touch/keyboard starts, taps outside the world viewport, no jump on the first press, Escape cancellation, and responsive prompt captures (`tap-to-start-*`).
 

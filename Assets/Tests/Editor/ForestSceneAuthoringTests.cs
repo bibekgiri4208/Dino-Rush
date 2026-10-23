@@ -33,6 +33,13 @@ namespace DinoRush.Tests
                 Assert.That(windData.FindProperty("spriteMaterial").objectReferenceValue, Is.Not.Null);
                 Assert.That(AssetDatabase.GetAssetPath(windData.FindProperty("leafTexture").objectReferenceValue),
                     Is.EqualTo("Assets/2D Sprites/leaf.png"), "Use the supplied leaf artwork, not a generated replacement.");
+                SnowMountainSnowfall snowfall = game.GetComponent<SnowMountainSnowfall>();
+                Assert.That(snowfall, Is.Not.Null, "Mountain snowfall must be wired in the saved scene.");
+                var snowData = new SerializedObject(snowfall);
+                Assert.That(snowData.FindProperty("game").objectReferenceValue, Is.EqualTo(game));
+                Assert.That(snowData.FindProperty("worldCamera").objectReferenceValue,
+                    Is.EqualTo(windData.FindProperty("worldCamera").objectReferenceValue));
+                Assert.That(snowData.FindProperty("spriteMaterial").objectReferenceValue, Is.Not.Null);
                 Assert.That(game.GetComponentsInChildren<Camera>(true).Length, Is.EqualTo(1));
                 Assert.That(game.GetComponentsInChildren<Canvas>(true).Length, Is.EqualTo(1));
                 Assert.That(game.transform.Find("Forest environment"), Is.Not.Null);

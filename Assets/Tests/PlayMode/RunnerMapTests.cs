@@ -134,6 +134,8 @@ namespace DinoRush.Tests
                 Assert.That(game.State, Is.EqualTo(ForestRunnerGame.RunState.AwaitingStart));
                 game.PrimaryAction();
                 Assert.That(game.State, Is.EqualTo(ForestRunnerGame.RunState.Running));
+                // Let map-specific ambient pools initialize before measuring retry allocations.
+                yield return null;
                 Assert.That(game.SelectedMapIndex, Is.EqualTo(i));
                 Assert.That(player.Hitbox, Is.EqualTo(hitbox));
                 Assert.That(game.transform.Find("Player/Blue dino player").GetComponent<SpriteRenderer>().sprite.texture,
