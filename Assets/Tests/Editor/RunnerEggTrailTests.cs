@@ -102,5 +102,22 @@ namespace DinoRush.Tests
             }
             finally { foreach (Object asset in assets) Object.DestroyImmediate(asset); }
         }
+
+        [Test]
+        public void PickupHaloHasAClearCenterAndAPointFilteredRing()
+        {
+            var assets = new List<Object>();
+            try
+            {
+                Sprite halo = RunnerEggArt.CreatePickupHalo(assets);
+                Assert.That(assets.Count, Is.EqualTo(2));
+                Assert.That(halo.texture.filterMode, Is.EqualTo(FilterMode.Point));
+                Assert.That(halo.texture.GetPixel(16, 16).a, Is.Zero);
+                Assert.That(halo.texture.GetPixel(0, 0).a, Is.Zero);
+                Assert.That(halo.texture.GetPixel(29, 16).a, Is.EqualTo(1f));
+                Assert.That(halo.texture.GetPixel(28, 16).a, Is.InRange(0.2f, 0.3f));
+            }
+            finally { foreach (Object asset in assets) Object.DestroyImmediate(asset); }
+        }
     }
 }

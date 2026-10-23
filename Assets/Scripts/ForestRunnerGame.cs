@@ -196,10 +196,10 @@ namespace DinoRush
                 particle.renderer.gameObject.SetActive(false);
             }
             audioCues = new RunnerAudio(gameObject);
-            eggs = new RunnerEggCollectibles(transform, spriteMaterial, () =>
+            eggs = new RunnerEggCollectibles(transform, spriteMaterial, position =>
             {
                 audioCues.Pickup();
-                hud.UpdateEggs(eggs.Collected);
+                hud.CollectEgg(eggs.Collected, position, gameCamera);
             });
             hud.Initialize(PrimaryAction, TogglePause, Jump, ToggleMute, RestartRun, ReturnToMenu, SetDuckHeld, eggs.EggSprite);
             hud.UpdateLives(Lives);

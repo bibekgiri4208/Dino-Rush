@@ -78,6 +78,7 @@ namespace DinoRush
         private GameObject eggDisplay;
         private Text eggCount, resultEggs;
         private float eggPulse;
+        private RunnerEggFlights eggFlights;
 
         public bool IsBuilt => root != null;
         public bool MainMenuDialogOpen => mainMenu != null && mainMenu.DialogOpen;
@@ -291,6 +292,7 @@ namespace DinoRush
 
         public void ShowReady(int highScore)
         {
+            eggFlights?.Clear();
             Menu(true);
             ClearDamage();
             eyebrow.text = "THE FOREST IS CALLING";
@@ -312,6 +314,7 @@ namespace DinoRush
 
         public void ShowAwaitingStart(string mapName)
         {
+            eggFlights?.Clear();
             Menu(true);
             panel.SetActive(false);
             shade.SetActive(false);
@@ -343,6 +346,7 @@ namespace DinoRush
 
         public void ShowGameOver(int points, int highScore, bool record)
         {
+            eggFlights?.Clear();
             Menu(true);
             if (minimalPresentation)
             {
@@ -377,6 +381,7 @@ namespace DinoRush
             if (lifeBar != null) lifeBar.SetActive(!visible);
             if (stageDisplay != null) stageDisplay.SetActive(!visible);
             if (eggDisplay != null) eggDisplay.SetActive(!visible);
+            eggFlights?.SetVisible(!visible);
             stats.gameObject.SetActive(!visible);
             if (statsFrame != null) statsFrame.SetActive(!visible);
             if (controlsGuide != null) controlsGuide.SetActive(!visible && !minimalPresentation);
@@ -409,8 +414,9 @@ namespace DinoRush
             toast.color = color;
             if (eggCount != null && eggDisplay.activeInHierarchy)
             {
+                eggFlights?.Tick(dt);
                 eggPulse = Mathf.Max(0f, eggPulse - dt);
-                eggCount.transform.localScale = Vector3.one * (1f + Mathf.Sin(eggPulse / 0.22f * Mathf.PI) * 0.14f);
+                eggCount.transform.localScale = Vector3.one * (1f + Mathf.Sin(eggPulse / 0.22f * Mathf.PI) * 0.08f);
                 eggCount.color = Color.Lerp(Cream, new Color32(255, 218, 119, 255), eggPulse / 0.22f);
             }
         }
@@ -430,22 +436,46 @@ namespace DinoRush
             Image icon = Box("Egg icon", frame.transform, new Vector2(-86, 0), new Vector2(28, 34), Color.white);
             icon.sprite = sprite;
             icon.preserveAspect = true;
-            Label("Egg caption", frame.transform, "EGGS", new Vector2(-27, 0), new Vector2(68, 26), 12, Cream);
-            eggCount = Label("Egg count", frame.transform, "000", new Vector2(60, 0), new Vector2(96, 30), 14,
+            Label("Egg caption", frame.transform, "EGGS", new Vector2(-32, 0), new Vector2(64, 26), 12, Cream);
+            eggCount = Label("Egg count", frame.transform, "000", Vector2.zero, new Vector2(84, 26), 14,
                 Cream, TextAnchor.MiddleRight);
+            // Keep the right edge inset even at the peak of the pickup pulse:
+            // a right-side pivot makes the number grow inward, not through the border.
+            eggCount.rectTransform.anchorMin = eggCount.rectTransform.anchorMax = new Vector2(1f, 0.5f);
+            eggCount.rectTransform.pivot = new Vector2(1f, 0.5f);
+            eggCount.rectTransform.anchoredPosition = new Vector2(-20f, 0f);
+            eggCount.horizontalOverflow = HorizontalWrapMode.Wrap;
+            eggCount.verticalOverflow = VerticalWrapMode.Truncate;
+            eggCount.resizeTextForBestFit = true;
+            eggCount.resizeTextMinSize = 12;
+            eggCount.resizeTextMaxSize = 14;
             if (minimalPresentation)
                 resultEggs = Label("Collected eggs", panel.transform, "EGGS COLLECTED: 000", new Vector2(0, -12),
                     new Vector2(384, 20), 12, new Color32(255, 218, 119, 255));
+            if (sprite != null) eggFlights = new RunnerEggFlights(root, icon.rectTransform, sprite, () => eggPulse = 0.22f);
             eggDisplay.SetActive(false);
         }
 
-        public void UpdateEggs(int count)
+        public void CollectEgg(int count, Vector3 worldPosition, Camera camera)
+        {
+            // Record awards immediately; the flight and arrival pulse are cosmetic,
+            // so pausing or ending the run can never lose an already collected egg.
+            UpdateEggs(count, false);
+            if (eggFlights != null && eggDisplay.activeInHierarchy && camera != null)
+                eggFlights.Play(worldPosition, camera);
+        }
+
+        public void UpdateEggs(int count, bool pulse = true)
         {
             if (eggCount == null) return;
             string caption = count > 99999 ? "99999+" : count.ToString("D3");
-            if (count > 0) eggPulse = 0.22f;
+            if (count > 0)
+            {
+                if (pulse) eggPulse = 0.22f;
+            }
             else
             {
+                eggFlights?.Clear();
                 eggPulse = 0f;
                 eggCount.transform.localScale = Vector3.one;
                 eggCount.color = Cream;
@@ -540,6 +570,11 @@ namespace DinoRush
         {
             responsiveUi?.Apply(layout);
             if (stageFill != null) UpdateProgress(progressElapsed);
+            if (eggFlights != null && eggFlights.ActiveCount > 0)
+            {
+                Canvas.ForceUpdateCanvases();
+                eggFlights.RefreshLayout();
+            }
         }
 
         public void ShowDamage(Vector3 worldPosition, Camera camera)

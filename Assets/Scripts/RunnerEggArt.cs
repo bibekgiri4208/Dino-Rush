@@ -50,6 +50,24 @@ namespace DinoRush
             return SaveSprite(texture, 24f, assets);
         }
 
+        public static Sprite CreatePickupHalo(List<Object> assets)
+        {
+            var texture = new Texture2D(32, 32, TextureFormat.RGBA32, false)
+            {
+                name = "Egg pickup halo", filterMode = FilterMode.Point, wrapMode = TextureWrapMode.Clamp
+            };
+            for (int y = 0; y < 32; y++)
+            for (int x = 0; x < 32; x++)
+            {
+                float distance = Vector2.Distance(new Vector2(x, y), new Vector2(15.5f, 15.5f));
+                float alpha = distance >= 13f && distance <= 14.5f ? 1f :
+                    distance >= 12f && distance < 13f ? 0.25f : 0f;
+                texture.SetPixel(x, y, new Color(1f, 1f, 1f, alpha));
+            }
+            texture.Apply();
+            return SaveSprite(texture, 32f, assets);
+        }
+
         private static Sprite SaveSprite(Texture2D texture, float ppu, List<Object> assets)
         {
             Sprite sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height),
