@@ -31,6 +31,7 @@ namespace DinoRush.Editor
             var scene = EditorSceneManager.OpenScene("Assets/Scenes/ForestRun.unity");
             ForestRunnerGame game = Object.FindAnyObjectByType<ForestRunnerGame>();
             Repair(game);
+            ForestUiMotionBuilder.Apply(game);
             game.AssignMainMenu(game.GetComponentInChildren<ForestMainMenu>(true));
             EditorUtility.SetDirty(game);
             AssetDatabase.SaveAssets();
@@ -125,15 +126,23 @@ namespace DinoRush.Editor
                 if (shadow != null) shadow.effectDistance = new Vector2(1, -1);
                 EditorUtility.SetDirty(text);
             }
+            menu.EnsureShopUi();
+            EditorUtility.SetDirty(menu);
             Canvas.ForceUpdateCanvases();
         }
 
         private static void RepairMainMenuButtons(Transform root)
         {
-            string[] names = { "Play", "Customize", "Options", "Quit" };
+            string[] names = { "Play", "Shop", "Options", "Quit" };
             for (int i = 0; i < names.Length; i++)
             {
                 Transform button = root.Find("Main menu buttons/" + names[i]);
+                if (button == null && names[i] == "Shop")
+                {
+                    button = root.Find("Main menu buttons/Customize");
+                    button.name = "Shop";
+                }
+                if (names[i] == "Shop") button.Find("Label").GetComponent<Text>().text = "SHOP";
                 RepairButton(button, 0, -12 - i * 78, 360, 68, 24);
                 Transform label = button.Find("Label");
                 TextLayout(label, 32, 0, 240, 52, 24);

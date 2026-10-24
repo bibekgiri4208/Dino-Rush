@@ -138,6 +138,7 @@ namespace DinoRush
         public int HighScore => best;
         public int ObstaclesCleared => cleared;
         public int EggsCollected => eggs != null ? eggs.Collected : 0;
+        public RunnerShopProgress Shop { get; private set; }
         public int Lives => health.Lives;
         public bool IsInvulnerable => health.IsInvulnerable;
         public int Level => RunnerRules.Level(elapsed);
@@ -183,9 +184,16 @@ namespace DinoRush
                 SelectedMapIndex = mapCatalog.Find(PlayerPrefs.GetString(RunnerMapCatalog.SelectionKey, "forest"));
             ApplyPixelFiltering();
             player = new RunnerPlayer(dinoRenderer, dinoFrames, playerShadow);
+            Shop = new RunnerShopProgress(dinoRoster);
             if (dinoRoster != null && dinoRoster.Count > 0)
             {
                 SelectedDinoIndex = dinoRoster.Find(PlayerPrefs.GetString(RunnerDinoRoster.SelectionKey, "blue"));
+                if (!Shop.IsUnlocked(SelectedDinoIndex))
+                {
+                    SelectedDinoIndex = 0;
+                    PlayerPrefs.SetString(RunnerDinoRoster.SelectionKey, dinoRoster[0].Id);
+                    PlayerPrefs.Save();
+                }
                 player.SetFrames(DinoFrames(SelectedDinoIndex));
             }
             foreach (Obstacle obstacle in obstacles)
@@ -201,9 +209,11 @@ namespace DinoRush
             audioCues = new RunnerAudio(gameObject);
             eggs = new RunnerEggCollectibles(transform, spriteMaterial, position =>
             {
+                Shop.CollectEgg();
                 audioCues.Pickup();
                 hud.CollectEgg(eggs.Collected, position, gameCamera);
             });
+            hud.InitializeShop(Shop);
             hud.Initialize(PrimaryAction, TogglePause, Jump, ToggleMute, RestartRun, ReturnToMenu, SetDuckHeld, eggs.EggSprite);
             hud.UpdateLives(Lives);
             hud.InitializeDinos(dinoRoster, SelectedDinoIndex, SelectDino);
@@ -250,6 +260,7 @@ namespace DinoRush
         public void SelectDino(int index)
         {
             if (!initialized || State != RunState.Ready || dinoRoster == null || index < 0 || index >= dinoRoster.Count) return;
+            if (!Shop.IsUnlocked(index)) return;
             player.SetFrames(DinoFrames(index));
             SelectedDinoIndex = index;
             hud.SetDinoSelection(index);

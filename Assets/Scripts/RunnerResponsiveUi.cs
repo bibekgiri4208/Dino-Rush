@@ -161,14 +161,14 @@ namespace DinoRush
             Place("Forest Main Menu/Dino Rush Logo", 0, top - 32f - 320.5f * logoScale);
             Scale("Forest Main Menu/Dino Rush Logo", logoScale);
             Place("Forest Main Menu/Main menu buttons", 0, bottom + 360);
-            string[] menuButtons = { "Play", "Customize", "Options", "Quit" };
+            string[] menuButtons = { "Play", "Shop", "Options", "Quit" };
             for (int i = 0; i < menuButtons.Length; i++)
                 Place("Forest Main Menu/Main menu buttons/" + menuButtons[i], 0, 84 - i * 120, 520, 104);
 
             const string dialog = "Forest Main Menu/Menu dialog/Moss framed dialog";
-            Place(dialog, 0, 0, 620, 760);
-            Place(dialog + "/Dialog heading", 0, 324, 560, 48);
-            Place(dialog + "/Back to main menu", 0, -292, 520, 104);
+            Place(dialog, 0, 0, 620, 1000);
+            Place(dialog + "/Dialog heading", 0, 444, 560, 48);
+            Place(dialog + "/Back to main menu", 0, -402, 520, 104);
             Place(dialog + "/Options page/Toggle sound effects", 0, 70, 500, 104);
             Place(dialog + "/Options page/Controls help", 0, -90, 520, 144);
             FontSize(dialog + "/Options page/Controls help", 16);
@@ -178,16 +178,24 @@ namespace DinoRush
             Place(modes + "/Story availability", 0, 34, 500, 30);
             Place(modes + "/Endless mode", 0, -90, 500, 104);
             const string custom = dialog + "/Customize page";
+            Place(custom + "/Shop egg balance", 0, 388, 560, 30);
+            Place(custom + "/Mystery egg rules", 0, 340, 560, 48);
+            Place(custom + "/Buy mystery egg", 0, 270, 520, 88);
+            Place(custom + "/Buy mystery egg/Label", 0, 0, 496, 64);
+            FontSize(custom + "/Buy mystery egg/Label", 14);
+            Place(custom + "/Mystery egg result", 0, 198, 560, 52);
             string[] dinos = { "Blue", "Red", "Yellow", "Green" };
             for (int i = 0; i < dinos.Length; i++)
             {
                 string card = custom + "/Dino choices/Select " + dinos[i] + " dino";
-                Place(card, i % 2 == 0 ? -142 : 142, i < 2 ? 104 : -64, 236, 136);
-                Place(card + "/Dino name", 0, -44, 200, 28);
+                Place(card, i % 2 == 0 ? -142 : 142, i < 2 ? 76 : -114, 236, 176);
+                Place(card + "/Dino name", 0, -34, 200, 28);
+                Place(card + "/Fragments", 0, -64, 212, 36);
+                FontSize(card + "/Fragments", 12);
                 FontSize(card + "/Dino name", 18);
             }
-            Place(custom + "/Selected status", 0, -176, 520, 24);
-            Place(custom + "/Map selection", 0, -204, 520, 24);
+            Place(custom + "/Selected status", 0, -246, 560, 28);
+            Place(custom + "/Map selection", 0, -284, 560, 24);
             FontSize(custom + "/Selected status", 14);
             FontSize(custom + "/Map selection", 14);
 

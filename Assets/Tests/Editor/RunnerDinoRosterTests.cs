@@ -57,6 +57,14 @@ namespace DinoRush.Tests
                 }
                 foreach (string field in new[] { "selectedDinoLabel", "selectedDinoFrame", "unselectedDinoFrame" })
                     Assert.That(data.FindProperty(field).objectReferenceValue, Is.Not.Null);
+                foreach (string field in new[] { "buyMysteryEgg", "shopBalance", "shopResult" })
+                    Assert.That(data.FindProperty(field).objectReferenceValue, Is.Not.Null, field);
+                SerializedProperty fragments = data.FindProperty("dinoFragments");
+                Assert.That(fragments.arraySize, Is.EqualTo(4));
+                for (int i = 0; i < 4; i++) Assert.That(fragments.GetArrayElementAtIndex(i).objectReferenceValue, Is.Not.Null);
+                var shopButton = data.FindProperty("customize").objectReferenceValue as UnityEngine.UI.Button;
+                Assert.That(shopButton.name, Is.EqualTo("Shop"));
+                Assert.That(shopButton.GetComponentInChildren<UnityEngine.UI.Text>(true).text, Is.EqualTo("SHOP"));
             }
             finally
             {

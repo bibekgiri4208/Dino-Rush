@@ -163,14 +163,14 @@ namespace DinoRush.Tests
             Click("Back to main menu");
             Assert.That(menu.DialogOpen, Is.False);
             yield return null;
-            Click("Customize");
+            Click("Shop");
             AssertVisibleMenuLayout();
             Assert.That(GameObject.Find("Select Blue dino"), Is.Not.Null);
             Assert.That(GameObject.Find("Select Red dino"), Is.Not.Null);
             Assert.That(GameObject.Find("Select Yellow dino"), Is.Not.Null);
             Assert.That(GameObject.Find("Select Green dino"), Is.Not.Null);
             Assert.That(GameObject.Find("Map selection").GetComponent<Text>().text, Is.EqualTo("MAP: FOREST"));
-            yield return Capture("menu-customize");
+            yield return Capture("menu-shop");
             Click("Back to main menu");
             yield return null;
             Click("Quit");

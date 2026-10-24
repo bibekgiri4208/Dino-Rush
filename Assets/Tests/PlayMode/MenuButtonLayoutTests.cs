@@ -41,7 +41,7 @@ namespace DinoRush.Tests
             canvas.scaleFactor = 1;
             foreach (Text label in menu.GetComponentsInChildren<Text>()) label.SetVerticesDirty();
             Canvas.ForceUpdateCanvases();
-            string[] names = { "Play", "Customize", "Options", "Quit" };
+            string[] names = { "Play", "Shop", "Options", "Quit" };
             for (int i = 0; i < names.Length; i++)
             {
                 Transform button = menu.transform.Find("Main menu buttons/" + names[i]);
@@ -76,7 +76,7 @@ namespace DinoRush.Tests
                 var texture = new Texture2D(2, 2);
                 try
                 {
-                    Assert.That(texture.LoadImage(System.IO.File.ReadAllBytes($"Assets/UI/ForestMenu/Icon{(names[i] == "Customize" ? "Dino" : names[i] == "Options" ? "Gear" : names[i])}.png")), Is.True);
+                    Assert.That(texture.LoadImage(System.IO.File.ReadAllBytes($"Assets/UI/ForestMenu/Icon{(names[i] == "Shop" ? "Dino" : names[i] == "Options" ? "Gear" : names[i])}.png")), Is.True);
                     int min = texture.width, max = 0;
                     for (int y = 0; y < texture.height; y++)
                     for (int x = 0; x < texture.width; x++)

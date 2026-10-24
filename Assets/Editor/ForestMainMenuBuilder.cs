@@ -60,7 +60,7 @@ namespace DinoRush.Editor
 
             RectTransform choices = Rect("Main menu buttons", menuRoot, Vector2.zero, new Vector2(1280, 720));
             Button play = MenuButton("Play", choices, new Vector2(0, -12), "PLAY", "Play", true);
-            Button customize = MenuButton("Customize", choices, new Vector2(0, -92), "CUSTOMIZE", "Dino");
+            Button customize = MenuButton("Shop", choices, new Vector2(0, -92), "SHOP", "Dino");
             Button options = MenuButton("Options", choices, new Vector2(0, -166), "OPTIONS", "Gear");
             Button quit = MenuButton("Quit", choices, new Vector2(0, -240), "QUIT", "Quit");
 
@@ -124,7 +124,7 @@ namespace DinoRush.Editor
             AssetDatabase.SaveAssets();
             EditorSceneManager.MarkSceneDirty(scene);
             EditorSceneManager.SaveScene(scene);
-            Debug.Log("Reference-inspired pixel-art forest menu saved in ForestRun, with working Play, Customize, Options, Quit and SFX controls.");
+            Debug.Log("Reference-inspired pixel-art forest menu saved in ForestRun, with working Play, Shop, Options, Quit and SFX controls.");
         }
 
         [MenuItem("Dino Rush/Add Mode Selector")]

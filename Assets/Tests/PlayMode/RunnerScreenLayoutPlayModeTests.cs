@@ -77,7 +77,7 @@ namespace DinoRush.Tests
                 {
                     yield return RunnerDisplayCapture.Capture("responsive-portrait-title", 360, 800, cases[i]);
                     layout = Apply(resolutions[i].x, resolutions[i].y, cases[i]);
-                    Click(root.Find("Forest Main Menu/Main menu buttons/Customize").GetComponent<Button>());
+                    Click(root.Find("Forest Main Menu/Main menu buttons/Shop").GetComponent<Button>());
                     yield return new WaitForSecondsRealtime(0.3f);
                     AssertVisibleUi(layout);
                     yield return RunnerDisplayCapture.Capture("responsive-portrait-dinos", 360, 800, cases[i]);

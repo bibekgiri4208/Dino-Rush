@@ -82,6 +82,7 @@ namespace DinoRush.Editor
             menuData.FindProperty("selectedDinoFrame").objectReferenceValue = ForestHudArt.Load("HudJump");
             menuData.FindProperty("unselectedDinoFrame").objectReferenceValue = ForestHudArt.Load("HudPanel");
             menuData.ApplyModifiedPropertiesWithoutUndo();
+            menu.EnsureShopUi();
             EditorUtility.SetDirty(game);
             EditorUtility.SetDirty(menu);
         }

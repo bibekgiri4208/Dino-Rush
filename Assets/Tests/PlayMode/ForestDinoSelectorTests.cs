@@ -50,7 +50,7 @@ namespace DinoRush.Tests
             for (int i = 0; i < 4; i++)
             {
                 RunnerDinoRoster.Dino dino = game.DinoRoster[i];
-                Click("Customize");
+                Click("Shop");
                 yield return null; // Newly enabled card graphics register with the raycaster on the next UI frame.
                 Click("Select " + dino.DisplayName + " dino");
                 Assert.That(game.State, Is.EqualTo(ForestRunnerGame.RunState.Ready));
@@ -70,7 +70,7 @@ namespace DinoRush.Tests
                 Assert.That((Vector2)renderer.sprite.bounds.size, Is.EqualTo(Vector2.one));
                 Assert.That(player.Hitbox, Is.EqualTo(standardHitbox));
                 game.PrimaryAction();
-                Assert.That(game.State, Is.EqualTo(ForestRunnerGame.RunState.Ready), "Space must not start a run through Customize.");
+                Assert.That(game.State, Is.EqualTo(ForestRunnerGame.RunState.Ready), "Space must not start a run through Shop.");
                 if (i == 3)
                 {
                     AssertSelectorLayout();
@@ -123,14 +123,14 @@ namespace DinoRush.Tests
         [UnityTest]
         public IEnumerator SelectionSurvivesSceneReloadAndUnknownSavedIdsFallBackToBlue()
         {
-            Click("Customize");
+            Click("Shop");
             yield return null;
             Click("Select Yellow dino");
             yield return Reload();
             Assert.That(game.SelectedDinoName, Is.EqualTo("Yellow"));
             Assert.That(game.transform.Find("Player/Blue dino player").GetComponent<SpriteRenderer>().sprite.texture,
                 Is.EqualTo(game.DinoRoster[2].Sheet));
-            Click("Customize");
+            Click("Shop");
             yield return null;
             Assert.That(GameObject.Find("Selected status").GetComponent<Text>().text, Is.EqualTo("YELLOW DINO SELECTED"));
             Click("Select Green dino");
@@ -166,12 +166,12 @@ namespace DinoRush.Tests
                 Assert.That(text.preferredHeight, Is.LessThanOrEqualTo(text.rectTransform.rect.height + 1), text.name);
             }
             Transform choices = GameObject.Find("Dino choices").transform;
-            float lastRight = -250;
+            float lastRight = -310;
             foreach (Transform card in choices)
             {
                 Bounds bounds = RectTransformUtility.CalculateRelativeRectTransformBounds(choices, card);
                 Assert.That(bounds.min.x, Is.GreaterThan(lastRight));
-                Assert.That(bounds.max.x, Is.LessThan(250));
+                Assert.That(bounds.max.x, Is.LessThan(310));
                 lastRight = bounds.max.x;
             }
         }
