@@ -292,5 +292,50 @@ namespace DinoRush.Tests
                 return 20;
             }
         }
+
+        [TestCase("jestergift")]
+        [TestCase("JESTERGIFT")]
+        [TestCase("  JesterGift  ")]
+        public void GiftCodeAddsOneThousandEggsRepeatedlyAndPersistsWithoutChangingDinos(string code)
+        {
+            PlayerPrefs.SetInt(RunnerShopProgress.WalletKey, 25);
+            PlayerPrefs.SetInt(RunnerShopProgress.FragmentKey("red"), 42);
+            var shop = new RunnerShopProgress(roster);
+            for (int attempt = 1; attempt <= 5; attempt++)
+            {
+                Assert.That(shop.Redeem(code), Is.EqualTo(RunnerShopProgress.RedeemResult.Success));
+                shop = new RunnerShopProgress(roster);
+                Assert.That(shop.Balance, Is.EqualTo(25 + attempt * 1000));
+            }
+            Assert.That(shop.Fragments(1), Is.EqualTo(42));
+            Assert.That(shop.IsUnlocked(1), Is.False);
+        }
+
+        [TestCase(null)]
+        [TestCase("")]
+        [TestCase("   ")]
+        [TestCase("jester gift")]
+        [TestCase("jestergift1000")]
+        public void InvalidGiftCodesNeverChangeTheWallet(string code)
+        {
+            PlayerPrefs.SetInt(RunnerShopProgress.WalletKey, 77);
+            var shop = new RunnerShopProgress(roster);
+            Assert.That(shop.Redeem(code), Is.EqualTo(RunnerShopProgress.RedeemResult.InvalidCode));
+            Assert.That(shop.Balance, Is.EqualTo(77));
+        }
+
+        [Test]
+        public void GiftsNeverOverflowOrPartiallyCreditTheWalletAndDoNotNeedARoster()
+        {
+            var shop = new RunnerShopProgress(null);
+            PlayerPrefs.SetInt(RunnerShopProgress.WalletKey, int.MaxValue - 1000);
+            Assert.That(shop.Redeem("jestergift"), Is.EqualTo(RunnerShopProgress.RedeemResult.Success));
+            Assert.That(shop.Balance, Is.EqualTo(int.MaxValue));
+            Assert.That(shop.Redeem("jestergift"), Is.EqualTo(RunnerShopProgress.RedeemResult.WalletFull));
+            Assert.That(shop.Balance, Is.EqualTo(int.MaxValue));
+            PlayerPrefs.SetInt(RunnerShopProgress.WalletKey, int.MaxValue - 999);
+            Assert.That(shop.Redeem("jestergift"), Is.EqualTo(RunnerShopProgress.RedeemResult.WalletFull));
+            Assert.That(shop.Balance, Is.EqualTo(int.MaxValue - 999));
+        }
     }
 }

@@ -66,6 +66,15 @@ namespace DinoRush.Tests
                 Transform root = game.transform.Find("Forest runner UI/16 by 9 safe content");
                 Assert.That(((RectTransform)root.Find("Forest Pause Menu")).sizeDelta, Is.EqualTo(new Vector2(420, 336)));
                 Assert.That(((RectTransform)root.Find("Forest Main Menu/Menu dialog/Moss framed dialog")).sizeDelta, Is.EqualTo(new Vector2(480, 352)));
+                ForestMainMenu menu = root.Find("Forest Main Menu").GetComponent<ForestMainMenu>();
+                Assert.That(menu.RedeemPresentation, Is.Not.Null);
+                Assert.That(menu.transform.Find("Redeem dialog").gameObject.activeSelf, Is.False);
+                InputField code = menu.RedeemPresentation.CodeInput;
+                Assert.That(code, Is.Not.Null);
+                Assert.That(code.textComponent.supportRichText, Is.False);
+                Assert.That(code.placeholder.raycastTarget, Is.False);
+                Assert.That(code.characterLimit, Is.EqualTo(64));
+                Assert.That(menu.transform.Find("Menu dialog/Moss framed dialog/Options page/Redeem gift").GetComponent<Button>(), Is.Not.Null);
                 Transform modes = root.Find("Forest Main Menu/Menu dialog/Moss framed dialog/Mode selection page");
                 foreach (string name in new[] { "Story mode", "Endless mode" })
                 {

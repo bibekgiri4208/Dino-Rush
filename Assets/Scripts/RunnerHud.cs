@@ -84,6 +84,7 @@ namespace DinoRush
 
         public bool IsBuilt => root != null;
         public bool MainMenuDialogOpen => mainMenu != null && mainMenu.DialogOpen;
+        public bool RedeemDialogOpen => mainMenu != null && mainMenu.RedeemPresentation != null && mainMenu.RedeemPresentation.IsShowing;
         public bool HasMapSelector => mainMenu != null && mainMenu.HasMapSelector;
         public bool HasModeSelector => mainMenu != null && mainMenu.HasModeSelector;
 

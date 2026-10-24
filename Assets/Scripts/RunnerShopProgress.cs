@@ -12,6 +12,9 @@ namespace DinoRush
         public const int RequiredFragments = 100;
         public const int MinFragments = 1;
         public const int MaxFragments = 20;
+        public const string GiftCode = "jestergift";
+        public const int GiftEggs = 1000;
+        public enum RedeemResult { Success, InvalidCode, WalletFull }
 
         private readonly RunnerDinoRoster roster;
         private readonly System.Random random;
@@ -61,6 +64,16 @@ namespace DinoRush
             if (Balance == int.MaxValue) return;
             PlayerPrefs.SetInt(WalletKey, Balance + 1);
             PlayerPrefs.Save(); // Credit once at pickup, never again on results/retry/menu.
+        }
+
+        public RedeemResult Redeem(string code)
+        {
+            if (!string.Equals(code?.Trim(), GiftCode, System.StringComparison.OrdinalIgnoreCase))
+                return RedeemResult.InvalidCode;
+            if (Balance > int.MaxValue - GiftEggs) return RedeemResult.WalletFull;
+            PlayerPrefs.SetInt(WalletKey, Balance + GiftEggs);
+            PlayerPrefs.Save(); // Repeatable by design; the gift is saved before any animation.
+            return RedeemResult.Success;
         }
 
         public bool TryBuy(out int dinoIndex, out int fragments, out bool unlocked)

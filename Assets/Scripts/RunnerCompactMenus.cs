@@ -22,7 +22,10 @@ namespace DinoRush
                     portrait ? 100 : 52, portrait ? 22 : 18, null, true);
                 Label(options.Find("Controls help"), 0, portrait ? -20 : -22, portrait ? 488 : 420,
                     portrait ? 112 : 100, portrait ? 12 : 10);
-                Control(back, 0, portrait ? -146 : -116, portrait ? 472 : 328, portrait ? 100 : 52, 18, "BACK");
+                Control(options.Find("Redeem gift"), portrait ? -124 : -90, portrait ? -146 : -116,
+                    portrait ? 224 : 156, portrait ? 100 : 52, portrait ? 18 : 14, "REDEEM");
+                Control(back, portrait ? 124 : 90, portrait ? -146 : -116,
+                    portrait ? 224 : 156, portrait ? 100 : 52, 18, "BACK");
             }
             else if (kind == DialogKind.Quit)
             {

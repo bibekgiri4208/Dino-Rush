@@ -884,6 +884,12 @@ namespace DinoRush
             if (State == RunState.AwaitingStart && Time.frameCount <= preparedInputFrame) return;
             bool waitingForStart = State == RunState.AwaitingStart;
             Keyboard keyboard = Keyboard.current;
+            // Gift-code typing belongs to the InputField, not to gameplay/menu hotkeys (M/P/W/Space).
+            if (State == RunState.Ready && hud.RedeemDialogOpen)
+            {
+                if (keyboard != null && keyboard.escapeKey.wasPressedThisFrame) hud.CloseMainMenuDialog();
+                return;
+            }
             bool duckKey = State == RunState.Running && keyboard != null &&
                 (keyboard.downArrowKey.isPressed || keyboard.sKey.isPressed);
             if (keyboardDuckHeld != duckKey)

@@ -52,6 +52,8 @@ namespace DinoRush
         [SerializeField] private Text[] dinoFragments = new Text[0];
         [SerializeField] private RunnerShopPresentation shopPresentation;
         [SerializeField] private RunnerShopCollection shopCollection;
+        [SerializeField] private Button redeemGift;
+        [SerializeField] private RunnerRedeemPresentation redeemPresentation;
         private int pendingRewardIndex = -1;
         private RunnerShopProgress shop;
         private int selectedDino;
@@ -68,6 +70,7 @@ namespace DinoRush
         public bool HasModeSelector => modePage != null;
         public RunnerShopPresentation ShopPresentation => shopPresentation;
         public RunnerShopCollection ShopCollection => shopCollection;
+        public RunnerRedeemPresentation RedeemPresentation => redeemPresentation;
 
         public void ApplyDialogLayout(bool portrait, Vector2 available)
         {
@@ -79,6 +82,7 @@ namespace DinoRush
                 modePage != null && modePage.activeSelf ? RunnerCompactMenus.DialogKind.Mode : RunnerCompactMenus.DialogKind.Options;
             RunnerCompactMenus.ApplyDialog(dialogTitle.transform.parent, kind, portrait, available);
             shopPresentation?.ApplyBatchLayout(portrait, available);
+            redeemPresentation?.ApplyLayout(portrait, available);
         }
 
         public void OpenModeSelector()
@@ -154,12 +158,18 @@ namespace DinoRush
             Bind(confirmQuit, QuitGame);
             if (buyMysteryEgg != null) Bind(buyMysteryEgg, BuyMysteryEgg);
             if (buyTenMysteryEggs != null) Bind(buyTenMysteryEggs, BuyTenMysteryEggs);
+            if (redeemGift != null) Bind(redeemGift, () =>
+            {
+                if (optionsPage.activeInHierarchy) redeemPresentation.Open();
+            });
         }
 
         public void InitializeShop(RunnerShopProgress progress, RunnerAudio audio = null)
         {
             shop = progress;
             EnsureShopUi();
+            EnsureRedeemUi();
+            redeemPresentation?.Initialize(shop, audio, RefreshShop);
             shopCollection?.Initialize(shop);
             shopPresentation?.Initialize(audio, () =>
             {
@@ -167,6 +177,19 @@ namespace DinoRush
                 pendingRewardIndex = -1;
                 RefreshShop();
             });
+        }
+
+        public void EnsureRedeemUi()
+        {
+            if (optionsPage == null || back == null || selectedDinoLabel == null) return;
+            if (Application.isPlaying && redeemGift != null && redeemPresentation != null) return;
+            redeemGift = PurchaseButton(optionsPage.transform, "Redeem gift");
+            ShopLabel(redeemGift.transform, "Label", "REDEEM", selectedDinoLabel.font, 14, 0, 44, 132);
+            redeemPresentation = GetComponent<RunnerRedeemPresentation>();
+            if (redeemPresentation == null) redeemPresentation = gameObject.AddComponent<RunnerRedeemPresentation>();
+            redeemPresentation.EnsureUi(transform, selectedDinoLabel.font, dialogTitle.transform.parent.GetComponent<Image>().sprite,
+                back.GetComponent<Image>().sprite);
+            ApplyDialogLayout(dialogPortrait, dialogAvailable);
         }
 
         // Shared by scene authoring and runtime fallback for older scenes. Existing bindings are retained.
@@ -357,6 +380,7 @@ namespace DinoRush
         public void Show()
         {
             shopPresentation?.CancelReveal();
+            redeemPresentation?.Cancel();
             gameObject.SetActive(true);
             foreach (GameObject item in gameplayChrome) if (item != null) item.SetActive(false);
             CloseDialog();
@@ -365,6 +389,7 @@ namespace DinoRush
         public void Hide()
         {
             shopPresentation?.CancelReveal();
+            redeemPresentation?.Cancel();
             gameObject.SetActive(false);
             foreach (GameObject item in gameplayChrome) if (item != null) item.SetActive(true);
         }
@@ -392,6 +417,7 @@ namespace DinoRush
 
         public void CloseDialog()
         {
+            if (redeemPresentation != null && redeemPresentation.HandleBack()) return;
             if (shopPresentation != null && shopPresentation.HandleBack()) return;
             if (mapPage != null) mapPage.SetActive(false);
             dialog.SetActive(false);

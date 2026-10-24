@@ -31,6 +31,7 @@ namespace DinoRush.Editor
         internal static void Apply(ForestMainMenu menu)
         {
             menu.EnsureShopUi();
+            menu.EnsureRedeemUi();
             RunnerEggHatchCatalog catalog = Catalog();
             RunnerShopPresentation presentation = menu.ShopPresentation;
             presentation.SetCatalog(catalog);
