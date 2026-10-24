@@ -35,13 +35,36 @@ namespace DinoRush
                 Control(back, -x, y, width, height, 14, "CANCEL");
                 Control(quit.Find("Confirm quit"), x, y, width, height, portrait ? 14 : 12, "QUIT GAME");
             }
+            else if (kind == DialogKind.Mode)
+            {
+                Panel(panel, portrait ? new Vector2(600, 640) : new Vector2(560, 400), available);
+                Label(heading, 0, portrait ? 264 : 154, portrait ? 536 : 504, 40, portrait ? 24 : 20);
+                Transform modes = panel.Find("Mode selection page");
+                ModeCard(modes.Find("Story mode"), true, portrait);
+                ModeCard(modes.Find("Endless mode"), false, portrait);
+                Control(back, 0, portrait ? -252 : -152, portrait ? 512 : 320, portrait ? 100 : 52, 18, "BACK");
+            }
             else
             {
-                // Shop/mode pages keep their existing roomy layout, even after visiting a compact dialog.
+                // The Shop keeps its roomy layout, even after visiting a compact dialog.
                 Panel(panel, portrait ? new Vector2(620, 1080) : new Vector2(680, 680), available);
                 Label(heading, 0, portrait ? 484 : 284, portrait ? 560 : 620, 48, 24);
                 Control(back, 0, portrait ? -476 : -288, portrait ? 520 : 400, portrait ? 104 : 64, 24, "BACK");
             }
+        }
+
+        private static void ModeCard(Transform card, bool story, bool portrait)
+        {
+            if (card == null) return;
+            Position(card, portrait ? 0 : story ? -126 : 126, portrait ? (story ? 126 : -86) : 0,
+                portrait ? 528 : 236, portrait ? 196 : 244);
+            Transform art = card.Find("Mode illustration");
+            Position(art, portrait ? -152 : 0, portrait ? 0 : 50, portrait ? 184 : 208, 112);
+            Position(art != null ? art.Find("Trail dino") : null, -52, -22, 40, 44);
+            Label(card.Find("Label"), portrait ? 96 : 0, portrait ? 48 : -28, portrait ? 272 : 212, 32, portrait ? 18 : 14);
+            Label(card.Find("Mode description"), portrait ? 96 : 0, portrait ? 0 : -60, portrait ? 264 : 212, 40, portrait ? 12 : 10);
+            Label(card.Find("Mode status"), portrait ? 96 : 0, portrait ? -52 : -96, portrait ? 264 : 212, 24, portrait ? 12 : 10);
+            card.GetComponent<RunnerUiButtonFeedback>()?.RefreshContentLayout();
         }
 
         public static void ApplyPause(Transform panel, bool portrait, Vector2 available)

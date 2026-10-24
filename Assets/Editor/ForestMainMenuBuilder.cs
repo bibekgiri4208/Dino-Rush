@@ -169,6 +169,7 @@ namespace DinoRush.Editor
             }
             Set(menu, "modePage", page.gameObject);
             Set(menu, "endlessMode", page.Find("Endless mode").GetComponent<Button>());
+            ForestModeCardBuilder.Apply(menu);
             EditorUtility.SetDirty(menu);
         }
 

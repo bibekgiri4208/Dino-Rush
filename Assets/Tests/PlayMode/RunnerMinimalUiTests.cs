@@ -243,6 +243,51 @@ namespace DinoRush.Tests
 
         private void NativeLayout() => game.ApplyScreenLayout(RunnerScreenLayout.Calculate(Screen.width, Screen.height, Screen.safeArea));
 
+        [UnityTest]
+        public IEnumerator IllustratedModesStayCompactAndReflowWithoutStartingTheRun()
+        {
+            Click("Forest Main Menu/Main menu buttons/Play");
+            Transform panel = root.Find("Forest Main Menu/Menu dialog/Moss framed dialog");
+            Transform modes = panel.Find("Mode selection page");
+            Button story = modes.Find("Story mode").GetComponent<Button>();
+            Button endless = modes.Find("Endless mode").GetComponent<Button>();
+            Assert.That(story.interactable, Is.False);
+            Assert.That(endless.interactable, Is.True);
+            Assert.That(story.transform.Find("Mode status").GetComponent<Text>().text, Is.EqualTo("COMING SOON"));
+            foreach (Vector2Int size in new[] { new Vector2Int(1280, 720), new Vector2Int(320, 568), new Vector2Int(1280, 720) })
+            {
+                bool portrait = size.x < size.y;
+                game.ApplyScreenLayout(RunnerScreenLayout.Calculate(size.x, size.y, new Rect(0, 0, size.x, size.y)));
+                yield return new WaitForSecondsRealtime(0.3f);
+                Assert.That(((RectTransform)panel).sizeDelta, Is.EqualTo(portrait ? new Vector2(600, 640) : new Vector2(560, 400)));
+                AssertCompactContents(panel);
+                Bounds left = RectTransformUtility.CalculateRelativeRectTransformBounds(panel, story.transform);
+                Bounds right = RectTransformUtility.CalculateRelativeRectTransformBounds(panel, endless.transform);
+                if (portrait) Assert.That(right.max.y, Is.LessThan(left.min.y));
+                else Assert.That(left.max.x, Is.LessThan(right.min.x));
+                foreach (Button button in new[] { story, endless })
+                {
+                    Image art = button.transform.Find("Mode illustration").GetComponent<Image>();
+                    Assert.That(art.sprite, Is.Not.Null);
+                    Assert.That(art.sprite.texture.filterMode, Is.EqualTo(FilterMode.Point));
+                    Assert.That(art.raycastTarget, Is.False);
+                    Assert.That(art.transform.Find("Trail dino").GetComponent<Image>().sprite, Is.Not.Null);
+                }
+                Assert.That(game.State, Is.EqualTo(ForestRunnerGame.RunState.Ready));
+                yield return RunnerDisplayCapture.Capture(portrait ? "compact-modes-portrait" : "compact-modes", size.x, size.y);
+            }
+            NativeLayout();
+            Click("Forest Main Menu/Menu dialog/Moss framed dialog/Mode selection page/Endless mode");
+            yield return null;
+            Assert.That(modes.gameObject.activeInHierarchy, Is.False);
+            Assert.That(GameObject.Find("Map selection panel"), Is.Not.Null);
+            Assert.That(game.State, Is.EqualTo(ForestRunnerGame.RunState.Ready));
+            Click("Forest Main Menu/Map selector/Map selection panel/Map selector back");
+            yield return new WaitForSecondsRealtime(0.3f);
+            Assert.That(modes.gameObject.activeInHierarchy, Is.True);
+            Assert.That(((RectTransform)panel).sizeDelta, Is.EqualTo(new Vector2(560, 400)));
+        }
+
         private void AssertRunningWithoutHints()
         {
             foreach (string name in new[] { "Jump", "Duck", "Controls", "Keyboard controls", "Duck/Drop hint", "Top left badge" })

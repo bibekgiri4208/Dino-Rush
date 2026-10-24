@@ -170,10 +170,6 @@ namespace DinoRush
                 Place("Forest Main Menu/Main menu buttons/" + menuButtons[i], 0, 84 - i * 120, 520, 104);
 
             const string dialog = "Forest Main Menu/Menu dialog/Moss framed dialog";
-            const string modes = dialog + "/Mode selection page";
-            Place(modes + "/Story mode", 0, 108, 500, 104);
-            Place(modes + "/Story availability", 0, 34, 500, 30);
-            Place(modes + "/Endless mode", 0, -90, 500, 104);
             const string custom = dialog + "/Customize page";
             Place(custom + "/Shop egg balance", 0, 428, 560, 30);
             const string product = custom + "/Mystery egg display";

@@ -1,3 +1,4 @@
+using System.IO;
 using NUnit.Framework;
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -9,6 +10,41 @@ namespace DinoRush.Tests
 {
     public sealed class RunnerMinimalUiAuthoringTests
     {
+        [Test]
+        public void EndlessMontageContainsCroppedSourcePixelsFromEveryMap()
+        {
+            var maps = AssetDatabase.LoadAssetAtPath<RunnerMapCatalog>("Assets/Generated/RunnerMaps/MapCatalog.asset");
+            var montage = new Texture2D(2, 2);
+            try
+            {
+                Assert.That(montage.LoadImage(File.ReadAllBytes("Assets/UI/ForestMenu/ModeEndless.png")), Is.True);
+                Assert.That(new Vector2(montage.width, montage.height), Is.EqualTo(new Vector2(320, 176)));
+                float stripWidth = 316f / maps.Count;
+                for (int i = 0; i < maps.Count; i++)
+                {
+                    Sprite preview = maps[i].preview;
+                    var source = new Texture2D(2, 2);
+                    try
+                    {
+                        source.LoadImage(File.ReadAllBytes(AssetDatabase.GetAssetPath(preview.texture)));
+                        Rect crop = preview.rect;
+                        float center = 2 + (i + 0.5f) * stripWidth;
+                        float scale = Mathf.Max((stripWidth + 24) / crop.width, 172f / crop.height);
+                        // Interior samples avoid the decorative angled seams and prove each real map is present.
+                        foreach (int y in new[] { 28, 76, 124, 150 })
+                        {
+                            int x = Mathf.FloorToInt(center);
+                            int sx = Mathf.FloorToInt(crop.center.x + (x + 0.5f - center) / scale);
+                            int sy = Mathf.FloorToInt(crop.yMax - 1 - (y - 2) / scale);
+                            Assert.That((Color32)montage.GetPixel(x, 175 - y), Is.EqualTo((Color32)source.GetPixel(sx, sy)), maps[i].displayName);
+                        }
+                    }
+                    finally { Object.DestroyImmediate(source); }
+                }
+            }
+            finally { Object.DestroyImmediate(montage); }
+        }
+
         [Test]
         public void SceneSavesFocusedForestThemedCardsAndHiddenLegacyInstructions()
         {
@@ -30,6 +66,20 @@ namespace DinoRush.Tests
                 Transform root = game.transform.Find("Forest runner UI/16 by 9 safe content");
                 Assert.That(((RectTransform)root.Find("Forest Pause Menu")).sizeDelta, Is.EqualTo(new Vector2(420, 336)));
                 Assert.That(((RectTransform)root.Find("Forest Main Menu/Menu dialog/Moss framed dialog")).sizeDelta, Is.EqualTo(new Vector2(480, 352)));
+                Transform modes = root.Find("Forest Main Menu/Menu dialog/Moss framed dialog/Mode selection page");
+                foreach (string name in new[] { "Story mode", "Endless mode" })
+                {
+                    Transform card = modes.Find(name);
+                    Assert.That(((RectTransform)card).sizeDelta, Is.EqualTo(new Vector2(236, 244)));
+                    Image art = card.Find("Mode illustration").GetComponent<Image>();
+                    Assert.That(art.sprite.name, Is.EqualTo(name == "Story mode" ? "ModeStory" : "ModeEndless"));
+                    Assert.That(art.sprite.rect.size, Is.EqualTo(name == "Story mode" ? new Vector2(160, 88) : new Vector2(320, 176)));
+                    Assert.That(art.sprite.texture.filterMode, Is.EqualTo(FilterMode.Point));
+                    Assert.That(art.raycastTarget, Is.False);
+                    Assert.That(art.transform.Find("Trail dino").gameObject.activeSelf, Is.EqualTo(name == "Story mode"));
+                    Assert.That(card.Find("Mode status").GetComponent<Text>().text,
+                        Is.EqualTo(name == "Story mode" ? "COMING SOON" : "CHOOSE A MAP  >"));
+                }
                 foreach (string path in new[] { "Keyboard controls", "Controls", "Duck/Drop hint", "Menu card/Description", "Menu card/Result",
                     "Menu card/Shortcut", "Forest Pause Menu/Pause description", "Forest Pause Menu/Pause shortcut" })
                     Assert.That(root.Find(path).gameObject.activeSelf, Is.False, path);
