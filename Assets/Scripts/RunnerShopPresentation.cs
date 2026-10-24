@@ -38,7 +38,7 @@ namespace DinoRush
         private readonly Dictionary<Texture2D, Sprite[]> frames = new Dictionary<Texture2D, Sprite[]>();
         private RunnerDinoRoster.Dino recipient;
         private RunnerEggHatchCatalog.Egg egg;
-        private RunnerAudio audio;
+        private RunnerAudio audioCues;
         private Action closed;
         private int reward, total;
         private bool unlocked, bound, crackPlayed, hatchPlayed;
@@ -60,7 +60,7 @@ namespace DinoRush
 
         public void Initialize(RunnerAudio cues, Action onClosed)
         {
-            audio = cues;
+            audioCues = cues;
             closed = onClosed;
             if (!bound && continueButton != null)
             {
@@ -143,8 +143,8 @@ namespace DinoRush
         {
             if (!IsShowing) return;
             elapsed += Mathf.Max(0, dt);
-            if (elapsed >= CrackTime && !crackPlayed) { crackPlayed = true; audio?.EggCrack(); }
-            if (elapsed >= RewardTime && !hatchPlayed) { hatchPlayed = true; audio?.EggHatch(); }
+            if (elapsed >= CrackTime && !crackPlayed) { crackPlayed = true; audioCues?.EggCrack(); }
+            if (elapsed >= RewardTime && !hatchPlayed) { hatchPlayed = true; audioCues?.EggHatch(); }
             RenderReveal();
         }
 
@@ -184,7 +184,7 @@ namespace DinoRush
             if (count != DisplayedFragments && elapsed - lastTick > 0.065f && elapsed < Duration)
             {
                 lastTick = elapsed;
-                audio?.Pickup();
+                audioCues?.Pickup();
             }
             DisplayedFragments = count;
             amount.text = "+" + count;

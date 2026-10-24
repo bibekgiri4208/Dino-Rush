@@ -28,6 +28,8 @@ namespace DinoRush.Tests
                 foreach (string field in new[] { "pausedBest", "resultScore", "resultBest" })
                     Assert.That(hud.FindPropertyRelative(field).objectReferenceValue, Is.Not.Null, field);
                 Transform root = game.transform.Find("Forest runner UI/16 by 9 safe content");
+                Assert.That(((RectTransform)root.Find("Forest Pause Menu")).sizeDelta, Is.EqualTo(new Vector2(420, 336)));
+                Assert.That(((RectTransform)root.Find("Forest Main Menu/Menu dialog/Moss framed dialog")).sizeDelta, Is.EqualTo(new Vector2(480, 352)));
                 foreach (string path in new[] { "Keyboard controls", "Controls", "Duck/Drop hint", "Menu card/Description", "Menu card/Result",
                     "Menu card/Shortcut", "Forest Pause Menu/Pause description", "Forest Pause Menu/Pause shortcut" })
                     Assert.That(root.Find(path).gameObject.activeSelf, Is.False, path);

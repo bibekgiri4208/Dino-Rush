@@ -8,6 +8,24 @@ namespace DinoRush.Editor
     /// <summary>Repairs the existing hierarchy in place; no scene objects or artwork are replaced.</summary>
     public static class ForestUiRepair
     {
+        [MenuItem("Dino Rush/Compact Utility Menus")]
+        public static void CompactUtilityMenus()
+        {
+            if (Application.isPlaying) return;
+            if (!Application.isBatchMode && !EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
+            var scene = EditorSceneManager.OpenScene("Assets/Scenes/ForestRun.unity");
+            ForestRunnerGame game = Object.FindAnyObjectByType<ForestRunnerGame>();
+            ForestMainMenu menu = game.GetComponentInChildren<ForestMainMenu>(true);
+            Transform panel = menu.transform.Find("Menu dialog/Moss framed dialog");
+            var available = new Vector2(1280, 720);
+            RunnerCompactMenus.ApplyDialog(panel, RunnerCompactMenus.DialogKind.Quit, false, available);
+            menu.ApplyDialogLayout(false, available);
+            RunnerCompactMenus.ApplyPause(game.transform.Find("Forest runner UI/16 by 9 safe content/Forest Pause Menu"), false, available);
+            EditorSceneManager.MarkSceneDirty(scene);
+            EditorSceneManager.SaveScene(scene);
+            Debug.Log("Saved compact Quit, Options/SFX and Pause menus. Shop, hatch reveal, results and map artwork were preserved.");
+        }
+
         [MenuItem("Dino Rush/Fix Main Menu Buttons")]
         public static void RepairButtonsScene()
         {

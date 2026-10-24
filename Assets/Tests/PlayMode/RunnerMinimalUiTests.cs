@@ -16,8 +16,8 @@ namespace DinoRush.Tests
         private ForestRunnerGame game;
         private Transform root;
         private RunnerHud hud;
-        private bool hadBest, hadMap;
-        private int oldBest;
+        private bool hadBest, hadMap, hadSound;
+        private int oldBest, oldSound;
         private string oldMap;
 
         [UnitySetUp]
@@ -27,6 +27,8 @@ namespace DinoRush.Tests
             oldBest = PlayerPrefs.GetInt("DinoRush.Forest.HighScore");
             hadMap = PlayerPrefs.HasKey(RunnerMapCatalog.SelectionKey);
             oldMap = PlayerPrefs.GetString(RunnerMapCatalog.SelectionKey);
+            hadSound = PlayerPrefs.HasKey("DinoRush.Muted");
+            oldSound = PlayerPrefs.GetInt("DinoRush.Muted");
             yield return SceneManager.LoadSceneAsync("ForestRun");
             game = Object.FindAnyObjectByType<ForestRunnerGame>();
             game.enabled = false;
@@ -45,6 +47,8 @@ namespace DinoRush.Tests
             else PlayerPrefs.DeleteKey("DinoRush.Forest.HighScore");
             if (hadMap) PlayerPrefs.SetString(RunnerMapCatalog.SelectionKey, oldMap);
             else PlayerPrefs.DeleteKey(RunnerMapCatalog.SelectionKey);
+            if (hadSound) PlayerPrefs.SetInt("DinoRush.Muted", oldSound);
+            else PlayerPrefs.DeleteKey("DinoRush.Muted");
             PlayerPrefs.Save();
         }
 
@@ -141,6 +145,103 @@ namespace DinoRush.Tests
             Assert.That(help.gameObject.activeInHierarchy, Is.True);
             Assert.That(help.text, Does.Contain("DOUBLE JUMP").And.Contain("DUCK").And.Contain("PAUSE"));
         }
+
+        [UnityTest]
+        public IEnumerator UtilityDialogsFitTheirContentAndRestoreTheLargeShopAfterSwitchingAndRotation()
+        {
+            Transform dialog = root.Find("Forest Main Menu/Menu dialog/Moss framed dialog");
+            var sizes = new[] { new Vector2Int(1280, 720), new Vector2Int(360, 800) };
+            foreach (Vector2Int size in sizes)
+            {
+                bool portrait = size.x < size.y;
+                RunnerScreenLayout layout = RunnerScreenLayout.Calculate(size.x, size.y, new Rect(0, 0, size.x, size.y));
+                // Pointer raycasts use the real Game view. Virtual dimensions are for layout/capture assertions.
+                NativeLayout();
+                Click("Forest Main Menu/Main menu buttons/Options");
+                game.ApplyScreenLayout(layout);
+                yield return new WaitForSecondsRealtime(0.3f);
+                Assert.That(((RectTransform)dialog).sizeDelta, Is.EqualTo(portrait ? new Vector2(560, 440) : new Vector2(480, 352)));
+                AssertCompactContents(dialog);
+                NativeLayout();
+                int soundBefore = PlayerPrefs.GetInt("DinoRush.Muted");
+                Click("Forest Main Menu/Menu dialog/Moss framed dialog/Options page/Toggle sound effects");
+                Assert.That(PlayerPrefs.GetInt("DinoRush.Muted"), Is.EqualTo(1 - soundBefore));
+                Assert.That(dialog.Find("Options page/Toggle sound effects").GetComponentInChildren<Text>().text,
+                    Is.EqualTo(soundBefore == 0 ? "SFX: OFF" : "SFX: ON"));
+                Click("Forest Main Menu/Menu dialog/Moss framed dialog/Options page/Toggle sound effects");
+                yield return RunnerDisplayCapture.Capture(portrait ? "compact-options-portrait" : "compact-options", size.x, size.y);
+                NativeLayout();
+                Click("Forest Main Menu/Menu dialog/Moss framed dialog/Back to main menu");
+                yield return null; // Re-enabled title buttons register with the raycaster on the next UI frame.
+                Click("Forest Main Menu/Main menu buttons/Quit");
+                game.ApplyScreenLayout(layout);
+                yield return new WaitForSecondsRealtime(0.3f);
+                Assert.That(((RectTransform)dialog).sizeDelta, Is.EqualTo(portrait ? new Vector2(560, 320) : new Vector2(448, 272)));
+                Transform back = dialog.Find("Back to main menu");
+                Assert.That(back.GetComponentInChildren<Text>().text, Is.EqualTo("CANCEL"));
+                Assert.That(((RectTransform)back).anchoredPosition.x, Is.LessThan(0));
+                Assert.That(((RectTransform)dialog.Find("Quit confirmation page/Confirm quit")).anchoredPosition.x, Is.GreaterThan(0));
+                AssertCompactContents(dialog);
+                yield return RunnerDisplayCapture.Capture(portrait ? "compact-quit-portrait" : "compact-quit", size.x, size.y);
+                NativeLayout();
+                Click("Forest Main Menu/Menu dialog/Moss framed dialog/Back to main menu");
+                yield return null;
+                Click("Forest Main Menu/Main menu buttons/Shop");
+                game.ApplyScreenLayout(layout);
+                yield return null;
+                Assert.That(((RectTransform)dialog).sizeDelta, Is.EqualTo(portrait ? new Vector2(620, 1080) : new Vector2(680, 680)));
+                Assert.That(back.GetComponentInChildren<Text>().text, Is.EqualTo("BACK"));
+                NativeLayout();
+                Click("Forest Main Menu/Menu dialog/Moss framed dialog/Back to main menu");
+                yield return null;
+            }
+        }
+
+        [UnityTest]
+        public IEnumerator CompactPauseSurvivesRotationAndKeepsReadableTappableControlsAndRunProgress()
+        {
+            game.StartRun();
+            Set("distance", 1234f);
+            hud.UpdateScore(1234, 5678, 0, RunnerRules.Speed(0));
+            game.TogglePause();
+            Transform pause = root.Find("Forest Pause Menu");
+            foreach (Vector2Int size in new[] { new Vector2Int(1280, 720), new Vector2Int(320, 568), new Vector2Int(1280, 720) })
+            {
+                bool portrait = size.x < size.y;
+                game.ApplyScreenLayout(RunnerScreenLayout.Calculate(size.x, size.y, new Rect(0, 0, size.x, size.y)));
+                yield return new WaitForSecondsRealtime(0.3f);
+                Assert.That(((RectTransform)pause).sizeDelta, Is.EqualTo(portrait ? new Vector2(520, 448) : new Vector2(420, 336)));
+                foreach (Button button in pause.GetComponentsInChildren<Button>())
+                    Assert.That(((RectTransform)button.transform).rect.height, Is.GreaterThanOrEqualTo(portrait ? 100 : 48));
+                AssertCompactContents(pause);
+                Assert.That(game.Score, Is.EqualTo(1234));
+                Assert.That(game.State, Is.EqualTo(ForestRunnerGame.RunState.Paused));
+                yield return RunnerDisplayCapture.Capture(portrait ? "compact-pause-portrait" : "compact-pause", size.x, size.y);
+            }
+            Click("Forest Pause Menu/Resume run");
+            Assert.That(game.State, Is.EqualTo(ForestRunnerGame.RunState.Running));
+            Assert.That(game.Score, Is.EqualTo(1234));
+        }
+
+        private static void AssertCompactContents(Transform panel)
+        {
+            Rect bounds = ((RectTransform)panel).rect;
+            foreach (Text text in panel.GetComponentsInChildren<Text>())
+            {
+                Assert.That(text.preferredWidth, Is.LessThanOrEqualTo(text.rectTransform.rect.width + 1), text.name);
+                Assert.That(text.preferredHeight, Is.LessThanOrEqualTo(text.rectTransform.rect.height + 1), text.name);
+            }
+            foreach (Button button in panel.GetComponentsInChildren<Button>())
+            {
+                Bounds buttonBounds = RectTransformUtility.CalculateRelativeRectTransformBounds(panel, button.transform);
+                Assert.That(buttonBounds.min.x, Is.GreaterThanOrEqualTo(bounds.xMin - 1), button.name);
+                Assert.That(buttonBounds.max.x, Is.LessThanOrEqualTo(bounds.xMax + 1), button.name);
+                Assert.That(buttonBounds.min.y, Is.GreaterThanOrEqualTo(bounds.yMin - 1), button.name);
+                Assert.That(buttonBounds.max.y, Is.LessThanOrEqualTo(bounds.yMax + 1), button.name);
+            }
+        }
+
+        private void NativeLayout() => game.ApplyScreenLayout(RunnerScreenLayout.Calculate(Screen.width, Screen.height, Screen.safeArea));
 
         private void AssertRunningWithoutHints()
         {

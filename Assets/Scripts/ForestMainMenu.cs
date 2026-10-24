@@ -57,11 +57,24 @@ namespace DinoRush
         private RunnerDinoRoster dinoRoster;
         private bool dinosBound;
         private bool bound;
+        private bool dialogPortrait;
+        private Vector2 dialogAvailable = new Vector2(1280, 720);
 
         public bool DialogOpen => (dialog != null && dialog.activeInHierarchy) || (mapPage != null && mapPage.activeInHierarchy);
         public bool HasMapSelector => mapPage != null;
         public bool HasModeSelector => modePage != null;
         public RunnerShopPresentation ShopPresentation => shopPresentation;
+
+        public void ApplyDialogLayout(bool portrait, Vector2 available)
+        {
+            dialogPortrait = portrait;
+            dialogAvailable = available;
+            if (dialogTitle == null) return;
+            var kind = quitPage != null && quitPage.activeSelf ? RunnerCompactMenus.DialogKind.Quit :
+                customizePage != null && customizePage.activeSelf ? RunnerCompactMenus.DialogKind.Shop :
+                modePage != null && modePage.activeSelf ? RunnerCompactMenus.DialogKind.Mode : RunnerCompactMenus.DialogKind.Options;
+            RunnerCompactMenus.ApplyDialog(dialogTitle.transform.parent, kind, portrait, available);
+        }
 
         public void OpenModeSelector()
         {
@@ -192,6 +205,7 @@ namespace DinoRush
             shopPresentation = page.GetComponent<RunnerShopPresentation>();
             if (shopPresentation == null) shopPresentation = page.gameObject.AddComponent<RunnerShopPresentation>();
             shopPresentation.EnsureUi(transform, font, dialogTitle.transform.parent.GetComponent<Image>().sprite, back.GetComponent<Image>().sprite);
+            ApplyDialogLayout(dialogPortrait, dialogAvailable);
         }
 
         private static Text ShopLabel(Transform parent, string name, string caption, Font font, int size,
@@ -326,6 +340,7 @@ namespace DinoRush
             quitPage.SetActive(page == quitPage);
             if (modePage != null) modePage.SetActive(page == modePage);
             dialogTitle.text = heading;
+            ApplyDialogLayout(dialogPortrait, dialogAvailable);
         }
 
         public void CloseDialog()
@@ -340,6 +355,7 @@ namespace DinoRush
             quitPage.SetActive(false);
             if (modePage != null) modePage.SetActive(false);
             dialogTitle.text = "OPTIONS";
+            ApplyDialogLayout(dialogPortrait, dialogAvailable);
         }
 
         private static void QuitGame()

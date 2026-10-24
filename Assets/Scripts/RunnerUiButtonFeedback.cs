@@ -86,6 +86,25 @@ namespace DinoRush
 
         public void SetHeld(bool value) => held = value && CanInteract;
 
+        /// <summary>Adopt a new resting child layout after a dialog reflow, without restoring old offsets.</summary>
+        public void RefreshContentLayout()
+        {
+            if (!initialized) return;
+            hovering.Clear();
+            pressing.Clear();
+            held = false;
+            clickTime = hover = lift = 0;
+            visualScale = 1;
+            for (int i = 0; i < content.Length; i++)
+            {
+                if (content[i] == null) continue;
+                positions[i] = content[i].anchoredPosition;
+                scales[i] = content[i].localScale;
+            }
+            SetGlow(0);
+            if (graphic != null) graphic.SetVerticesDirty();
+        }
+
         private void Update()
         {
             if (!initialized) return;

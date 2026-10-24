@@ -58,6 +58,7 @@ namespace DinoRush.Editor
             Control(pause.Find("Resume run"), primaryArt, "RESUME", 0, -70, 384, 56, true);
             Control(pause.Find("Restart run"), secondaryArt, "RESTART", -100, -136, 184, 48);
             Control(pause.Find("Quit run"), secondaryArt, "MAIN MENU", 100, -136, 184, 48);
+            RunnerCompactMenus.ApplyPause(pause, false, new Vector2(1280, 720));
 
             Label(results.Find("Eyebrow"), "FOREST", 0, 158, 384, 24, 12, Gold);
             Label(results.Find("Title"), "GAME OVER", 0, 116, 384, 48, 28, Cream);

@@ -119,6 +119,8 @@ namespace DinoRush
                     ShiftVertical(path, -extra);
             }
             Fit("Forest Main Menu/Hatch reveal/Hatch reward panel", layout.UiSize);
+            root.Find("Forest Main Menu")?.GetComponent<ForestMainMenu>()?.ApplyDialogLayout(layout.Portrait, layout.UiSize);
+            RunnerCompactMenus.ApplyPause(root.Find("Forest Pause Menu"), layout.Portrait, layout.UiSize);
 
             Rect world = layout.WorldPixels;
             Matte(0, Rect.MinMaxRect(0, 0, world.xMin, layout.ScreenSize.y), layout);
@@ -168,13 +170,6 @@ namespace DinoRush
                 Place("Forest Main Menu/Main menu buttons/" + menuButtons[i], 0, 84 - i * 120, 520, 104);
 
             const string dialog = "Forest Main Menu/Menu dialog/Moss framed dialog";
-            Place(dialog, 0, 0, 620, 1080);
-            Place(dialog + "/Dialog heading", 0, 484, 560, 48);
-            Place(dialog + "/Back to main menu", 0, -476, 520, 104);
-            Place(dialog + "/Options page/Toggle sound effects", 0, 70, 500, 104);
-            Place(dialog + "/Options page/Controls help", 0, -90, 520, 144);
-            FontSize(dialog + "/Options page/Controls help", 16);
-            Place(dialog + "/Quit confirmation page/Confirm quit", 0, -60, 500, 104);
             const string modes = dialog + "/Mode selection page";
             Place(modes + "/Story mode", 0, 108, 500, 104);
             Place(modes + "/Story availability", 0, 34, 500, 30);
@@ -243,20 +238,12 @@ namespace DinoRush
             Place(maps + "/Start selected map", 126, -306 - extra * 0.5f, 268, 72);
             Place(maps + "/Start selected map/Label", 0, 0, 244, 40);
 
-            Place("Forest Pause Menu", 0, 0, 600, 520);
-            Place("Forest Pause Menu/Pause eyebrow", 0, 204);
-            Place("Forest Pause Menu/Pause title", 0, 156);
-            Place("Forest Pause Menu/Resume run", 0, -80, 504, 88);
-            Place("Forest Pause Menu/Restart run", -136, -184, 232, 80);
-            Place("Forest Pause Menu/Quit run", 136, -184, 232, 80);
             Place("Menu card", 0, 0, 600, 560);
             Place("Menu card/Eyebrow", 0, 220);
             Place("Menu card/Title", 0, 168);
             Place("Menu card/Primary action", 0, -100, 504, 88);
             Place("Menu card/Results main menu", 0, -204, 504, 80);
-            Fit(dialog, size);
             Fit(maps, size);
-            Fit("Forest Pause Menu", size);
             Fit("Menu card", size);
         }
 
