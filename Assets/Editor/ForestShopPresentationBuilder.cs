@@ -34,8 +34,8 @@ namespace DinoRush.Editor
             RunnerEggHatchCatalog catalog = Catalog();
             RunnerShopPresentation presentation = menu.ShopPresentation;
             presentation.SetCatalog(catalog);
-            presentation.SetPreview(Ids.Select(id =>
-                AssetDatabase.LoadAllAssetsAtPath(AssetDatabase.GetAssetPath(catalog.Find(id).move))
+            presentation.SetPreview(Enumerable.Range(0, catalog.Count).Select(i =>
+                AssetDatabase.LoadAllAssetsAtPath(AssetDatabase.GetAssetPath(catalog[i].move))
                     .OfType<Sprite>().OrderBy(sprite => sprite.name).First()).ToArray());
             EditorUtility.SetDirty(presentation);
             EditorUtility.SetDirty(menu);
@@ -44,20 +44,26 @@ namespace DinoRush.Editor
         private static RunnerEggHatchCatalog Catalog()
         {
             var existing = AssetDatabase.LoadAssetAtPath<RunnerEggHatchCatalog>(CatalogPath);
-            if (existing != null) return existing;
-            var catalog = ScriptableObject.CreateInstance<RunnerEggHatchCatalog>();
+            var catalog = existing != null ? existing : ScriptableObject.CreateInstance<RunnerEggHatchCatalog>();
             var data = new SerializedObject(catalog);
             SerializedProperty eggs = data.FindProperty("eggs");
-            eggs.arraySize = Ids.Length;
-            Color[] accents = { new Color32(240, 127, 118, 255), new Color32(255, 217, 104, 255), new Color32(170, 221, 111, 255) };
-            for (int i = 0; i < Ids.Length; i++)
+            if (existing == null) eggs.arraySize = 0;
+            Color[] accents = { new Color32(240, 127, 118, 255), new Color32(255, 217, 104, 255),
+                new Color32(170, 221, 111, 255), new Color32(195, 169, 245, 255), new Color32(244, 147, 206, 255),
+                new Color32(143, 172, 191, 255), new Color32(104, 192, 246, 255), new Color32(221, 222, 208, 255),
+                new Color32(164, 131, 255, 255) };
+            string[] ids = Ids.Concat(ForestDinoAnimationBuilder.Names.Select(name => name.ToLowerInvariant())).ToArray();
+            for (int i = 0; i < ids.Length; i++)
             {
-                SerializedProperty egg = eggs.GetArrayElementAtIndex(i);
-                egg.FindPropertyRelative("dinoId").stringValue = Ids[i];
+                if (Enumerable.Range(0, eggs.arraySize).Any(index => eggs.GetArrayElementAtIndex(index).FindPropertyRelative("dinoId").stringValue == ids[i])) continue;
+                int index = eggs.arraySize++;
+                SerializedProperty egg = eggs.GetArrayElementAtIndex(index);
+                egg.FindPropertyRelative("dinoId").stringValue = ids[i];
                 egg.FindPropertyRelative("accent").colorValue = accents[i];
                 foreach (string stage in new[] { "move", "crack", "hatch" })
                 {
-                    string path = "Assets/2D Sprites/dino/" + Folders[i] + "/" + stage + ".png";
+                    string folder = i < Folders.Length ? Folders[i] : ids[i] + "/egg";
+                    string path = "Assets/2D Sprites/dino/" + folder + "/" + stage + ".png";
                     Texture2D sheet = AssetDatabase.LoadAssetAtPath<Texture2D>(path);
                     if (sheet == null || sheet.height != RunnerEggHatchCatalog.CellSize || sheet.width != 4 * RunnerEggHatchCatalog.CellSize)
                         throw new System.InvalidOperationException("Expected the original four-frame egg strip: " + path);
@@ -65,7 +71,8 @@ namespace DinoRush.Editor
                 }
             }
             data.ApplyModifiedPropertiesWithoutUndo();
-            AssetDatabase.CreateAsset(catalog, CatalogPath);
+            if (existing == null) AssetDatabase.CreateAsset(catalog, CatalogPath);
+            EditorUtility.SetDirty(catalog);
             return catalog;
         }
     }

@@ -1,0 +1,741 @@
+fileFormatVersion: 2
+guid: 06c69a601b75edf4b846cbf9aa499071
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -3043072304409509110
+    second: kira_runner_0
+  - first:
+      213: 2876546879146107049
+    second: kira_runner_1
+  - first:
+      213: -8497856179164764101
+    second: kira_runner_2
+  - first:
+      213: -6259093454375266990
+    second: kira_runner_3
+  - first:
+      213: 2572431593252743088
+    second: kira_runner_4
+  - first:
+      213: -4350970801467357614
+    second: kira_runner_5
+  - first:
+      213: 2699916292982545901
+    second: kira_runner_6
+  - first:
+      213: 5837505007853142965
+    second: kira_runner_7
+  - first:
+      213: 5607100678090175443
+    second: kira_runner_8
+  - first:
+      213: -6582903487883496084
+    second: kira_runner_9
+  - first:
+      213: 4487702220932117875
+    second: kira_runner_10
+  - first:
+      213: -5615880059296756495
+    second: kira_runner_11
+  - first:
+      213: 3852006497608549537
+    second: kira_runner_12
+  - first:
+      213: -4334689655102091059
+    second: kira_runner_13
+  - first:
+      213: 8516201938574556103
+    second: kira_runner_14
+  - first:
+      213: 7348258740688828724
+    second: kira_runner_15
+  - first:
+      213: -3436494696006582974
+    second: kira_runner_16
+  - first:
+      213: 4862727909017931370
+    second: kira_runner_17
+  - first:
+      213: -3159106249459395668
+    second: kira_runner_18
+  - first:
+      213: -8394981534247864924
+    second: kira_runner_19
+  - first:
+      213: 164380558373883569
+    second: kira_runner_20
+  - first:
+      213: 5441763033291918467
+    second: kira_runner_21
+  - first:
+      213: -8829472815237656372
+    second: kira_runner_22
+  - first:
+      213: 3814713185143720931
+    second: kira_runner_23
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 1
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 24
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: kira_runner_0
+      rect:
+        serializedVersion: 2
+        x: 5
+        y: 2
+        width: 17
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a0387ddacd5d4c5d0800000000000000
+      internalID: -3043072304409509110
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: kira_runner_1
+      rect:
+        serializedVersion: 2
+        x: 29
+        y: 2
+        width: 17
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9a0234f552c8be720800000000000000
+      internalID: 2876546879146107049
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: kira_runner_2
+      rect:
+        serializedVersion: 2
+        x: 53
+        y: 2
+        width: 17
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b38a68024dc811a80800000000000000
+      internalID: -8497856179164764101
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: kira_runner_3
+      rect:
+        serializedVersion: 2
+        x: 77
+        y: 2
+        width: 17
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2555df35aab3329a0800000000000000
+      internalID: -6259093454375266990
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: kira_runner_4
+      rect:
+        serializedVersion: 2
+        x: 101
+        y: 3
+        width: 17
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0b762dc97ec13b320800000000000000
+      internalID: 2572431593252743088
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: kira_runner_5
+      rect:
+        serializedVersion: 2
+        x: 125
+        y: 2
+        width: 17
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2560176cb1f3e93c0800000000000000
+      internalID: -4350970801467357614
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: kira_runner_6
+      rect:
+        serializedVersion: 2
+        x: 149
+        y: 2
+        width: 17
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ded938e4097087520800000000000000
+      internalID: 2699916292982545901
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: kira_runner_7
+      rect:
+        serializedVersion: 2
+        x: 173
+        y: 3
+        width: 17
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5b386af40ebf20150800000000000000
+      internalID: 5837505007853142965
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: kira_runner_8
+      rect:
+        serializedVersion: 2
+        x: 197
+        y: 2
+        width: 17
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3d3ba69eb5c60dd40800000000000000
+      internalID: 5607100678090175443
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: kira_runner_9
+      rect:
+        serializedVersion: 2
+        x: 221
+        y: 2
+        width: 17
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c65360ec724d4a4a0800000000000000
+      internalID: -6582903487883496084
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: kira_runner_10
+      rect:
+        serializedVersion: 2
+        x: 245
+        y: 2
+        width: 17
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 375f360a465874e30800000000000000
+      internalID: 4487702220932117875
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: kira_runner_11
+      rect:
+        serializedVersion: 2
+        x: 269
+        y: 2
+        width: 17
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1fcca6c17d26012b0800000000000000
+      internalID: -5615880059296756495
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: kira_runner_12
+      rect:
+        serializedVersion: 2
+        x: 293
+        y: 6
+        width: 17
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1a444723083157530800000000000000
+      internalID: 3852006497608549537
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: kira_runner_13
+      rect:
+        serializedVersion: 2
+        x: 317
+        y: 2
+        width: 17
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dc0541099b618d3c0800000000000000
+      internalID: -4334689655102091059
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: kira_runner_14
+      rect:
+        serializedVersion: 2
+        x: 341
+        y: 2
+        width: 17
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7cbba38da80af2670800000000000000
+      internalID: 8516201938574556103
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: kira_runner_15
+      rect:
+        serializedVersion: 2
+        x: 365
+        y: 2
+        width: 17
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 439ba6454624af560800000000000000
+      internalID: 7348258740688828724
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: kira_runner_16
+      rect:
+        serializedVersion: 2
+        x: 389
+        y: 2
+        width: 17
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 24d7304084e1f40d0800000000000000
+      internalID: -3436494696006582974
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: kira_runner_17
+      rect:
+        serializedVersion: 2
+        x: 413
+        y: 2
+        width: 17
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a6e4468f441eb7340800000000000000
+      internalID: 4862727909017931370
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: kira_runner_18
+      rect:
+        serializedVersion: 2
+        x: 437
+        y: 2
+        width: 17
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ca391419a999824d0800000000000000
+      internalID: -3159106249459395668
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: kira_runner_19
+      rect:
+        serializedVersion: 2
+        x: 459
+        y: 2
+        width: 17
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4a5313be5c80f7b80800000000000000
+      internalID: -8394981534247864924
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: kira_runner_20
+      rect:
+        serializedVersion: 2
+        x: 482
+        y: 2
+        width: 17
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1be0bd53f3ff74200800000000000000
+      internalID: 164380558373883569
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: kira_runner_21
+      rect:
+        serializedVersion: 2
+        x: 509
+        y: 2
+        width: 17
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 38c8737a5a6058b40800000000000000
+      internalID: 5441763033291918467
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: kira_runner_22
+      rect:
+        serializedVersion: 2
+        x: 531
+        y: 2
+        width: 17
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cc09acd4149677580800000000000000
+      internalID: -8829472815237656372
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: kira_runner_23
+      rect:
+        serializedVersion: 2
+        x: 554
+        y: 2
+        width: 17
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3eb8d704e6590f430800000000000000
+      internalID: 3814713185143720931
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      kira_runner_0: -3043072304409509110
+      kira_runner_1: 2876546879146107049
+      kira_runner_10: 4487702220932117875
+      kira_runner_11: -5615880059296756495
+      kira_runner_12: 3852006497608549537
+      kira_runner_13: -4334689655102091059
+      kira_runner_14: 8516201938574556103
+      kira_runner_15: 7348258740688828724
+      kira_runner_16: -3436494696006582974
+      kira_runner_17: 4862727909017931370
+      kira_runner_18: -3159106249459395668
+      kira_runner_19: -8394981534247864924
+      kira_runner_2: -8497856179164764101
+      kira_runner_20: 164380558373883569
+      kira_runner_21: 5441763033291918467
+      kira_runner_22: -8829472815237656372
+      kira_runner_23: 3814713185143720931
+      kira_runner_3: -6259093454375266990
+      kira_runner_4: 2572431593252743088
+      kira_runner_5: -4350970801467357614
+      kira_runner_6: 2699916292982545901
+      kira_runner_7: 5837505007853142965
+      kira_runner_8: 5607100678090175443
+      kira_runner_9: -6582903487883496084
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

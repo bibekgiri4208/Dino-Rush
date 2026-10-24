@@ -13,9 +13,9 @@ namespace DinoRush.Tests
         {
             var catalog = AssetDatabase.LoadAssetAtPath<RunnerEggHatchCatalog>("Assets/Generated/RunnerEggHatchCatalog.asset");
             Assert.That(catalog, Is.Not.Null);
-            Assert.That(catalog.Count, Is.EqualTo(3));
-            string[] ids = { "red", "yellow", "green" };
-            string[] folders = { "egg - 2", "egg - 3", "egg- 4" };
+            Assert.That(catalog.Count, Is.EqualTo(9));
+            string[] ids = { "red", "yellow", "green", "cole", "kira", "kuro", "loki", "mono", "sena" };
+            string[] folders = { "egg - 2", "egg - 3", "egg- 4", "cole/egg", "kira/egg", "kuro/egg", "loki/egg", "mono/egg", "sena/egg" };
             for (int i = 0; i < ids.Length; i++)
             {
                 var egg = catalog.Find(ids[i]);
@@ -45,7 +45,7 @@ namespace DinoRush.Tests
                 foreach (GameObject root in scene.GetRootGameObjects())
                     if ((menu = root.GetComponentInChildren<ForestMainMenu>(true)) != null) break;
                 Assert.That(menu.ShopPresentation, Is.Not.Null);
-                Assert.That(menu.ShopPresentation.Catalog.Count, Is.EqualTo(3));
+                Assert.That(menu.ShopPresentation.Catalog.Count, Is.EqualTo(9));
                 Assert.That(menu.ShopPresentation.transform.Find("Mystery egg display/Showcase egg").GetComponent<UnityEngine.UI.Image>().sprite, Is.Not.Null);
                 Assert.That(menu.transform.Find("Hatch reveal").gameObject.activeSelf, Is.False);
                 foreach (RunnerHatchGlowGraphic glow in menu.GetComponentsInChildren<RunnerHatchGlowGraphic>(true))

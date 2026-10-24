@@ -51,6 +51,7 @@ namespace DinoRush
             elapsed < HatchTime ? HatchStage.Crack : elapsed < RewardTime ? HatchStage.Hatch : HatchStage.Reward;
 
         public void SetCatalog(RunnerEggHatchCatalog value) => catalog = value;
+        public void RefreshLayout() { if (IsShowing) RenderReveal(); }
         public void SetPreview(Sprite[] sprites)
         {
             if (sprites.Length == 0) return;
@@ -230,7 +231,7 @@ namespace DinoRush
             foreach (Image side in companionEggs) side.color = new Color(1, 1, 1, 0.48f);
             productEgg = Picture("Showcase egg", display, -214, 0, 120);
             Label("Egg product title", display, "MYSTERY EGG", font, 18, 76, 42, 386, 30, Gold);
-            Label("Egg product description", display, "1-20 RANDOM FRAGMENTS\nONE DINO. ONE STEP CLOSER.", font, 11, 76, 0, 386, 44, Cream);
+            Label("Egg product description", display, "1-20 RANDOM FRAGMENTS\nA NEW DINO AWAITS.", font, 11, 76, 0, 386, 44, Cream);
             Label("Egg unlock requirement", display, "100 FRAGMENTS TO UNLOCK", font, 10, 76, -44, 386, 24, Cream);
 
             Transform overlay = Node("Hatch reveal", menuRoot);

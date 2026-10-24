@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2ac8350953c84a8d9a112f364ca26084, type: 3}
-  m_Name: ForestDinoRoster
+  m_Name: Forest Dino Roster
   m_EditorClassIdentifier: DinoRush::DinoRush.RunnerDinoRoster
   dinos:
   - id: blue
@@ -29,3 +29,27 @@ MonoBehaviour:
     displayName: Green
     sheet: {fileID: 2800000, guid: 065c75be80852714d8e07defc134c893, type: 3}
     portrait: {fileID: -8459571847589683294, guid: 065c75be80852714d8e07defc134c893, type: 3}
+  - id: cole
+    displayName: Cole
+    sheet: {fileID: 2800000, guid: 7c317c1b2cf018f48b0b6f9e1e8ca465, type: 3}
+    portrait: {fileID: 8793639957104055765, guid: 1697797af3a1f70449b02515e24da97e, type: 3}
+  - id: kira
+    displayName: Kira
+    sheet: {fileID: 2800000, guid: 06c69a601b75edf4b846cbf9aa499071, type: 3}
+    portrait: {fileID: 8793639957104055765, guid: 950fe1057930b8841b4acfb67477053e, type: 3}
+  - id: kuro
+    displayName: Kuro
+    sheet: {fileID: 2800000, guid: de3bb9ba2ff9eb449b793cac76506566, type: 3}
+    portrait: {fileID: 8793639957104055765, guid: 25c8178295b27064f8f141372f25b733, type: 3}
+  - id: loki
+    displayName: Loki
+    sheet: {fileID: 2800000, guid: e9af652547c0aec4ea7204ee01957526, type: 3}
+    portrait: {fileID: 8793639957104055765, guid: e7aac49654c67e24cadf42b69f6c2e47, type: 3}
+  - id: mono
+    displayName: Mono
+    sheet: {fileID: 2800000, guid: 693dc12c17811b0408322d9ae7f3199f, type: 3}
+    portrait: {fileID: 8793639957104055765, guid: 21e1c891ec0c7ad4fbd9a8a863194c22, type: 3}
+  - id: sena
+    displayName: Sena
+    sheet: {fileID: 2800000, guid: f1bd8f857f2cefc499d1d5b5531026e7, type: 3}
+    portrait: {fileID: 8793639957104055765, guid: 663e2d87fa2925c458eeef87af70f014, type: 3}

@@ -189,7 +189,7 @@ namespace DinoRush.Tests
                 Click("Forest Main Menu/Main menu buttons/Shop");
                 game.ApplyScreenLayout(layout);
                 yield return null;
-                Assert.That(((RectTransform)dialog).sizeDelta, Is.EqualTo(portrait ? new Vector2(620, 1080) : new Vector2(680, 680)));
+                Assert.That(((RectTransform)dialog).sizeDelta, Is.EqualTo(portrait ? new Vector2(640, 1240) : new Vector2(960, 644)));
                 Assert.That(back.GetComponentInChildren<Text>().text, Is.EqualTo("BACK"));
                 NativeLayout();
                 Click("Forest Main Menu/Menu dialog/Moss framed dialog/Back to main menu");

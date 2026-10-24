@@ -50,6 +50,8 @@ namespace DinoRush
         [SerializeField] private Text shopResult;
         [SerializeField] private Text[] dinoFragments = new Text[0];
         [SerializeField] private RunnerShopPresentation shopPresentation;
+        [SerializeField] private RunnerShopCollection shopCollection;
+        private int pendingRewardIndex = -1;
         private RunnerShopProgress shop;
         private int selectedDino;
         private RunnerMapCatalog mapCatalog;
@@ -64,6 +66,7 @@ namespace DinoRush
         public bool HasMapSelector => mapPage != null;
         public bool HasModeSelector => modePage != null;
         public RunnerShopPresentation ShopPresentation => shopPresentation;
+        public RunnerShopCollection ShopCollection => shopCollection;
 
         public void ApplyDialogLayout(bool portrait, Vector2 available)
         {
@@ -138,6 +141,7 @@ namespace DinoRush
             Bind(customize, () =>
             {
                 RefreshShop();
+                shopCollection?.ShowIndex(selectedDino);
                 OpenDialog("SHOP", customizePage);
             });
             Bind(options, () => OpenDialog("OPTIONS", optionsPage));
@@ -153,7 +157,13 @@ namespace DinoRush
         {
             shop = progress;
             EnsureShopUi();
-            shopPresentation?.Initialize(audio, RefreshShop);
+            shopCollection?.Initialize(shop);
+            shopPresentation?.Initialize(audio, () =>
+            {
+                if (pendingRewardIndex >= 0) shopCollection?.ShowIndex(pendingRewardIndex);
+                pendingRewardIndex = -1;
+                RefreshShop();
+            });
         }
 
         // Shared by scene authoring and runtime fallback for older scenes. Existing bindings are retained.
@@ -161,7 +171,7 @@ namespace DinoRush
         {
             if (customize == null || customizePage == null || dinoChoices.Length == 0) return;
             if (Application.isPlaying && buyMysteryEgg != null && shopBalance != null && shopResult != null &&
-                dinoFragments.Length == dinoChoices.Length && shopPresentation != null) return; // Preserve editable saved layouts.
+                dinoFragments.Length == dinoChoices.Length && shopPresentation != null && shopCollection != null) return; // Preserve editable saved layouts.
             customize.name = "Shop";
             customize.GetComponentInChildren<Text>(true).text = "SHOP";
             Font font = selectedDinoLabel.font;
@@ -205,6 +215,9 @@ namespace DinoRush
             shopPresentation = page.GetComponent<RunnerShopPresentation>();
             if (shopPresentation == null) shopPresentation = page.gameObject.AddComponent<RunnerShopPresentation>();
             shopPresentation.EnsureUi(transform, font, dialogTitle.transform.parent.GetComponent<Image>().sprite, back.GetComponent<Image>().sprite);
+            shopCollection = page.GetComponent<RunnerShopCollection>();
+            if (shopCollection == null) shopCollection = page.gameObject.AddComponent<RunnerShopCollection>();
+            shopCollection.EnsureUi(dinoChoices, font, back.GetComponent<Image>().sprite);
             ApplyDialogLayout(dialogPortrait, dialogAvailable);
         }
 
@@ -248,6 +261,7 @@ namespace DinoRush
             {
                 shopResult.text = "+" + fragments + " " + dinoRoster[index].DisplayName.ToUpperInvariant() + " FRAGMENTS!\n" +
                     (unlocked ? "DINO UNLOCKED! TAP ITS CARD TO SELECT" : shop.Fragments(index) + " / 100 TO UNLOCK");
+                pendingRewardIndex = index;
                 shopPresentation?.Play(dinoRoster[index], fragments, shop.Fragments(index), unlocked);
             }
             RefreshShop();
@@ -288,14 +302,15 @@ namespace DinoRush
             {
                 bool unlocked = shop == null || shop.IsUnlocked(i);
                 dinoPortraits[i].sprite = dinoRoster[i].Portrait;
-                dinoPortraits[i].color = unlocked ? Color.white : new Color(0.45f, 0.5f, 0.5f, 1f);
+                dinoPortraits[i].color = unlocked ? Color.white : new Color(0.75f, 0.8f, 0.78f, 1f);
                 dinoChoices[i].interactable = unlocked;
                 if (i < dinoFragments.Length)
-                    dinoFragments[i].text = unlocked ? "UNLOCKED" : shop.Fragments(i) + " / 100\nLOCKED";
+                    dinoFragments[i].text = unlocked ? "OWNED" : shop.Fragments(i) + " / 100";
                 dinoCaptions[i].text = dinoRoster[i].DisplayName.ToUpperInvariant();
                 dinoChoices[i].GetComponent<Image>().sprite = i == selected ? selectedDinoFrame : unselectedDinoFrame;
             }
             selectedDinoLabel.text = dinoRoster[selected].DisplayName.ToUpperInvariant() + " DINO SELECTED";
+            shopCollection?.Refresh(selected);
         }
 
         private static void Bind(Button button, Action action)

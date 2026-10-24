@@ -12,6 +12,15 @@ namespace DinoRush.Tests
         private string previousMap;
         private readonly Dictionary<string, int> shopPrefs = new Dictionary<string, int>();
         private readonly HashSet<string> existingShopPrefs = new HashSet<string>();
+        internal static IEnumerable<string> ShopKeys
+        {
+            get
+            {
+                yield return RunnerShopProgress.WalletKey;
+                foreach (string id in new[] { "red", "yellow", "green", "cole", "kira", "kuro", "loki", "mono", "sena" })
+                    yield return RunnerShopProgress.FragmentKey(id);
+            }
+        }
 
         [OneTimeSetUp]
         public void UseForestForRegressions()
@@ -20,8 +29,7 @@ namespace DinoRush.Tests
             previousMap = PlayerPrefs.GetString(RunnerMapCatalog.SelectionKey);
             PlayerPrefs.SetString(RunnerMapCatalog.SelectionKey, "forest");
             // Animation/map regressions exercise every dino. Shop-specific tests use a fresh locked profile.
-            foreach (string key in new[] { RunnerShopProgress.WalletKey, RunnerShopProgress.FragmentKey("red"),
-                RunnerShopProgress.FragmentKey("yellow"), RunnerShopProgress.FragmentKey("green") })
+            foreach (string key in ShopKeys)
             {
                 if (PlayerPrefs.HasKey(key)) existingShopPrefs.Add(key);
                 shopPrefs[key] = PlayerPrefs.GetInt(key);

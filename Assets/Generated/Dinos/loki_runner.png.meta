@@ -1,0 +1,741 @@
+fileFormatVersion: 2
+guid: e9af652547c0aec4ea7204ee01957526
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -8845429932826322274
+    second: loki_runner_0
+  - first:
+      213: 7951905509171748472
+    second: loki_runner_1
+  - first:
+      213: 5166234564118823940
+    second: loki_runner_2
+  - first:
+      213: 2280711945040042163
+    second: loki_runner_3
+  - first:
+      213: 1642806974617225779
+    second: loki_runner_4
+  - first:
+      213: -8597995530017371975
+    second: loki_runner_5
+  - first:
+      213: 8098121885554917305
+    second: loki_runner_6
+  - first:
+      213: 2061068698563893786
+    second: loki_runner_7
+  - first:
+      213: -2537157320452250974
+    second: loki_runner_8
+  - first:
+      213: 6249975155999783250
+    second: loki_runner_9
+  - first:
+      213: -2884255270412026210
+    second: loki_runner_10
+  - first:
+      213: 732078200210004067
+    second: loki_runner_11
+  - first:
+      213: 7375273829603944536
+    second: loki_runner_12
+  - first:
+      213: -8059811927335820176
+    second: loki_runner_13
+  - first:
+      213: -3445350081049364097
+    second: loki_runner_14
+  - first:
+      213: -4749959318143826635
+    second: loki_runner_15
+  - first:
+      213: 9082800025407082342
+    second: loki_runner_16
+  - first:
+      213: -7380883660208397085
+    second: loki_runner_17
+  - first:
+      213: 6279067885645094197
+    second: loki_runner_18
+  - first:
+      213: 2748980742317843280
+    second: loki_runner_19
+  - first:
+      213: -159632445270164993
+    second: loki_runner_20
+  - first:
+      213: 2471007528118318848
+    second: loki_runner_21
+  - first:
+      213: 2943253565055819555
+    second: loki_runner_22
+  - first:
+      213: 3786173618577632672
+    second: loki_runner_23
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 1
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 24
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: loki_runner_0
+      rect:
+        serializedVersion: 2
+        x: 3
+        y: 2
+        width: 17
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e9a97485758be3580800000000000000
+      internalID: -8845429932826322274
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: loki_runner_1
+      rect:
+        serializedVersion: 2
+        x: 27
+        y: 2
+        width: 17
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 87e57a9fde7da5e60800000000000000
+      internalID: 7951905509171748472
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: loki_runner_2
+      rect:
+        serializedVersion: 2
+        x: 51
+        y: 2
+        width: 17
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 404c5a4d6f622b740800000000000000
+      internalID: 5166234564118823940
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: loki_runner_3
+      rect:
+        serializedVersion: 2
+        x: 75
+        y: 2
+        width: 17
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3b81a172e67b6af10800000000000000
+      internalID: 2280711945040042163
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: loki_runner_4
+      rect:
+        serializedVersion: 2
+        x: 99
+        y: 3
+        width: 17
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 33a089c4d3c6cc610800000000000000
+      internalID: 1642806974617225779
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: loki_runner_5
+      rect:
+        serializedVersion: 2
+        x: 123
+        y: 2
+        width: 17
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9b80bec9e98cda880800000000000000
+      internalID: -8597995530017371975
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: loki_runner_6
+      rect:
+        serializedVersion: 2
+        x: 147
+        y: 2
+        width: 17
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9bf315003fe426070800000000000000
+      internalID: 8098121885554917305
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: loki_runner_7
+      rect:
+        serializedVersion: 2
+        x: 171
+        y: 3
+        width: 17
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a1ad393bf036a9c10800000000000000
+      internalID: 2061068698563893786
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: loki_runner_8
+      rect:
+        serializedVersion: 2
+        x: 195
+        y: 2
+        width: 17
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2a269270cd43accd0800000000000000
+      internalID: -2537157320452250974
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: loki_runner_9
+      rect:
+        serializedVersion: 2
+        x: 219
+        y: 2
+        width: 17
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 25932646a4f5cb650800000000000000
+      internalID: 6249975155999783250
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: loki_runner_10
+      rect:
+        serializedVersion: 2
+        x: 243
+        y: 2
+        width: 17
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e9efa8dec1119f7d0800000000000000
+      internalID: -2884255270412026210
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: loki_runner_11
+      rect:
+        serializedVersion: 2
+        x: 267
+        y: 2
+        width: 17
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 368135f8e3dd82a00800000000000000
+      internalID: 732078200210004067
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: loki_runner_12
+      rect:
+        serializedVersion: 2
+        x: 291
+        y: 6
+        width: 17
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 85827ced87c3a5660800000000000000
+      internalID: 7375273829603944536
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: loki_runner_13
+      rect:
+        serializedVersion: 2
+        x: 315
+        y: 2
+        width: 17
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 07421ba31cbc52090800000000000000
+      internalID: -8059811927335820176
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: loki_runner_14
+      rect:
+        serializedVersion: 2
+        x: 339
+        y: 2
+        width: 17
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f7970340b58af20d0800000000000000
+      internalID: -3445350081049364097
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: loki_runner_15
+      rect:
+        serializedVersion: 2
+        x: 363
+        y: 2
+        width: 17
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5350b70aa21c41eb0800000000000000
+      internalID: -4749959318143826635
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: loki_runner_16
+      rect:
+        serializedVersion: 2
+        x: 387
+        y: 2
+        width: 17
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 66f4c4810869c0e70800000000000000
+      internalID: 9082800025407082342
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: loki_runner_17
+      rect:
+        serializedVersion: 2
+        x: 411
+        y: 2
+        width: 17
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3e42bc8aa65d19990800000000000000
+      internalID: -7380883660208397085
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: loki_runner_18
+      rect:
+        serializedVersion: 2
+        x: 435
+        y: 2
+        width: 17
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 53d507c59fab32750800000000000000
+      internalID: 6279067885645094197
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: loki_runner_19
+      rect:
+        serializedVersion: 2
+        x: 457
+        y: 2
+        width: 17
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 053ae30ab67562620800000000000000
+      internalID: 2748980742317843280
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: loki_runner_20
+      rect:
+        serializedVersion: 2
+        x: 480
+        y: 2
+        width: 17
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ff97b05032fd8cdf0800000000000000
+      internalID: -159632445270164993
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: loki_runner_21
+      rect:
+        serializedVersion: 2
+        x: 507
+        y: 2
+        width: 17
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 007fece3148ca4220800000000000000
+      internalID: 2471007528118318848
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: loki_runner_22
+      rect:
+        serializedVersion: 2
+        x: 529
+        y: 2
+        width: 17
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 32fdd0df58988d820800000000000000
+      internalID: 2943253565055819555
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: loki_runner_23
+      rect:
+        serializedVersion: 2
+        x: 552
+        y: 2
+        width: 17
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0ad664998d03b8430800000000000000
+      internalID: 3786173618577632672
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      loki_runner_0: -8845429932826322274
+      loki_runner_1: 7951905509171748472
+      loki_runner_10: -2884255270412026210
+      loki_runner_11: 732078200210004067
+      loki_runner_12: 7375273829603944536
+      loki_runner_13: -8059811927335820176
+      loki_runner_14: -3445350081049364097
+      loki_runner_15: -4749959318143826635
+      loki_runner_16: 9082800025407082342
+      loki_runner_17: -7380883660208397085
+      loki_runner_18: 6279067885645094197
+      loki_runner_19: 2748980742317843280
+      loki_runner_2: 5166234564118823940
+      loki_runner_20: -159632445270164993
+      loki_runner_21: 2471007528118318848
+      loki_runner_22: 2943253565055819555
+      loki_runner_23: 3786173618577632672
+      loki_runner_3: 2280711945040042163
+      loki_runner_4: 1642806974617225779
+      loki_runner_5: -8597995530017371975
+      loki_runner_6: 8098121885554917305
+      loki_runner_7: 2061068698563893786
+      loki_runner_8: -2537157320452250974
+      loki_runner_9: 6249975155999783250
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

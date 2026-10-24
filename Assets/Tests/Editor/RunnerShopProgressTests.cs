@@ -44,7 +44,7 @@ namespace DinoRush.Tests
             Assert.That(shop.IsUnlocked(0), Is.True);
             Assert.That(shop.IsUnlocked(-1), Is.False);
             Assert.That(shop.IsUnlocked(roster.Count), Is.False);
-            Assert.That(shop.LockedCount, Is.EqualTo(3));
+            Assert.That(shop.LockedCount, Is.EqualTo(roster.Count - 1));
             Assert.That(shop.TryBuy(out int index, out int amount, out bool unlocked), Is.False);
             Assert.That(index, Is.EqualTo(-1));
             Assert.That(amount, Is.Zero);
@@ -87,8 +87,7 @@ namespace DinoRush.Tests
             Assert.That(shop.Fragments(1), Is.EqualTo(expectedTotal), "The full fragment reward is retained.");
             Assert.That(shop.TryBuy(out index, out _, out _), Is.True);
             Assert.That(index, Is.EqualTo(2), "Skip the starter and the newly unlocked red dino.");
-            PlayerPrefs.SetInt(RunnerShopProgress.FragmentKey("yellow"), 100);
-            PlayerPrefs.SetInt(RunnerShopProgress.FragmentKey("green"), 100);
+            for (int i = 1; i < roster.Count; i++) PlayerPrefs.SetInt(RunnerShopProgress.FragmentKey(roster[i].Id), 100);
             int before = shop.Balance;
             Assert.That(shop.LockedCount, Is.Zero);
             Assert.That(shop.CanBuy, Is.False);
@@ -113,12 +112,12 @@ namespace DinoRush.Tests
                     PlayerPrefs.SetInt(RunnerShopProgress.WalletKey, RunnerShopProgress.MysteryEggCost);
                     for (int d = 1; d < roster.Count; d++) PlayerPrefs.DeleteKey(RunnerShopProgress.FragmentKey(roster[d].Id));
                     Assert.That(shop.TryBuy(out int index, out int amount, out _), Is.True);
-                    Assert.That(index, Is.InRange(1, 3));
+                    Assert.That(index, Is.InRange(1, roster.Count - 1));
                     Assert.That(amount, Is.InRange(1, 20));
                     dinos.Add(index);
                     amounts.Add(amount);
                 }
-                Assert.That(dinos.Count, Is.EqualTo(3));
+                Assert.That(dinos.Count, Is.EqualTo(roster.Count - 1));
                 Assert.That(amounts.Count, Is.GreaterThan(1));
                 Assert.That(Random.value, Is.EqualTo(expected));
             }
@@ -152,6 +151,30 @@ namespace DinoRush.Tests
                 Assert.That(minValue, Is.EqualTo(1));
                 Assert.That(maxValue, Is.EqualTo(21));
                 return amount;
+            }
+        }
+
+        [Test]
+        public void ExistingWalletAndColorProgressSurviveTheExpandedRosterAndNewDinosReceiveRewards()
+        {
+            PlayerPrefs.SetInt(RunnerShopProgress.WalletKey, 500);
+            PlayerPrefs.SetInt(RunnerShopProgress.FragmentKey("red"), 45);
+            PlayerPrefs.SetInt(RunnerShopProgress.FragmentKey("yellow"), 100);
+            PlayerPrefs.SetInt(RunnerShopProgress.FragmentKey("green"), 8);
+            var shop = new RunnerShopProgress(roster);
+            Assert.That(shop.Balance, Is.EqualTo(500));
+            Assert.That(shop.Fragments(1), Is.EqualTo(45));
+            Assert.That(shop.IsUnlocked(2), Is.True);
+            Assert.That(shop.Fragments(3), Is.EqualTo(8));
+            PlayerPrefs.DeleteKey(RunnerShopProgress.FragmentKey("yellow"));
+            for (int i = 4; i < roster.Count; i++)
+            {
+                Assert.That(shop.IsUnlocked(i), Is.False);
+                var purchase = new RunnerShopProgress(roster, new FixedRandom(i - 1, 20));
+                Assert.That(purchase.TryBuy(out int target, out int reward, out _), Is.True);
+                Assert.That(target, Is.EqualTo(i));
+                Assert.That(reward, Is.EqualTo(20));
+                Assert.That(new RunnerShopProgress(roster).Fragments(i), Is.EqualTo(20));
             }
         }
     }

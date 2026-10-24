@@ -23,8 +23,7 @@ namespace DinoRush.Tests
         {
             saved.Clear();
             existing.Clear();
-            foreach (string key in new[] { RunnerShopProgress.WalletKey, RunnerShopProgress.FragmentKey("red"),
-                RunnerShopProgress.FragmentKey("yellow"), RunnerShopProgress.FragmentKey("green") })
+            foreach (string key in RunnerMapPreferenceScope.ShopKeys)
             {
                 if (PlayerPrefs.HasKey(key)) existing.Add(key);
                 saved[key] = PlayerPrefs.GetInt(key);
@@ -75,13 +74,15 @@ namespace DinoRush.Tests
             Assert.That(GameObject.Find("Buy mystery egg").GetComponent<Button>().interactable, Is.False);
             for (int i = 1; i < game.DinoRoster.Count; i++)
             {
+                game.GetComponentInChildren<ForestMainMenu>().ShopCollection.ShowIndex(i);
                 Button card = GameObject.Find("Select " + game.DinoRoster[i].DisplayName + " dino").GetComponent<Button>();
                 Assert.That(card.interactable, Is.False);
-                Assert.That(card.transform.Find("Fragments").GetComponent<Text>().text, Is.EqualTo("0 / 100\nLOCKED"));
+                Assert.That(card.transform.Find("Fragments").GetComponent<Text>().text, Is.EqualTo("0 / 100"));
                 game.SelectDino(i); // Also enforce ownership outside UI.
                 Assert.That(game.SelectedDinoIndex, Is.Zero);
             }
             game.PrimaryAction();
+            game.GetComponentInChildren<ForestMainMenu>().ShopCollection.ShowIndex(0);
             Assert.That(game.State, Is.EqualTo(ForestRunnerGame.RunState.Ready));
             yield return RunnerDisplayCapture.Capture("shop-locked", 1280, 720);
             yield return RunnerDisplayCapture.Capture("shop-portrait", 360, 800);
@@ -115,6 +116,7 @@ namespace DinoRush.Tests
                 Is.EqualTo("+" + (game.Shop.Fragments(unlocked) - 99)));
             yield return RunnerDisplayCapture.Capture("shop-hatch-unlocked", 1280, 720);
             Click("Hatch continue");
+            yield return null;
             Button card = GameObject.Find("Select " + game.DinoRoster[unlocked].DisplayName + " dino").GetComponent<Button>();
             Assert.That(card.interactable, Is.True);
             Click(card.name);
@@ -155,7 +157,7 @@ namespace DinoRush.Tests
             Click("Shop");
             yield return new WaitForSecondsRealtime(0.3f);
             RunnerShopPresentation reveal = game.GetComponentInChildren<ForestMainMenu>().ShopPresentation;
-            Assert.That(reveal.Catalog.Count, Is.EqualTo(3));
+            Assert.That(reveal.Catalog.Count, Is.EqualTo(game.DinoRoster.Count - 1));
             int balance = game.Shop.Balance;
             for (int index = 1; index < game.DinoRoster.Count; index++)
             {
@@ -182,6 +184,8 @@ namespace DinoRush.Tests
                 Assert.That(GameObject.Find("Fragment reward progress").GetComponent<Text>().text, Is.EqualTo("46 / 100 FRAGMENTS"));
                 Assert.That(GameObject.Find("Hatched dino").GetComponent<Image>().sprite, Is.SameAs(dino.Portrait));
                 yield return RunnerDisplayCapture.Capture("shop-hatch-" + dino.Id, 1280, 720);
+                Assert.That(((RectTransform)GameObject.Find("Fragment progress fill").transform).anchorMax.x,
+                    Is.EqualTo(0.46f).Within(0.001f), "Resizing/capturing must preserve the actual reward progress bar.");
                 if (index == 2) yield return RunnerDisplayCapture.Capture("shop-hatch-portrait", 360, 800);
                 Click("Hatch continue");
                 Assert.That(reveal.IsShowing, Is.False);
@@ -234,18 +238,51 @@ namespace DinoRush.Tests
             ForestMainMenu menu = game.GetComponentInChildren<ForestMainMenu>();
             Sprite animationFrame = GameObject.Find("Hatching egg").GetComponent<Image>().sprite;
             Texture2D original = animationFrame.texture;
-            int[] fragments = { game.Shop.Fragments(1), game.Shop.Fragments(2), game.Shop.Fragments(3) };
+            var fragments = new int[game.DinoRoster.Count];
+            for (int i = 1; i < fragments.Length; i++) fragments[i] = game.Shop.Fragments(i);
             menu.Hide();
             Assert.That(menu.ShopPresentation.IsShowing, Is.False);
             yield return Reload();
             Assert.That(game.Shop.Balance, Is.Zero);
-            for (int i = 1; i < 4; i++) Assert.That(game.Shop.Fragments(i), Is.EqualTo(fragments[i - 1]));
+            for (int i = 1; i < fragments.Length; i++) Assert.That(game.Shop.Fragments(i), Is.EqualTo(fragments[i]));
             Assert.That(animationFrame == null, Is.True, "Generated presentation frames should be disposed on scene exit.");
             Assert.That(original != null, Is.True, "Never destroy the supplied sprite sheet.");
         }
 
         private static void Advance(RunnerShopPresentation reveal, float dt) => typeof(RunnerShopPresentation)
             .GetMethod("Advance", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(reveal, new object[] { dt });
+
+        [UnityTest]
+        public IEnumerator CollectionPagesShowAllTenDinosWithProgressAndNeverSpendOnNavigation()
+        {
+            PlayerPrefs.SetInt(RunnerShopProgress.WalletKey, 100);
+            PlayerPrefs.SetInt(RunnerShopProgress.FragmentKey("cole"), 42);
+            Click("Shop");
+            yield return new WaitForSecondsRealtime(0.3f);
+            var collection = game.GetComponentInChildren<ForestMainMenu>().ShopCollection;
+            Assert.That(collection.PageCount, Is.EqualTo(3));
+            for (int page = 0; page < 3; page++)
+            {
+                Assert.That(collection.Page, Is.EqualTo(page));
+                Assert.That(GameObject.Find("Collection page").GetComponent<Text>().text, Is.EqualTo("PAGE " + (page + 1) + " / 3"));
+                Assert.That(GameObject.Find("Dino choices").GetComponentsInChildren<Button>().Length, Is.EqualTo(page < 2 ? 4 : 2));
+                if (page == 1)
+                {
+                    Transform cole = GameObject.Find("Select Cole dino").transform;
+                    Assert.That(cole.Find("Fragments").GetComponent<Text>().text, Is.EqualTo("42 / 100"));
+                    Assert.That(((RectTransform)cole.Find("Collection progress/Fill")).anchorMax.x, Is.EqualTo(0.42f).Within(0.001f));
+                }
+                yield return RunnerDisplayCapture.Capture("shop-collection-page-" + (page + 1), 1280, 720);
+                if (page == 1) yield return RunnerDisplayCapture.Capture("shop-collection-new-portrait", 320, 568);
+                if (page < 2) { Click("Next dinos"); yield return null; }
+            }
+            Assert.That(GameObject.Find("Next dinos").GetComponent<Button>().interactable, Is.False);
+            Click("Previous dinos");
+            yield return null;
+            Assert.That(collection.Page, Is.EqualTo(1));
+            Assert.That(game.Shop.Balance, Is.EqualTo(100));
+            Assert.That(game.SelectedDinoIndex, Is.Zero);
+        }
 
         private static void Click(string name)
         {

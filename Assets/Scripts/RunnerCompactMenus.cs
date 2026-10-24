@@ -47,9 +47,10 @@ namespace DinoRush
             else
             {
                 // The Shop keeps its roomy layout, even after visiting a compact dialog.
-                Panel(panel, portrait ? new Vector2(620, 1080) : new Vector2(680, 680), available);
-                Label(heading, 0, portrait ? 484 : 284, portrait ? 560 : 620, 48, 24);
-                Control(back, 0, portrait ? -476 : -288, portrait ? 520 : 400, portrait ? 104 : 64, 24, "BACK");
+                Panel(panel, portrait ? new Vector2(640, 1240) : new Vector2(960, 644), available);
+                Label(heading, 0, portrait ? 566 : 280, portrait ? 560 : 900, 48, 24);
+                Control(back, portrait ? 0 : -272, portrait ? -560 : -272, portrait ? 560 : 340, portrait ? 100 : 52, 18, "BACK");
+                panel.Find("Customize page")?.GetComponent<RunnerShopCollection>()?.ApplyLayout(portrait);
             }
         }
 

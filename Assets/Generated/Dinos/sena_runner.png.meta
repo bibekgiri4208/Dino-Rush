@@ -1,0 +1,741 @@
+fileFormatVersion: 2
+guid: f1bd8f857f2cefc499d1d5b5531026e7
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -3066227474420492299
+    second: sena_runner_0
+  - first:
+      213: -514287569014791527
+    second: sena_runner_1
+  - first:
+      213: 1761281664669217664
+    second: sena_runner_2
+  - first:
+      213: -2851327314794970112
+    second: sena_runner_3
+  - first:
+      213: 3208048751070208302
+    second: sena_runner_4
+  - first:
+      213: -1940952153011335219
+    second: sena_runner_5
+  - first:
+      213: -3652167794011846834
+    second: sena_runner_6
+  - first:
+      213: 5390778087647916711
+    second: sena_runner_7
+  - first:
+      213: 7523916331449256778
+    second: sena_runner_8
+  - first:
+      213: 9095670077178394647
+    second: sena_runner_9
+  - first:
+      213: 4301597285803038741
+    second: sena_runner_10
+  - first:
+      213: -8399942228737829939
+    second: sena_runner_11
+  - first:
+      213: 4593759038213782110
+    second: sena_runner_12
+  - first:
+      213: -1500442387140849212
+    second: sena_runner_13
+  - first:
+      213: -3467383060614028338
+    second: sena_runner_14
+  - first:
+      213: 7381616848013676434
+    second: sena_runner_15
+  - first:
+      213: -4302808504120850669
+    second: sena_runner_16
+  - first:
+      213: -3138823924728084231
+    second: sena_runner_17
+  - first:
+      213: -116485749267662232
+    second: sena_runner_18
+  - first:
+      213: -1249253380651061669
+    second: sena_runner_19
+  - first:
+      213: 7178482609614854539
+    second: sena_runner_20
+  - first:
+      213: 1758248428457798487
+    second: sena_runner_21
+  - first:
+      213: 471526066430268005
+    second: sena_runner_22
+  - first:
+      213: 5276965111096835594
+    second: sena_runner_23
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 1
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 24
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: sena_runner_0
+      rect:
+        serializedVersion: 2
+        x: 5
+        y: 2
+        width: 17
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5f79f9a8b529275d0800000000000000
+      internalID: -3066227474420492299
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sena_runner_1
+      rect:
+        serializedVersion: 2
+        x: 29
+        y: 2
+        width: 17
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 99269784e22ecd8f0800000000000000
+      internalID: -514287569014791527
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sena_runner_2
+      rect:
+        serializedVersion: 2
+        x: 53
+        y: 2
+        width: 17
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0837404a754517810800000000000000
+      internalID: 1761281664669217664
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sena_runner_3
+      rect:
+        serializedVersion: 2
+        x: 77
+        y: 2
+        width: 17
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 00407470aec0e68d0800000000000000
+      internalID: -2851327314794970112
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sena_runner_4
+      rect:
+        serializedVersion: 2
+        x: 101
+        y: 3
+        width: 17
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e21eca59757458c20800000000000000
+      internalID: 3208048751070208302
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sena_runner_5
+      rect:
+        serializedVersion: 2
+        x: 125
+        y: 2
+        width: 17
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dcfcab9ec4a5015e0800000000000000
+      internalID: -1940952153011335219
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sena_runner_6
+      rect:
+        serializedVersion: 2
+        x: 149
+        y: 2
+        width: 17
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e474dc9cdb4e05dc0800000000000000
+      internalID: -3652167794011846834
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sena_runner_7
+      rect:
+        serializedVersion: 2
+        x: 173
+        y: 3
+        width: 17
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7a2b631fb14efca40800000000000000
+      internalID: 5390778087647916711
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sena_runner_8
+      rect:
+        serializedVersion: 2
+        x: 197
+        y: 2
+        width: 17
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a4b0bcf3a025a6860800000000000000
+      internalID: 7523916331449256778
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sena_runner_9
+      rect:
+        serializedVersion: 2
+        x: 221
+        y: 2
+        width: 17
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7183e588ebf4a3e70800000000000000
+      internalID: 9095670077178394647
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sena_runner_10
+      rect:
+        serializedVersion: 2
+        x: 245
+        y: 2
+        width: 17
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 518131bc0f752bb30800000000000000
+      internalID: 4301597285803038741
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sena_runner_11
+      rect:
+        serializedVersion: 2
+        x: 269
+        y: 2
+        width: 17
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dc3574a3c096d6b80800000000000000
+      internalID: -8399942228737829939
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sena_runner_12
+      rect:
+        serializedVersion: 2
+        x: 293
+        y: 6
+        width: 17
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e5af878a18f40cf30800000000000000
+      internalID: 4593759038213782110
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sena_runner_13
+      rect:
+        serializedVersion: 2
+        x: 317
+        y: 2
+        width: 17
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4c1d78c399b5d2be0800000000000000
+      internalID: -1500442387140849212
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sena_runner_14
+      rect:
+        serializedVersion: 2
+        x: 341
+        y: 2
+        width: 17
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ec3e4e33a7161efc0800000000000000
+      internalID: -3467383060614028338
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sena_runner_15
+      rect:
+        serializedVersion: 2
+        x: 365
+        y: 2
+        width: 17
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 29fc4ede965c07660800000000000000
+      internalID: 7381616848013676434
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sena_runner_16
+      rect:
+        serializedVersion: 2
+        x: 389
+        y: 2
+        width: 17
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 317c857767a5944c0800000000000000
+      internalID: -4302808504120850669
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sena_runner_17
+      rect:
+        serializedVersion: 2
+        x: 413
+        y: 2
+        width: 17
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9f8c51a4548a074d0800000000000000
+      internalID: -3138823924728084231
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sena_runner_18
+      rect:
+        serializedVersion: 2
+        x: 437
+        y: 2
+        width: 17
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 86a718504d8226ef0800000000000000
+      internalID: -116485749267662232
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sena_runner_19
+      rect:
+        serializedVersion: 2
+        x: 459
+        y: 2
+        width: 17
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b5e66db4ba2c9aee0800000000000000
+      internalID: -1249253380651061669
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sena_runner_20
+      rect:
+        serializedVersion: 2
+        x: 482
+        y: 2
+        width: 17
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b89996476e71f9360800000000000000
+      internalID: 7178482609614854539
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sena_runner_21
+      rect:
+        serializedVersion: 2
+        x: 509
+        y: 2
+        width: 17
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 75bad1d41ad866810800000000000000
+      internalID: 1758248428457798487
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sena_runner_22
+      rect:
+        serializedVersion: 2
+        x: 531
+        y: 2
+        width: 17
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 562d9eb85723b8600800000000000000
+      internalID: 471526066430268005
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: sena_runner_23
+      rect:
+        serializedVersion: 2
+        x: 554
+        y: 2
+        width: 17
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a0e7e0b5fcb8b3940800000000000000
+      internalID: 5276965111096835594
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      sena_runner_0: -3066227474420492299
+      sena_runner_1: -514287569014791527
+      sena_runner_10: 4301597285803038741
+      sena_runner_11: -8399942228737829939
+      sena_runner_12: 4593759038213782110
+      sena_runner_13: -1500442387140849212
+      sena_runner_14: -3467383060614028338
+      sena_runner_15: 7381616848013676434
+      sena_runner_16: -4302808504120850669
+      sena_runner_17: -3138823924728084231
+      sena_runner_18: -116485749267662232
+      sena_runner_19: -1249253380651061669
+      sena_runner_2: 1761281664669217664
+      sena_runner_20: 7178482609614854539
+      sena_runner_21: 1758248428457798487
+      sena_runner_22: 471526066430268005
+      sena_runner_23: 5276965111096835594
+      sena_runner_3: -2851327314794970112
+      sena_runner_4: 3208048751070208302
+      sena_runner_5: -1940952153011335219
+      sena_runner_6: -3652167794011846834
+      sena_runner_7: 5390778087647916711
+      sena_runner_8: 7523916331449256778
+      sena_runner_9: 9095670077178394647
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

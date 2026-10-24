@@ -28,3 +28,33 @@ MonoBehaviour:
     crack: {fileID: 2800000, guid: 6ba83aa5b8dae134ba259eb2495f9eea, type: 3}
     hatch: {fileID: 2800000, guid: 89341b4710b9b264186c679736899bab, type: 3}
     accent: {r: 0.6666667, g: 0.8666667, b: 0.43529412, a: 1}
+  - dinoId: cole
+    move: {fileID: 2800000, guid: 3ebae3899ea992844b9a825f2edc8be4, type: 3}
+    crack: {fileID: 2800000, guid: 4eb7368634c1cb8408825fa40ab6cda7, type: 3}
+    hatch: {fileID: 2800000, guid: 551f0e6c6661bf146bb2c168afc93dca, type: 3}
+    accent: {r: 0.7647059, g: 0.6627451, b: 0.9607843, a: 1}
+  - dinoId: kira
+    move: {fileID: 2800000, guid: 9371af05efe2f674f9c9a4971e084a6b, type: 3}
+    crack: {fileID: 2800000, guid: 2b0064a4f9b41ee46a91e01314ad08ca, type: 3}
+    hatch: {fileID: 2800000, guid: 37f26a13b6a7ed44b91ec9258ae74a86, type: 3}
+    accent: {r: 0.95686275, g: 0.5764706, b: 0.80784315, a: 1}
+  - dinoId: kuro
+    move: {fileID: 2800000, guid: 8b8cbe1637e3fca40b62527d002e412b, type: 3}
+    crack: {fileID: 2800000, guid: 00a1426d1516ed240a50a9592984bb17, type: 3}
+    hatch: {fileID: 2800000, guid: 436b7fc78b8e66644afd94463d22535b, type: 3}
+    accent: {r: 0.56078434, g: 0.6745098, b: 0.7490196, a: 1}
+  - dinoId: loki
+    move: {fileID: 2800000, guid: 33c63143dd0e09b44b4bc776d28e3996, type: 3}
+    crack: {fileID: 2800000, guid: 9fe208972f7daf742bd0e921bcaf030f, type: 3}
+    hatch: {fileID: 2800000, guid: ad0a5bfefdf43934d921e9f23f17f7e9, type: 3}
+    accent: {r: 0.40784314, g: 0.7529412, b: 0.9647059, a: 1}
+  - dinoId: mono
+    move: {fileID: 2800000, guid: 24770f26a49427a4985bf8195f1b623f, type: 3}
+    crack: {fileID: 2800000, guid: b36d2087ec31b904693f7b7b69af988c, type: 3}
+    hatch: {fileID: 2800000, guid: 94919881467a53b4cb3713086ad91a52, type: 3}
+    accent: {r: 0.8666667, g: 0.87058824, b: 0.8156863, a: 1}
+  - dinoId: sena
+    move: {fileID: 2800000, guid: 8af02ddda8cd05548bf19ff2897570b5, type: 3}
+    crack: {fileID: 2800000, guid: 2b8bad75f85054d4e9a4e39ab987b58e, type: 3}
+    hatch: {fileID: 2800000, guid: f11ab43ade150bc4295f1edc29f6b1fc, type: 3}
+    accent: {r: 0.6431373, g: 0.5137255, b: 1, a: 1}

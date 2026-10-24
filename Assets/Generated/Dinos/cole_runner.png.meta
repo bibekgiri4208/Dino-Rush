@@ -1,0 +1,741 @@
+fileFormatVersion: 2
+guid: 7c317c1b2cf018f48b0b6f9e1e8ca465
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -8219696278270210495
+    second: cole_runner_0
+  - first:
+      213: -2560197958267044588
+    second: cole_runner_1
+  - first:
+      213: 981831545560220787
+    second: cole_runner_2
+  - first:
+      213: 5684885279923542749
+    second: cole_runner_3
+  - first:
+      213: -8126070489269070298
+    second: cole_runner_4
+  - first:
+      213: 8391221504412633007
+    second: cole_runner_5
+  - first:
+      213: 6089460347762220202
+    second: cole_runner_6
+  - first:
+      213: 7291009593651107927
+    second: cole_runner_7
+  - first:
+      213: -4668800041750123258
+    second: cole_runner_8
+  - first:
+      213: -5929701004288344587
+    second: cole_runner_9
+  - first:
+      213: -4251507402645506294
+    second: cole_runner_10
+  - first:
+      213: 6593032597126504579
+    second: cole_runner_11
+  - first:
+      213: -7838884405861801675
+    second: cole_runner_12
+  - first:
+      213: 9013036543169902124
+    second: cole_runner_13
+  - first:
+      213: -2710474896787403806
+    second: cole_runner_14
+  - first:
+      213: -4717534877904856316
+    second: cole_runner_15
+  - first:
+      213: 168798476350566932
+    second: cole_runner_16
+  - first:
+      213: 4670978433554983234
+    second: cole_runner_17
+  - first:
+      213: 309475646404807482
+    second: cole_runner_18
+  - first:
+      213: -3266501303872849205
+    second: cole_runner_19
+  - first:
+      213: -9160424053171620053
+    second: cole_runner_20
+  - first:
+      213: 7013317356601957700
+    second: cole_runner_21
+  - first:
+      213: 171586041754949261
+    second: cole_runner_22
+  - first:
+      213: -4231822198314303567
+    second: cole_runner_23
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 1
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 24
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: cole_runner_0
+      rect:
+        serializedVersion: 2
+        x: 5
+        y: 2
+        width: 17
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 14e8a14e8c5cded80800000000000000
+      internalID: -8219696278270210495
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cole_runner_1
+      rect:
+        serializedVersion: 2
+        x: 29
+        y: 2
+        width: 17
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 41dffce7589587cd0800000000000000
+      internalID: -2560197958267044588
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cole_runner_2
+      rect:
+        serializedVersion: 2
+        x: 53
+        y: 2
+        width: 17
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 374c366b69a20ad00800000000000000
+      internalID: 981831545560220787
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cole_runner_3
+      rect:
+        serializedVersion: 2
+        x: 77
+        y: 2
+        width: 17
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dda90b2da05c4ee40800000000000000
+      internalID: 5684885279923542749
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cole_runner_4
+      rect:
+        serializedVersion: 2
+        x: 101
+        y: 3
+        width: 17
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 626155b91f56a3f80800000000000000
+      internalID: -8126070489269070298
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cole_runner_5
+      rect:
+        serializedVersion: 2
+        x: 125
+        y: 2
+        width: 17
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fa7422aef7b937470800000000000000
+      internalID: 8391221504412633007
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cole_runner_6
+      rect:
+        serializedVersion: 2
+        x: 149
+        y: 2
+        width: 17
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: aac91364ceb128450800000000000000
+      internalID: 6089460347762220202
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cole_runner_7
+      rect:
+        serializedVersion: 2
+        x: 173
+        y: 3
+        width: 17
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7581a83989ede2560800000000000000
+      internalID: 7291009593651107927
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cole_runner_8
+      rect:
+        serializedVersion: 2
+        x: 197
+        y: 2
+        width: 17
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 60da7203917153fb0800000000000000
+      internalID: -4668800041750123258
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cole_runner_9
+      rect:
+        serializedVersion: 2
+        x: 221
+        y: 2
+        width: 17
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5fdbd1f7a5875bda0800000000000000
+      internalID: -5929701004288344587
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cole_runner_10
+      rect:
+        serializedVersion: 2
+        x: 245
+        y: 2
+        width: 17
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a07fe51fa8c9ff4c0800000000000000
+      internalID: -4251507402645506294
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cole_runner_11
+      rect:
+        serializedVersion: 2
+        x: 269
+        y: 2
+        width: 17
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 380eb4837382f7b50800000000000000
+      internalID: 6593032597126504579
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cole_runner_12
+      rect:
+        serializedVersion: 2
+        x: 293
+        y: 6
+        width: 17
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 53122414a20b63390800000000000000
+      internalID: -7838884405861801675
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cole_runner_13
+      rect:
+        serializedVersion: 2
+        x: 317
+        y: 2
+        width: 17
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c26b14f9bfcb41d70800000000000000
+      internalID: 9013036543169902124
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cole_runner_14
+      rect:
+        serializedVersion: 2
+        x: 341
+        y: 2
+        width: 17
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2eb8f5c2175726ad0800000000000000
+      internalID: -2710474896787403806
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cole_runner_15
+      rect:
+        serializedVersion: 2
+        x: 365
+        y: 2
+        width: 17
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 40b17fae503f78eb0800000000000000
+      internalID: -4717534877904856316
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cole_runner_16
+      rect:
+        serializedVersion: 2
+        x: 389
+        y: 2
+        width: 17
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 412b085e151b75200800000000000000
+      internalID: 168798476350566932
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cole_runner_17
+      rect:
+        serializedVersion: 2
+        x: 413
+        y: 2
+        width: 17
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2492e8d2326a2d040800000000000000
+      internalID: 4670978433554983234
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cole_runner_18
+      rect:
+        serializedVersion: 2
+        x: 437
+        y: 2
+        width: 17
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a3bc792f57a7b4400800000000000000
+      internalID: 309475646404807482
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cole_runner_19
+      rect:
+        serializedVersion: 2
+        x: 459
+        y: 2
+        width: 17
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bcafe4cee5e0ba2d0800000000000000
+      internalID: -3266501303872849205
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cole_runner_20
+      rect:
+        serializedVersion: 2
+        x: 482
+        y: 2
+        width: 17
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b27f2ce8bd2afd080800000000000000
+      internalID: -9160424053171620053
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cole_runner_21
+      rect:
+        serializedVersion: 2
+        x: 509
+        y: 2
+        width: 17
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 44d57594afe445160800000000000000
+      internalID: 7013317356601957700
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cole_runner_22
+      rect:
+        serializedVersion: 2
+        x: 531
+        y: 2
+        width: 17
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d86183b8898916200800000000000000
+      internalID: 171586041754949261
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: cole_runner_23
+      rect:
+        serializedVersion: 2
+        x: 554
+        y: 2
+        width: 17
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1bffcdcb12c8545c0800000000000000
+      internalID: -4231822198314303567
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      cole_runner_0: -8219696278270210495
+      cole_runner_1: -2560197958267044588
+      cole_runner_10: -4251507402645506294
+      cole_runner_11: 6593032597126504579
+      cole_runner_12: -7838884405861801675
+      cole_runner_13: 9013036543169902124
+      cole_runner_14: -2710474896787403806
+      cole_runner_15: -4717534877904856316
+      cole_runner_16: 168798476350566932
+      cole_runner_17: 4670978433554983234
+      cole_runner_18: 309475646404807482
+      cole_runner_19: -3266501303872849205
+      cole_runner_2: 981831545560220787
+      cole_runner_20: -9160424053171620053
+      cole_runner_21: 7013317356601957700
+      cole_runner_22: 171586041754949261
+      cole_runner_23: -4231822198314303567
+      cole_runner_3: 5684885279923542749
+      cole_runner_4: -8126070489269070298
+      cole_runner_5: 8391221504412633007
+      cole_runner_6: 6089460347762220202
+      cole_runner_7: 7291009593651107927
+      cole_runner_8: -4668800041750123258
+      cole_runner_9: -5929701004288344587
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

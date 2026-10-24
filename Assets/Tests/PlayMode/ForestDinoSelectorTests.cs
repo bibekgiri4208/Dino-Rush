@@ -14,8 +14,8 @@ namespace DinoRush.Tests
     {
         private const BindingFlags Private = BindingFlags.Instance | BindingFlags.NonPublic;
         private ForestRunnerGame game;
-        private bool hadDino, hadBest;
-        private string previousDino;
+        private bool hadDino, hadBest, hadMap;
+        private string previousDino, previousMap;
         private int previousBest;
 
         [UnitySetUp]
@@ -25,6 +25,8 @@ namespace DinoRush.Tests
             previousDino = PlayerPrefs.GetString(RunnerDinoRoster.SelectionKey);
             hadBest = PlayerPrefs.HasKey("DinoRush.Forest.HighScore");
             previousBest = PlayerPrefs.GetInt("DinoRush.Forest.HighScore");
+            hadMap = PlayerPrefs.HasKey(RunnerMapCatalog.SelectionKey);
+            previousMap = PlayerPrefs.GetString(RunnerMapCatalog.SelectionKey);
             PlayerPrefs.SetString(RunnerDinoRoster.SelectionKey, "blue");
             yield return Reload();
         }
@@ -38,6 +40,8 @@ namespace DinoRush.Tests
             else PlayerPrefs.DeleteKey(RunnerDinoRoster.SelectionKey);
             if (hadBest) PlayerPrefs.SetInt("DinoRush.Forest.HighScore", previousBest);
             else PlayerPrefs.DeleteKey("DinoRush.Forest.HighScore");
+            if (hadMap) PlayerPrefs.SetString(RunnerMapCatalog.SelectionKey, previousMap);
+            else PlayerPrefs.DeleteKey(RunnerMapCatalog.SelectionKey);
             PlayerPrefs.Save();
         }
 
@@ -47,10 +51,11 @@ namespace DinoRush.Tests
             SpriteRenderer renderer = game.transform.Find("Player/Blue dino player").GetComponent<SpriteRenderer>();
             var player = (RunnerPlayer)typeof(ForestRunnerGame).GetField("player", Private).GetValue(game);
             Rect standardHitbox = player.Hitbox;
-            for (int i = 0; i < 4; i++)
+            for (int i = 0; i < game.DinoRoster.Count; i++)
             {
                 RunnerDinoRoster.Dino dino = game.DinoRoster[i];
                 Click("Shop");
+                game.GetComponentInChildren<ForestMainMenu>().ShopCollection.ShowIndex(i);
                 yield return null; // Newly enabled card graphics register with the raycaster on the next UI frame.
                 Click("Select " + dino.DisplayName + " dino");
                 Assert.That(game.State, Is.EqualTo(ForestRunnerGame.RunState.Ready));
@@ -58,13 +63,14 @@ namespace DinoRush.Tests
                 Assert.That(game.SelectedDinoName, Is.EqualTo(dino.DisplayName));
                 Assert.That(PlayerPrefs.GetString(RunnerDinoRoster.SelectionKey), Is.EqualTo(dino.Id));
                 Assert.That(GameObject.Find("Selected status").GetComponent<Text>().text, Is.EqualTo(dino.DisplayName.ToUpperInvariant() + " DINO SELECTED"));
-                for (int j = 0; j < 4; j++)
+                for (int j = (i / 4) * 4; j < Mathf.Min((i / 4 + 1) * 4, game.DinoRoster.Count); j++)
                 {
                     GameObject card = GameObject.Find("Select " + game.DinoRoster[j].DisplayName + " dino");
                     Assert.That(card.GetComponent<Image>().sprite.name, Is.EqualTo(j == i ? "HudJump" : "HudPanel"));
                     Assert.That(card.transform.Find("Dino portrait").GetComponent<Image>().sprite, Is.EqualTo(game.DinoRoster[j].Portrait));
                 }
                 Assert.That(renderer.sprite.texture, Is.EqualTo(dino.Sheet));
+                Assert.That(dino.Portrait.texture.filterMode, Is.EqualTo(FilterMode.Point));
                 Assert.That(renderer.sprite.rect.size, Is.EqualTo(new Vector2(24, 24)));
                 Assert.That(renderer.sprite.pivot, Is.EqualTo(new Vector2(12, 2)));
                 Assert.That((Vector2)renderer.sprite.bounds.size, Is.EqualTo(Vector2.one));
@@ -89,6 +95,7 @@ namespace DinoRush.Tests
                 game.PrimaryAction();
                 player.Render(0.1f, true, false, 1f);
                 Assert.That(renderer.sprite.name, Does.Match(dino.DisplayName + " dino frame [4-9]$"));
+                if (i >= 4) yield return RunnerDisplayCapture.Capture("new-dino-" + dino.Id, 1280, 720);
                 game.Jump();
                 Step();
                 player.Render(0f, true, false, 1f);
@@ -99,10 +106,10 @@ namespace DinoRush.Tests
                 for (int frame = 0; frame < 24; frame++) Step();
                 Assert.That(player.Grounded, Is.True);
                 game.SetDuckHeld(false);
-                game.SelectDino((i + 1) % 4);
+                game.SelectDino((i + 1) % game.DinoRoster.Count);
                 Assert.That(game.SelectedDinoIndex, Is.EqualTo(i), "Do not switch characters during a run.");
                 game.TogglePause();
-                game.SelectDino((i + 1) % 4);
+                game.SelectDino((i + 1) % game.DinoRoster.Count);
                 Assert.That(game.SelectedDinoIndex, Is.EqualTo(i));
                 game.RestartRun();
                 Assert.That(renderer.sprite.texture, Is.EqualTo(dino.Sheet));
@@ -111,12 +118,12 @@ namespace DinoRush.Tests
                 yield return null;
             }
             var cache = (Dictionary<int, Sprite[]>)typeof(ForestRunnerGame).GetField("dinoFrameCache", Private).GetValue(game);
-            Assert.That(cache.Count, Is.EqualTo(4));
+            Assert.That(cache.Count, Is.EqualTo(game.DinoRoster.Count));
             Sprite[] red = cache[1];
             game.SelectDino(1);
             game.SelectDino(2);
             game.SelectDino(1);
-            Assert.That(cache.Count, Is.EqualTo(4));
+            Assert.That(cache.Count, Is.EqualTo(game.DinoRoster.Count));
             Assert.That(cache[1], Is.SameAs(red), "Selecting again must reuse the existing frame set.");
         }
 
@@ -141,7 +148,7 @@ namespace DinoRush.Tests
             Assert.That(game.SelectedDinoIndex, Is.Zero);
             Assert.That(game.SelectedDinoName, Is.EqualTo("Blue"));
             game.SelectDino(-1);
-            game.SelectDino(4);
+            game.SelectDino(game.DinoRoster.Count);
             Assert.That(game.SelectedDinoIndex, Is.Zero);
         }
 
@@ -150,7 +157,31 @@ namespace DinoRush.Tests
             yield return SceneManager.LoadSceneAsync("ForestRun");
             game = Object.FindAnyObjectByType<ForestRunnerGame>();
             game.enabled = false;
-            Assert.That(game.DinoRoster.Count, Is.EqualTo(4));
+            Assert.That(game.DinoRoster.Count, Is.EqualTo(10));
+            yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator EveryNewDinoRunsAndJumpsOnEveryMapWithTheSameCollisionBounds()
+        {
+            var player = (RunnerPlayer)typeof(ForestRunnerGame).GetField("player", Private).GetValue(game);
+            SpriteRenderer renderer = game.transform.Find("Player/Blue dino player").GetComponent<SpriteRenderer>();
+            Rect normal = player.Hitbox;
+            for (int dino = 4; dino < game.DinoRoster.Count; dino++)
+                for (int map = 0; map < game.MapCatalog.Count; map++)
+                {
+                    game.SelectDino(dino);
+                    game.SelectMap(map);
+                    game.StartRun();
+                    Assert.That(player.Hitbox, Is.EqualTo(normal));
+                    Assert.That(renderer.sprite.texture, Is.EqualTo(game.DinoRoster[dino].Sheet));
+                    game.Jump();
+                    Step();
+                    Assert.That(player.Grounded, Is.False);
+                    player.Render(0, true, false, 1);
+                    Assert.That(renderer.sprite.name, Does.EndWith("frame 11"));
+                    game.ReturnToMenu();
+                }
             yield return null;
         }
 
@@ -166,13 +197,15 @@ namespace DinoRush.Tests
                 Assert.That(text.preferredHeight, Is.LessThanOrEqualTo(text.rectTransform.rect.height + 1), text.name);
             }
             Transform choices = GameObject.Find("Dino choices").transform;
-            float lastRight = -310;
+            var boundsOnPage = new List<Bounds>();
             foreach (Transform card in choices)
             {
+                if (!card.gameObject.activeSelf) continue;
                 Bounds bounds = RectTransformUtility.CalculateRelativeRectTransformBounds(choices, card);
-                Assert.That(bounds.min.x, Is.GreaterThan(lastRight));
-                Assert.That(bounds.max.x, Is.LessThan(310));
-                lastRight = bounds.max.x;
+                foreach (Bounds other in boundsOnPage) Assert.That(bounds.Intersects(other), Is.False);
+                boundsOnPage.Add(bounds);
+                Assert.That(bounds.min.x, Is.GreaterThanOrEqualTo(-256));
+                Assert.That(bounds.max.x, Is.LessThanOrEqualTo(256));
             }
         }
 

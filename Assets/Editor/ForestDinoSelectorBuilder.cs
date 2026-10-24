@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 namespace DinoRush.Editor
 {
-    /// <summary>Adds four editable choice cards without rebuilding the menu or reslicing source art.</summary>
+    /// <summary>Extends the editable roster and collection without replacing saved IDs or reslicing source art.</summary>
     public static class ForestDinoSelectorBuilder
     {
         private const string RosterPath = "Assets/Generated/ForestDinoRoster.asset";
@@ -28,7 +28,7 @@ namespace DinoRush.Editor
             AssetDatabase.SaveAssets();
             EditorSceneManager.MarkSceneDirty(scene);
             EditorSceneManager.SaveScene(scene);
-            Debug.Log("Saved Blue / Red / Yellow / Green dino choices. Source sprite sheets and slices were preserved.");
+            Debug.Log("Saved the expanded dino collection and matching hatch rewards. Source sprite sheets and saved IDs were preserved.");
         }
 
         internal static void Apply(ForestRunnerGame game, ForestMainMenu menu)
@@ -39,12 +39,12 @@ namespace DinoRush.Editor
             if (font == null) throw new System.InvalidOperationException("The forest pixel font is missing.");
             Transform custom = menu.transform.Find("Menu dialog/Moss framed dialog/Customize page");
             Transform choices = Node("Dino choices", custom);
-            var buttons = new Button[Names.Length];
-            var portraits = new Image[Names.Length];
-            var captions = new Text[Names.Length];
-            for (int i = 0; i < Names.Length; i++)
+            var buttons = new Button[roster.Count];
+            var portraits = new Image[roster.Count];
+            var captions = new Text[roster.Count];
+            for (int i = 0; i < roster.Count; i++)
             {
-                Transform card = Node("Select " + Names[i] + " dino", choices);
+                Transform card = Node("Select " + roster[i].DisplayName + " dino", choices);
                 Image frame = Image(card);
                 frame.sprite = ForestHudArt.Load(i == 0 ? "HudJump" : "HudPanel");
                 frame.type = UnityEngine.UI.Image.Type.Sliced;
@@ -93,12 +93,13 @@ namespace DinoRush.Editor
                 custom.Find(legacy).gameObject.SetActive(false); // Retain old authored artwork, but not the blue-only placeholder.
             Transform choices = custom.Find("Dino choices");
             Position(choices, 0, 0, 500, 224);
-            for (int i = 0; i < Names.Length; i++)
+            int i = 0;
+            foreach (Transform card in choices)
             {
-                Transform card = choices.Find("Select " + Names[i] + " dino");
-                Position(card, -180 + i * 120, 20, 108, 124);
+                Position(card, i % 2 == 0 ? -130 : 130, (i % 4) < 2 ? 90 : -86, 244, 160);
                 Position(card.Find("Dino portrait"), 0, 14, 72, 80);
                 Position(card.Find("Dino name"), 0, -40, 96, 22);
+                i++;
             }
             Position(custom.Find("Selected status"), 0, -64, 480, 24);
             Position(custom.Find("Map selection"), 0, -88, 480, 20);
@@ -107,17 +108,12 @@ namespace DinoRush.Editor
         private static RunnerDinoRoster Roster()
         {
             RunnerDinoRoster existing = AssetDatabase.LoadAssetAtPath<RunnerDinoRoster>(RosterPath);
-            if (existing != null)
-            {
-                if (existing.Count != Names.Length) throw new System.InvalidOperationException("The edited dino roster must contain four choices.");
-                return existing;
-            }
-            var roster = ScriptableObject.CreateInstance<RunnerDinoRoster>();
+            var roster = existing != null ? existing : ScriptableObject.CreateInstance<RunnerDinoRoster>();
             roster.name = "Forest Dino Roster";
             var data = new SerializedObject(roster);
             SerializedProperty entries = data.FindProperty("dinos");
-            entries.arraySize = Names.Length;
-            for (int i = 0; i < Names.Length; i++)
+            if (existing == null) entries.arraySize = Names.Length;
+            for (int i = 0; existing == null && i < Names.Length; i++)
             {
                 string path = $"Assets/2D Sprites/dino/DinoSprites - {i + 1}.png";
                 Texture2D sheet = AssetDatabase.LoadAssetAtPath<Texture2D>(path);
@@ -130,8 +126,24 @@ namespace DinoRush.Editor
                 entry.FindPropertyRelative("sheet").objectReferenceValue = sheet;
                 entry.FindPropertyRelative("portrait").objectReferenceValue = portrait;
             }
+            foreach (string name in ForestDinoAnimationBuilder.Names)
+            {
+                string id = name.ToLowerInvariant();
+                if (Enumerable.Range(0, entries.arraySize).Any(i => entries.GetArrayElementAtIndex(i).FindPropertyRelative("id").stringValue == id)) continue;
+                Texture2D sheet = ForestDinoAnimationBuilder.Sheet(id);
+                string idle = "Assets/2D Sprites/dino/" + id + "/base/idle.png";
+                Sprite portrait = AssetDatabase.LoadAllAssetsAtPath(idle).OfType<Sprite>().OrderBy(sprite => sprite.rect.x).FirstOrDefault();
+                if (portrait == null) throw new System.InvalidOperationException("Missing idle portrait: " + idle);
+                int index = entries.arraySize++;
+                SerializedProperty entry = entries.GetArrayElementAtIndex(index);
+                entry.FindPropertyRelative("id").stringValue = id;
+                entry.FindPropertyRelative("displayName").stringValue = name;
+                entry.FindPropertyRelative("sheet").objectReferenceValue = sheet;
+                entry.FindPropertyRelative("portrait").objectReferenceValue = portrait;
+            }
             data.ApplyModifiedPropertiesWithoutUndo();
-            AssetDatabase.CreateAsset(roster, RosterPath);
+            if (existing == null) AssetDatabase.CreateAsset(roster, RosterPath);
+            EditorUtility.SetDirty(roster);
             return roster;
         }
 

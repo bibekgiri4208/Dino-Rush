@@ -254,7 +254,11 @@ namespace DinoRush
             nearForest.filterMode = ground.filterMode = FilterMode.Point;
             foreach (Texture2D texture in obstacleTextures) texture.filterMode = FilterMode.Point;
             if (dinoRoster != null)
-                for (int i = 0; i < dinoRoster.Count; i++) dinoRoster[i].Sheet.filterMode = FilterMode.Point;
+                for (int i = 0; i < dinoRoster.Count; i++)
+                {
+                    dinoRoster[i].Sheet.filterMode = FilterMode.Point;
+                    if (dinoRoster[i].Portrait != null) dinoRoster[i].Portrait.texture.filterMode = FilterMode.Point;
+                }
         }
 
         public void SelectDino(int index)
