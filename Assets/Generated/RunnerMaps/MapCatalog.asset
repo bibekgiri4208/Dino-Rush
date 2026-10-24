@@ -228,7 +228,7 @@ MonoBehaviour:
     - source: {fileID: 2800000, guid: 2969d407746300341b8a5b135b9bf72c, type: 3}
       sprite: {fileID: 21300000, guid: 3092aac075d31a14991dd0367c6135e1, type: 3}
       height: 10.4
-      bottom: -4.2
+      bottom: -4.8
       speed: 0.03
       order: -90
       stationary: 0
@@ -236,7 +236,7 @@ MonoBehaviour:
     - source: {fileID: 2800000, guid: a161b520d67eadc4c9248e3b607be714, type: 3}
       sprite: {fileID: 21300000, guid: 6e6529fa76855354d850cdcf3b3ed049, type: 3}
       height: 8.4
-      bottom: -5.05
+      bottom: -3.53
       speed: 0.05
       order: -85
       stationary: 0
@@ -244,7 +244,7 @@ MonoBehaviour:
     - source: {fileID: 2800000, guid: 95c5e993dddbb494da9868ecb7ab5f3d, type: 3}
       sprite: {fileID: 21300000, guid: bef6a6cd8e148184bb0f77ead4fbd8d3, type: 3}
       height: 8.4
-      bottom: -4.95
+      bottom: -3.74
       speed: 0.07
       order: -80
       stationary: 0
@@ -252,7 +252,7 @@ MonoBehaviour:
     - source: {fileID: 2800000, guid: 8c40fb74bf0f75d45958f937a59d72da, type: 3}
       sprite: {fileID: 21300000, guid: d879c79f8fec6c041b17d78a9f5f6a63, type: 3}
       height: 8.4
-      bottom: -4.8
+      bottom: -3.51
       speed: 0.12
       order: -75
       stationary: 0
@@ -260,7 +260,7 @@ MonoBehaviour:
     - source: {fileID: 2800000, guid: 61a139581db381447864368778c531fe, type: 3}
       sprite: {fileID: 21300000, guid: 5c6dfb3d8db6ce14ba89cc91926ddec7, type: 3}
       height: 8.4
-      bottom: -3.7
+      bottom: -3.76
       speed: 0.24
       order: -60
       stationary: 0
@@ -276,7 +276,7 @@ MonoBehaviour:
     - source: {fileID: 2800000, guid: 40e255bc7963c4d42b10c33e945c8b8e, type: 3}
       sprite: {fileID: 21300000, guid: 1269b6d8b6c02da4895e386c5a7a4055, type: 3}
       height: 8.4
-      bottom: -3.7
+      bottom: -3.64
       speed: 0.3
       order: -49
       stationary: 0
@@ -284,7 +284,7 @@ MonoBehaviour:
     - source: {fileID: 2800000, guid: d84d135ff3fcea84ab99c5aa61b23730, type: 3}
       sprite: {fileID: 21300000, guid: 6dac4c4bb67afe94493f9203c30ef902, type: 3}
       height: 8.4
-      bottom: -3.7
+      bottom: -3.66
       speed: 0.4
       order: -45
       stationary: 0
