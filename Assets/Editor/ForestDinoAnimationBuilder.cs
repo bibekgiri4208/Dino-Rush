@@ -5,16 +5,25 @@ using UnityEngine;
 namespace DinoRush.Editor
 {
     /// <summary>Adapts named action strips to the runner's existing 24-frame pose contract, without editing sources.</summary>
-    internal static class ForestDinoAnimationBuilder
+    public static class ForestDinoAnimationBuilder
     {
         internal static readonly string[] Names = { "Cole", "Kira", "Kuro", "Loki", "Mono", "Sena" };
         internal const string Directory = "Assets/Generated/Dinos";
 
-        internal static Texture2D Sheet(string id)
+        [MenuItem("Dino Rush/Refresh Dino Animation Sheets")]
+        public static void Refresh()
+        {
+            if (Application.isPlaying) return;
+            foreach (string name in Names) Sheet(name.ToLowerInvariant(), true);
+            Debug.Log("Refreshed the six derived dino sheets: move for running, kick for jumping, dash for ducking, and supplied hurt poses. Source art, importers, GUIDs and scenes were preserved.");
+        }
+
+        internal static Texture2D Sheet(string id, bool refresh = false)
         {
             if (!AssetDatabase.IsValidFolder(Directory)) AssetDatabase.CreateFolder("Assets/Generated", "Dinos");
             string path = Directory + "/" + id + "_runner.png";
-            if (!File.Exists(path))
+            bool exists = File.Exists(path);
+            if (!exists || refresh)
             {
                 var result = new Texture2D(576, 24, TextureFormat.RGBA32, false);
                 var pixels = new Color32[576 * 24];
@@ -22,17 +31,21 @@ namespace DinoRush.Editor
                 {
                     Copy(pixels, id, "idle", 0, 4);
                     Copy(pixels, id, "move", 4, 6);
-                    Copy(pixels, id, "jump", 10, 4);
-                    Copy(pixels, id, "hurt", 14, 1);
-                    Copy(pixels, id, "hurt", 15, 1, true);
-                    Copy(pixels, id, "dead", 16, 2);
-                    Copy(pixels, id, "avoid", 18, 6);
+                    // Match the ORIGINAL four sheets, not the action filenames alone:
+                    // RunnerPlayer uses 11/12 (kick 1/2) for ascent/descent. The jump strip
+                    // bakes vertical displacement into the pixels and is not that pose pair.
+                    Copy(pixels, id, "kick", 10, 3);
+                    Copy(pixels, id, "hurt", 13, 4);
+                    Copy(pixels, id, "dash", 17, 1, 1);
+                    // 'avoid' stays upright; only 'dash' matches the legacy low duck cycle.
+                    Copy(pixels, id, "dash", 18, 6);
                     result.SetPixels32(pixels);
                     result.Apply();
                     File.WriteAllBytes(path, result.EncodeToPNG());
                 }
                 finally { Object.DestroyImmediate(result); }
                 AssetDatabase.ImportAsset(path);
+                if (exists) return AssetDatabase.LoadAssetAtPath<Texture2D>(path); // Keep any authored sprite slices/import settings.
                 var importer = (TextureImporter)AssetImporter.GetAtPath(path);
                 importer.textureType = TextureImporterType.Sprite;
                 importer.spriteImportMode = SpriteImportMode.Single;
@@ -46,7 +59,7 @@ namespace DinoRush.Editor
             return AssetDatabase.LoadAssetAtPath<Texture2D>(path);
         }
 
-        private static void Copy(Color32[] output, string id, string action, int first, int count, bool silhouette = false)
+        private static void Copy(Color32[] output, string id, string action, int first, int count, int sourceStart = 0)
         {
             string path = "Assets/2D Sprites/dino/" + id + "/base/" + action + ".png";
             var source = new Texture2D(2, 2, TextureFormat.RGBA32, false);
@@ -60,8 +73,7 @@ namespace DinoRush.Editor
                     for (int y = 0; y < 24; y++)
                         for (int x = 0; x < 24; x++)
                         {
-                            Color32 color = pixels[y * source.width + (frame % available) * 24 + x];
-                            if (silhouette) color = new Color32(255, 255, 255, color.a);
+                            Color32 color = pixels[y * source.width + ((sourceStart + frame) % available) * 24 + x];
                             output[y * 576 + (first + frame) * 24 + x] = color;
                         }
             }

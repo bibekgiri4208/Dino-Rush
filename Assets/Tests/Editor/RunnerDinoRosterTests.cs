@@ -77,12 +77,14 @@ namespace DinoRush.Tests
         }
 
         [Test]
-        public void NewRunnerSheetsUseTheSuppliedActionPixelsAndAlignedWhiteDamageSilhouettes()
+        public void NewRunnerSheetsUseEveryMatchingLegacyActionCellIncludingKickDashAndSuppliedHurtPoses()
         {
             var roster = AssetDatabase.LoadAssetAtPath<RunnerDinoRoster>("Assets/Generated/ForestDinoRoster.asset");
-            string[] actions = { "idle", "idle", "move", "move", "jump", "jump", "hurt", "hurt", "avoid", "avoid" };
-            int[] targetFrames = { 0, 3, 4, 9, 11, 12, 14, 15, 18, 23 };
-            int[] sourceFrames = { 0, 3, 0, 5, 1, 2, 0, 0, 0, 5 };
+            // The legacy 11/12 jump pair is visually kick 1/2, NOT the baked-height jump strip.
+            // Its six low duck frames are dash 0..5, NOT the upright avoid animation.
+            string[] actions = { "idle", "idle", "idle", "idle", "move", "move", "move", "move", "move", "move",
+                "kick", "kick", "kick", "hurt", "hurt", "hurt", "hurt", "dash", "dash", "dash", "dash", "dash", "dash", "dash" };
+            int[] sourceFrames = { 0, 1, 2, 0, 0, 1, 2, 3, 4, 5, 0, 1, 2, 0, 1, 2, 3, 1, 0, 1, 2, 3, 4, 5 };
             for (int i = 4; i < roster.Count; i++)
             {
                 var sheet = new Texture2D(2, 2);
@@ -99,8 +101,7 @@ namespace DinoRush.Tests
                                 for (int x = 0; x < 24; x++)
                                 {
                                     Color32 expected = source.GetPixel((sourceFrames[pose] % (source.width / 24)) * 24 + x, y);
-                                    if (targetFrames[pose] == 15) expected = new Color32(255, 255, 255, expected.a);
-                                    Assert.That((Color32)sheet.GetPixel(targetFrames[pose] * 24 + x, y), Is.EqualTo(expected), roster[i].Id + " " + actions[pose]);
+                                    Assert.That((Color32)sheet.GetPixel(pose * 24 + x, y), Is.EqualTo(expected), roster[i].Id + " " + actions[pose] + " slot " + pose);
                                 }
                         }
                         finally { Object.DestroyImmediate(source); }
@@ -108,6 +109,40 @@ namespace DinoRush.Tests
                 }
                 finally { Object.DestroyImmediate(sheet); }
             }
+        }
+
+        [Test]
+        public void AllTenDinosUseLowDuckSilhouettesAndJumpPosesWithoutBakedVerticalDisplacement()
+        {
+            var roster = AssetDatabase.LoadAssetAtPath<RunnerDinoRoster>("Assets/Generated/ForestDinoRoster.asset");
+            for (int dino = 0; dino < roster.Count; dino++)
+            {
+                var sheet = new Texture2D(2, 2);
+                try
+                {
+                    sheet.LoadImage(File.ReadAllBytes(AssetDatabase.GetAssetPath(roster[dino].Sheet)));
+                    int standingTop = OpaqueBounds(sheet, 0).yMax;
+                    int groundedBottom = OpaqueBounds(sheet, 0).yMin;
+                    Assert.That(OpaqueBounds(sheet, 11).yMin, Is.EqualTo(groundedBottom), roster[dino].Id + " ascending pose must not move the pixels up inside the cell");
+                    Assert.That(OpaqueBounds(sheet, 12).yMin, Is.EqualTo(groundedBottom), roster[dino].Id + " falling pose must not move the pixels up inside the cell");
+                    for (int frame = 18; frame < 24; frame++)
+                        Assert.That(OpaqueBounds(sheet, frame).yMax, Is.LessThan(standingTop), roster[dino].Id + " duck frame " + frame + " must actually lower its head");
+                }
+                finally { Object.DestroyImmediate(sheet); }
+            }
+        }
+
+        private static RectInt OpaqueBounds(Texture2D sheet, int frame)
+        {
+            int left = 24, bottom = 24, right = 0, top = 0;
+            for (int y = 0; y < 24; y++)
+                for (int x = 0; x < 24; x++)
+                    if (sheet.GetPixel(frame * 24 + x, y).a > 0)
+                    {
+                        left = Mathf.Min(left, x); right = Mathf.Max(right, x + 1);
+                        bottom = Mathf.Min(bottom, y); top = Mathf.Max(top, y + 1);
+                    }
+            return new RectInt(left, bottom, right - left, top - bottom);
         }
     }
 }

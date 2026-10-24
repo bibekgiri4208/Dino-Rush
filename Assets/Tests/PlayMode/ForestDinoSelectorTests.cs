@@ -187,6 +187,61 @@ namespace DinoRush.Tests
 
         private void Step() => typeof(ForestRunnerGame).GetMethod("Step", Private).Invoke(game, new object[] { RunnerRules.SimulationStep });
 
+        [UnityTest]
+        public IEnumerator AllTenDinosUseTheSameRunRiseFallDuckAndHitSlotsWithoutChangingPhysics()
+        {
+            var player = (RunnerPlayer)typeof(ForestRunnerGame).GetField("player", Private).GetValue(game);
+            SpriteRenderer renderer = game.transform.Find("Player/Blue dino player").GetComponent<SpriteRenderer>();
+            Rect standing = player.Hitbox;
+            for (int dino = 0; dino < game.DinoRoster.Count; dino++)
+            {
+                game.SelectDino(dino);
+                game.StartRun();
+                string prefix = game.DinoRoster[dino].DisplayName + " dino frame ";
+                for (int frame = 0; frame < 6; frame++)
+                {
+                    player.Reset();
+                    player.Render((frame + 0.1f) / 12, true, false, 1);
+                    Assert.That(renderer.sprite.name, Is.EqualTo(prefix + (4 + frame)));
+                    Assert.That(player.Hitbox, Is.EqualTo(standing));
+                }
+                player.Reset();
+                player.QueueJump();
+                player.Step(RunnerRules.SimulationStep, out _, out _);
+                player.Render(0, true, false, 1);
+                Assert.That(renderer.sprite.name, Is.EqualTo(prefix + "11"));
+                if (dino >= 4) yield return RunnerDisplayCapture.Capture("dino-action-" + game.DinoRoster[dino].Id + "-rising", 1280, 720);
+                for (int step = 0; step < 120 && renderer.sprite.name != prefix + "12"; step++)
+                {
+                    player.Step(RunnerRules.SimulationStep, out _, out _);
+                    player.Render(0, true, false, 1);
+                }
+                Assert.That(player.Grounded, Is.False);
+                Assert.That(renderer.sprite.name, Is.EqualTo(prefix + "12"));
+                if (dino >= 4) yield return RunnerDisplayCapture.Capture("dino-action-" + game.DinoRoster[dino].Id + "-falling", 1280, 720);
+                player.SetDucking(true);
+                for (int step = 0; step < 120 && !player.Grounded; step++) player.Step(RunnerRules.SimulationStep, out _, out _);
+                Assert.That(player.Grounded, Is.True);
+                for (int frame = 0; frame < 6; frame++)
+                {
+                    player.Reset();
+                    player.SetDucking(true);
+                    player.Render((frame + 0.1f) / 12, true, false, 1);
+                    Assert.That(renderer.sprite.name, Is.EqualTo(prefix + (18 + frame)));
+                    Assert.That(player.Hitbox.height, Is.EqualTo(RunnerRules.DuckHeight));
+                }
+                if (dino >= 4) yield return RunnerDisplayCapture.Capture("dino-action-" + game.DinoRoster[dino].Id + "-duck", 1280, 720);
+                player.Reset();
+                player.Hurt();
+                player.Render(0.1f, true, false, 1);
+                Assert.That(renderer.sprite.name, Is.EqualTo(prefix + "15"));
+                player.Render(0, true, false, 1);
+                Assert.That(renderer.sprite.name, Is.EqualTo(prefix + "14"));
+                game.ReturnToMenu();
+            }
+            yield return null;
+        }
+
         private void AssertSelectorLayout()
         {
             Canvas.ForceUpdateCanvases();
