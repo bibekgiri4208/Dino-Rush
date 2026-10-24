@@ -93,20 +93,26 @@ namespace DinoRush
         public void ApplyLayout(bool portrait)
         {
             float productX = portrait ? 0 : -272;
-            Rect("Mystery egg display", productX, portrait ? 370 : 54, portrait ? 560 : 340, portrait ? 220 : 312);
+            Rect("Mystery egg display", productX, portrait ? 370 : 70, portrait ? 560 : 340, portrait ? 220 : 280);
             const string product = "Mystery egg display/";
             Rect(product + "Egg display glow", portrait ? -184 : 0, portrait ? 0 : 64, 184, 184);
             Rect(product + "Showcase egg", portrait ? -184 : 0, portrait ? 0 : 64, 144, 144);
             Rect(product + "Companion egg left", portrait ? -232 : -62, portrait ? -12 : 52, 80, 80);
             Rect(product + "Companion egg right", portrait ? -136 : 62, portrait ? -12 : 52, 80, 80);
             TextLayout(product + "Egg product title", portrait ? 86 : 0, portrait ? 54 : -28, portrait ? 336 : 312, 30, portrait ? 20 : 18);
-            TextLayout(product + "Egg product description", portrait ? 86 : 0, portrait ? 0 : -78, portrait ? 336 : 312, 48, portrait ? 14 : 11);
-            TextLayout(product + "Egg unlock requirement", portrait ? 86 : 0, portrait ? -60 : -126, portrait ? 336 : 312, 24, portrait ? 12 : 10);
+            TextLayout(product + "Egg product description", portrait ? 86 : 0, portrait ? 0 : -70, portrait ? 336 : 312, 48, portrait ? 14 : 11);
+            TextLayout(product + "Egg unlock requirement", portrait ? 86 : 0, portrait ? -60 : -112, portrait ? 336 : 312, 24, portrait ? 12 : 10);
             TextLayout("Shop egg balance", productX, portrait ? 516 : 226, portrait ? 560 : 340, 30, 16);
-            Rect("Buy mystery egg", productX, portrait ? 196 : -146, portrait ? 560 : 340, portrait ? 100 : 60);
-            TextLayout("Buy mystery egg/Label", 0, 0, portrait ? 520 : 316, portrait ? 72 : 44, portrait ? 20 : 14);
+            Rect("Buy mystery egg", portrait ? -146 : productX, portrait ? 196 : -104, portrait ? 268 : 340, portrait ? 100 : 52);
+            TextLayout("Buy mystery egg/Label", 0, 0, portrait ? 236 : 316, portrait ? 76 : 40, portrait ? 18 : 14);
+            transform.Find("Buy mystery egg/Label").GetComponent<Text>().text = portrait ? "HATCH 1\n50 EGGS" : "HATCH 1 - 50 EGGS";
+            Rect("Buy ten mystery eggs", portrait ? 146 : productX, portrait ? 196 : -166, portrait ? 268 : 340, portrait ? 100 : 60);
+            TextLayout("Buy ten mystery eggs/Label", 0, 0, portrait ? 236 : 316, portrait ? 76 : 44, portrait ? 18 : 14);
+            Transform tenLabel = transform.Find("Buy ten mystery eggs/Label");
+            if (tenLabel != null) tenLabel.GetComponent<Text>().text = portrait ? "HATCH 10\n500 EGGS" : "HATCH 10 - 500 EGGS";
+            transform.Find("Buy ten mystery eggs")?.GetComponent<RunnerUiButtonFeedback>()?.RefreshContentLayout();
             transform.Find("Buy mystery egg").GetComponent<RunnerUiButtonFeedback>()?.RefreshContentLayout();
-            TextLayout("Mystery egg result", productX, portrait ? 104 : -212, portrait ? 560 : 340, 52, portrait ? 12 : 10);
+            TextLayout("Mystery egg result", productX, portrait ? 104 : -224, portrait ? 560 : 340, portrait ? 52 : 32, portrait ? 12 : 9);
             TextLayout("Collection heading", portrait ? 0 : 184, portrait ? 34 : 224, portrait ? 560 : 512, 30, portrait ? 22 : 16);
             TextLayout("Collection hint", portrait ? 0 : 184, portrait ? 0 : 192, portrait ? 560 : 512, 24, portrait ? 12 : 10);
             Rect("Dino choices", portrait ? 0 : 184, 0, portrait ? 560 : 512, portrait ? 420 : 352);

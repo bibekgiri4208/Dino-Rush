@@ -46,6 +46,7 @@ namespace DinoRush
         [SerializeField] private Button startMap;
         [SerializeField] private Button mapBack;
         [SerializeField] private Button buyMysteryEgg;
+        [SerializeField] private Button buyTenMysteryEggs;
         [SerializeField] private Text shopBalance;
         [SerializeField] private Text shopResult;
         [SerializeField] private Text[] dinoFragments = new Text[0];
@@ -77,6 +78,7 @@ namespace DinoRush
                 customizePage != null && customizePage.activeSelf ? RunnerCompactMenus.DialogKind.Shop :
                 modePage != null && modePage.activeSelf ? RunnerCompactMenus.DialogKind.Mode : RunnerCompactMenus.DialogKind.Options;
             RunnerCompactMenus.ApplyDialog(dialogTitle.transform.parent, kind, portrait, available);
+            shopPresentation?.ApplyBatchLayout(portrait, available);
         }
 
         public void OpenModeSelector()
@@ -151,6 +153,7 @@ namespace DinoRush
             Bind(optionsSound, toggleSound);
             Bind(confirmQuit, QuitGame);
             if (buyMysteryEgg != null) Bind(buyMysteryEgg, BuyMysteryEgg);
+            if (buyTenMysteryEggs != null) Bind(buyTenMysteryEggs, BuyTenMysteryEggs);
         }
 
         public void InitializeShop(RunnerShopProgress progress, RunnerAudio audio = null)
@@ -171,7 +174,8 @@ namespace DinoRush
         {
             if (customize == null || customizePage == null || dinoChoices.Length == 0) return;
             if (Application.isPlaying && buyMysteryEgg != null && shopBalance != null && shopResult != null &&
-                dinoFragments.Length == dinoChoices.Length && shopPresentation != null && shopCollection != null) return; // Preserve editable saved layouts.
+                dinoFragments.Length == dinoChoices.Length && shopPresentation != null && shopCollection != null &&
+                buyTenMysteryEggs != null && shopPresentation.Batch != null) return; // Preserve editable saved layouts.
             customize.name = "Shop";
             customize.GetComponentInChildren<Text>(true).text = "SHOP";
             Font font = selectedDinoLabel.font;
@@ -179,23 +183,12 @@ namespace DinoRush
             shopBalance = ShopLabel(page, "Shop egg balance", "EGGS: 0", font, 14, 238, 30);
             // Retain the legacy text object for old scene references, but replace it with a visual product card.
             if (page.Find("Mystery egg rules") != null) page.Find("Mystery egg rules").gameObject.SetActive(false);
-            Transform purchase = page.Find("Buy mystery egg");
-            if (purchase == null)
-            {
-                purchase = new GameObject("Buy mystery egg", typeof(RectTransform), typeof(Image), typeof(Button)).transform;
-                purchase.SetParent(page, false);
-                Image image = purchase.GetComponent<Image>();
-                image.sprite = back.GetComponent<Image>().sprite;
-                image.type = Image.Type.Sliced;
-                image.pixelsPerUnitMultiplier = 0.5f;
-                Button button = purchase.GetComponent<Button>();
-                button.targetGraphic = image;
-                button.colors = back.colors;
-                button.navigation = new Navigation { mode = Navigation.Mode.None };
-            }
-            buyMysteryEgg = purchase.GetComponent<Button>();
+            buyMysteryEgg = PurchaseButton(page, "Buy mystery egg");
+            Transform purchase = buyMysteryEgg.transform;
             ShopPosition(purchase, 0, 32, 440, 56);
             ShopLabel(purchase, "Label", "HATCH EGG - " + RunnerShopProgress.MysteryEggCost + " EGGS", font, 16, 0, 40, 416);
+            buyTenMysteryEggs = PurchaseButton(page, "Buy ten mystery eggs");
+            ShopLabel(buyTenMysteryEggs.transform, "Label", "HATCH 10 - " + RunnerShopProgress.TenPullCost + " EGGS", font, 14, 0, 44, 316);
             shopResult = ShopLabel(page, "Mystery egg result", "COLLECT EGGS ON YOUR RUNS TO HATCH", font, 10, -20, 36);
             dinoFragments = new Text[dinoChoices.Length];
             ShopPosition(page.Find("Dino choices"), 0, 0, 620, 340);
@@ -219,6 +212,26 @@ namespace DinoRush
             if (shopCollection == null) shopCollection = page.gameObject.AddComponent<RunnerShopCollection>();
             shopCollection.EnsureUi(dinoChoices, font, back.GetComponent<Image>().sprite);
             ApplyDialogLayout(dialogPortrait, dialogAvailable);
+        }
+
+        private Button PurchaseButton(Transform page, string name)
+        {
+            Transform purchase = page.Find(name);
+            if (purchase == null)
+            {
+                purchase = new GameObject(name, typeof(RectTransform), typeof(Image), typeof(Button)).transform;
+                purchase.SetParent(page, false);
+                purchase.gameObject.layer = 5;
+                Image image = purchase.GetComponent<Image>();
+                image.sprite = back.GetComponent<Image>().sprite;
+                image.type = Image.Type.Sliced;
+                image.pixelsPerUnitMultiplier = 0.5f;
+                Button button = purchase.GetComponent<Button>();
+                button.targetGraphic = image;
+                button.colors = back.colors;
+                button.navigation = new Navigation { mode = Navigation.Mode.None };
+            }
+            return purchase.GetComponent<Button>();
         }
 
         private static Text ShopLabel(Transform parent, string name, string caption, Font font, int size,
@@ -272,10 +285,29 @@ namespace DinoRush
             if (shop == null || shopBalance == null) return;
             shopBalance.text = "EGGS: " + shop.Balance;
             buyMysteryEgg.interactable = shop.CanBuy && (shopPresentation == null || !shopPresentation.IsShowing);
+            if (buyTenMysteryEggs != null) buyTenMysteryEggs.interactable = shop.CanBuyTen && (shopPresentation == null || !shopPresentation.IsShowing);
             if (shop.LockedCount == 0 && !shopResult.text.StartsWith("+", StringComparison.Ordinal)) shopResult.text = "ALL DINOS UNLOCKED!";
             else if (shop.Balance < RunnerShopProgress.MysteryEggCost && !shopResult.text.StartsWith("+", StringComparison.Ordinal))
                 shopResult.text = "COLLECT EGGS ON YOUR RUNS TO HATCH";
             SetDinoSelection(selectedDino);
+        }
+
+        private void BuyTenMysteryEggs()
+        {
+            if (shop == null || !customizePage.activeInHierarchy || shopPresentation == null || shopPresentation.IsShowing) return;
+            if (shop.TryBuyTen(out RunnerShopProgress.Reward[] rewards))
+            {
+                int total = 0, unlocks = 0;
+                pendingRewardIndex = rewards[0].DinoIndex;
+                foreach (var reward in rewards)
+                {
+                    total += reward.Fragments;
+                    if (reward.NewlyUnlocked) { unlocks++; pendingRewardIndex = reward.DinoIndex; }
+                }
+                shopResult.text = "+" + total + " FRAGMENTS / " + unlocks + " NEW DINOS";
+                shopPresentation.Batch.Play(dinoRoster, rewards);
+            }
+            RefreshShop();
         }
 
         public void InitializeDinos(RunnerDinoRoster roster, int selected, Action<int> select)

@@ -78,6 +78,7 @@ namespace DinoRush
         private GameObject eggDisplay;
         private Text eggCount, resultEggs;
         private float eggPulse;
+        private RectTransform eggIcon;
         private RunnerEggFlights eggFlights;
         private int movementLevel;
 
@@ -424,9 +425,19 @@ namespace DinoRush
             {
                 eggFlights?.Tick(dt);
                 eggPulse = Mathf.Max(0f, eggPulse - dt);
-                eggCount.transform.localScale = Vector3.one * (1f + Mathf.Sin(eggPulse / 0.22f * Mathf.PI) * 0.08f);
-                eggCount.color = Color.Lerp(Cream, new Color32(255, 218, 119, 255), eggPulse / 0.22f);
+                RenderEggPulse();
             }
+        }
+
+        private void RenderEggPulse()
+        {
+            if (eggCount == null) return;
+            float bounce = Mathf.Sin(eggPulse / 0.22f * Mathf.PI);
+            eggCount.transform.localScale = Vector3.one * (1 + bounce * 0.08f);
+            eggCount.color = Color.Lerp(Cream, new Color32(255, 218, 119, 255), eggPulse / 0.22f);
+            if (eggIcon == null) return;
+            eggIcon.localScale = new Vector3(1 + bounce * 0.12f, 1 - bounce * 0.08f, 1);
+            eggIcon.localRotation = Quaternion.Euler(0, 0, bounce * -10f);
         }
 
         private void CreateEggDisplay(Sprite sprite)
@@ -444,6 +455,7 @@ namespace DinoRush
             Image icon = Box("Egg icon", frame.transform, new Vector2(-86, 0), new Vector2(28, 34), Color.white);
             icon.sprite = sprite;
             icon.preserveAspect = true;
+            eggIcon = icon.rectTransform;
             Label("Egg caption", frame.transform, "EGGS", new Vector2(-32, 0), new Vector2(64, 26), 12, Cream);
             eggCount = Label("Egg count", frame.transform, "000", Vector2.zero, new Vector2(84, 26), 14,
                 Cream, TextAnchor.MiddleRight);
@@ -460,7 +472,7 @@ namespace DinoRush
             if (minimalPresentation)
                 resultEggs = Label("Collected eggs", panel.transform, "EGGS COLLECTED: 000", new Vector2(0, -12),
                     new Vector2(384, 20), 12, new Color32(255, 218, 119, 255));
-            if (sprite != null) eggFlights = new RunnerEggFlights(root, icon.rectTransform, sprite, () => eggPulse = 0.22f);
+            if (sprite != null) eggFlights = new RunnerEggFlights(root, icon.rectTransform, sprite, () => eggPulse = 0.22f, font);
             eggDisplay.SetActive(false);
         }
 
@@ -487,6 +499,11 @@ namespace DinoRush
                 eggPulse = 0f;
                 eggCount.transform.localScale = Vector3.one;
                 eggCount.color = Cream;
+                if (eggIcon != null)
+                {
+                    eggIcon.localScale = Vector3.one;
+                    eggIcon.localRotation = Quaternion.identity;
+                }
             }
             eggCount.text = caption;
             if (resultEggs != null) resultEggs.text = "EGGS COLLECTED: " + caption;
@@ -578,10 +595,11 @@ namespace DinoRush
         {
             responsiveUi?.Apply(layout);
             if (stageFill != null) UpdateProgress(progressElapsed);
-            if (eggFlights != null && eggFlights.ActiveCount > 0)
+            if (eggFlights != null)
             {
                 Canvas.ForceUpdateCanvases();
                 eggFlights.RefreshLayout();
+                RenderEggPulse();
             }
         }
 

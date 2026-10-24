@@ -68,6 +68,22 @@ namespace DinoRush
             return SaveSprite(texture, 32f, assets);
         }
 
+        public static Sprite CreatePickupShard(List<Object> assets)
+        {
+            var texture = new Texture2D(9, 5, TextureFormat.RGBA32, false)
+            {
+                name = "Egg pickup gold shard", filterMode = FilterMode.Point, wrapMode = TextureWrapMode.Clamp
+            };
+            for (int y = 0; y < 5; y++)
+                for (int x = 0; x < 9; x++)
+                {
+                    bool filled = Mathf.Abs(x - 4) + Mathf.Abs(y - 2) * 2 <= 4;
+                    texture.SetPixel(x, y, !filled ? Color.clear : y >= 2 ? Color.white : new Color(1, 0.72f, 0.26f));
+                }
+            texture.Apply();
+            return SaveSprite(texture, 24, assets);
+        }
+
         private static Sprite SaveSprite(Texture2D texture, float ppu, List<Object> assets)
         {
             Sprite sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height),

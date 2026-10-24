@@ -72,6 +72,7 @@ namespace DinoRush.Tests
             Assert.That(GameObject.Find("Dialog heading").GetComponent<Text>().text, Is.EqualTo("SHOP"));
             Assert.That(GameObject.Find("Shop egg balance").GetComponent<Text>().text, Is.EqualTo("EGGS: 0"));
             Assert.That(GameObject.Find("Buy mystery egg").GetComponent<Button>().interactable, Is.False);
+            Assert.That(GameObject.Find("Buy ten mystery eggs").GetComponent<Button>().interactable, Is.False);
             for (int i = 1; i < game.DinoRoster.Count; i++)
             {
                 game.GetComponentInChildren<ForestMainMenu>().ShopCollection.ShowIndex(i);
@@ -282,6 +283,194 @@ namespace DinoRush.Tests
             Assert.That(collection.Page, Is.EqualTo(1));
             Assert.That(game.Shop.Balance, Is.EqualTo(100));
             Assert.That(game.SelectedDinoIndex, Is.Zero);
+        }
+
+        [UnityTest]
+        public IEnumerator TenPullRequiresFiveHundredSavesEveryRewardAndShowsAnAccurateSkippableResultGrid()
+        {
+            PlayerPrefs.SetInt(RunnerShopProgress.WalletKey, 499);
+            Click("Shop");
+            yield return new WaitForSecondsRealtime(0.3f);
+            Assert.That(GameObject.Find("Buy mystery egg").GetComponent<Button>().interactable, Is.True);
+            Assert.That(GameObject.Find("Buy ten mystery eggs").GetComponent<Button>().interactable, Is.False);
+            GameObject.Find("Buy ten mystery eggs").GetComponent<Button>().onClick.Invoke();
+            Assert.That(game.Shop.Balance, Is.EqualTo(499));
+            var menu = game.GetComponentInChildren<ForestMainMenu>();
+            menu.CloseDialog();
+            yield return new WaitForSecondsRealtime(0.3f);
+            PlayerPrefs.SetInt(RunnerShopProgress.WalletKey, 1000);
+            for (int i = 1; i < game.DinoRoster.Count; i++) PlayerPrefs.SetInt(RunnerShopProgress.FragmentKey(game.DinoRoster[i].Id), 99);
+            Click("Shop");
+            yield return new WaitForSecondsRealtime(0.3f);
+            yield return RunnerDisplayCapture.Capture("shop-ten-pull-option", 1280, 720);
+            yield return RunnerDisplayCapture.Capture("shop-ten-pull-option-portrait", 360, 800);
+            Click("Buy ten mystery eggs");
+            RunnerShopBatchPresentation batch = menu.ShopPresentation.Batch;
+            Assert.That(menu.ShopPresentation.IsShowing, Is.True);
+            Assert.That(menu.ShopPresentation.Stage, Is.EqualTo(RunnerShopPresentation.HatchStage.Batch));
+            Assert.That(batch.RevealedCount, Is.Zero);
+            Assert.That(game.Shop.Balance, Is.EqualTo(500));
+            Assert.That(GameObject.Find("Buy mystery egg").GetComponent<Button>().interactable, Is.False);
+            Assert.That(GameObject.Find("Buy ten mystery eggs").GetComponent<Button>().interactable, Is.False);
+            var rewards = (RunnerShopProgress.Reward[])typeof(RunnerShopBatchPresentation).GetField("rewards", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(batch);
+            Assert.That(rewards.Length, Is.EqualTo(10));
+            var totals = new int[game.DinoRoster.Count];
+            int sum = 0, unlocks = 0;
+            foreach (var reward in rewards)
+            {
+                totals[reward.DinoIndex] += reward.Fragments;
+                sum += reward.Fragments;
+                if (reward.NewlyUnlocked) unlocks++;
+            }
+            for (int i = 1; i < totals.Length; i++) Assert.That(game.Shop.Fragments(i), Is.EqualTo(99 + totals[i]));
+            GameObject.Find("Buy ten mystery eggs").GetComponent<Button>().onClick.Invoke();
+            GameObject.Find("Buy mystery egg").GetComponent<Button>().onClick.Invoke();
+            Assert.That(game.Shop.Balance, Is.EqualTo(500));
+            AdvanceBatch(batch, 0.45f);
+            yield return RunnerDisplayCapture.Capture("shop-ten-pull-summon", 1280, 720);
+            AdvanceBatch(batch, 2.1f);
+            Assert.That(batch.RevealedCount, Is.InRange(1, 5));
+            yield return RunnerDisplayCapture.Capture("shop-ten-pull-hatching", 1280, 720);
+            Click("Ten pull continue"); // Reveal all; do not dismiss results or make another purchase.
+            Assert.That(batch.Complete, Is.True);
+            Assert.That(batch.RevealedCount, Is.EqualTo(10));
+            for (int i = 0; i < rewards.Length; i++)
+            {
+                Transform card = GameObject.Find("Ten pull reward " + (i + 1)).transform;
+                var reward = rewards[i];
+                Assert.That(card.Find("Reward dino").GetComponent<Image>().sprite, Is.SameAs(game.DinoRoster[reward.DinoIndex].Portrait));
+                Assert.That(card.Find("Reward labels/Reward name").GetComponent<Text>().text, Is.EqualTo(game.DinoRoster[reward.DinoIndex].DisplayName.ToUpperInvariant()));
+                Assert.That(card.Find("Reward labels/Reward fragments").GetComponent<Text>().text, Is.EqualTo("+" + reward.Fragments + " FRAGS"));
+                Assert.That(card.Find("Reward labels/Reward badge").GetComponent<Text>().text, Is.EqualTo(reward.NewlyUnlocked ? "NEW DINO!" : "FRAGMENTS"));
+            }
+            Assert.That(GameObject.Find("Ten pull summary").GetComponent<Text>().text, Is.EqualTo("+" + sum + " FRAGMENTS / " + unlocks + " NEW DINOS"));
+            yield return RunnerDisplayCapture.Capture("shop-ten-pull-results", 1280, 720);
+            yield return RunnerDisplayCapture.Capture("shop-ten-pull-results-portrait", 360, 800);
+            foreach (Vector2Int size in new[] { new Vector2Int(1280, 720), new Vector2Int(1024, 768), new Vector2Int(320, 568) })
+            {
+                game.ApplyScreenLayout(RunnerScreenLayout.Calculate(size.x, size.y, new Rect(0, 16, size.x, size.y - 32)));
+                Canvas.ForceUpdateCanvases();
+                Transform panel = GameObject.Find("Ten pull panel").transform;
+                var bounds = new List<Bounds>();
+                for (int i = 1; i <= 10; i++)
+                {
+                    Transform card = panel.Find("Ten pull reward " + i);
+                    Bounds current = RectTransformUtility.CalculateRelativeRectTransformBounds(panel, card);
+                    foreach (Bounds other in bounds) Assert.That(current.Intersects(other), Is.False, "Reward cards must not overlap at " + size);
+                    bounds.Add(current);
+                    foreach (Text label in card.GetComponentsInChildren<Text>())
+                        Assert.That(label.cachedTextGenerator.characterCountVisible, Is.EqualTo(label.text.Length), label.name + " clipped at " + size);
+                }
+            }
+            game.ApplyScreenLayout(RunnerScreenLayout.Calculate(Screen.width, Screen.height, Screen.safeArea));
+            Click("Ten pull continue");
+            Assert.That(menu.ShopPresentation.IsShowing, Is.False);
+            Assert.That(menu.DialogOpen, Is.True);
+            Assert.That(game.Shop.Balance, Is.EqualTo(500));
+        }
+
+        [UnityTest]
+        public IEnumerator TenPullUsesMatchingEggStagesAndRunsUnscaledBehindAModalBlocker()
+        {
+            PlayerPrefs.SetInt(RunnerShopProgress.WalletKey, 500);
+            Click("Shop");
+            yield return new WaitForSecondsRealtime(0.3f);
+            var menu = game.GetComponentInChildren<ForestMainMenu>();
+            var batch = menu.ShopPresentation.Batch;
+            Click("Buy ten mystery eggs");
+            Image egg = GameObject.Find("Ten pull reward 1").transform.Find("Sealed egg").GetComponent<Image>();
+            Vector3 before = egg.transform.parent.localPosition;
+            float scale = Time.timeScale;
+            try
+            {
+                Time.timeScale = 0;
+                yield return new WaitForSecondsRealtime(0.35f);
+                Assert.That(egg.transform.parent.localPosition, Is.Not.EqualTo(before));
+                var rewards = (RunnerShopProgress.Reward[])typeof(RunnerShopBatchPresentation).GetField("rewards", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(batch);
+                var art = menu.ShopPresentation.Catalog.Find(game.DinoRoster[rewards[0].DinoIndex].Id);
+                Assert.That(egg.sprite.texture, Is.SameAs(art.move));
+                AdvanceBatch(batch, 1.0f);
+                Assert.That(egg.sprite.texture, Is.SameAs(art.crack));
+                AdvanceBatch(batch, 0.6f);
+                Assert.That(egg.sprite.texture, Is.SameAs(art.hatch));
+                var pointer = new PointerEventData(EventSystem.current) { position = RectTransformUtility.WorldToScreenPoint(null, GameObject.Find("Buy ten mystery eggs").transform.position) };
+                var hits = new List<RaycastResult>();
+                EventSystem.current.RaycastAll(pointer, hits);
+                Assert.That(hits[0].gameObject.name, Is.Not.EqualTo("Buy ten mystery eggs"));
+                menu.CloseDialog();
+                Assert.That(batch.Complete, Is.True);
+                menu.CloseDialog();
+                Assert.That(batch.IsShowing, Is.False);
+                Assert.That(menu.DialogOpen, Is.True);
+                Assert.That(game.Shop.Balance, Is.Zero);
+            }
+            finally { Time.timeScale = scale; }
+        }
+
+        [UnityTest]
+        public IEnumerator InterruptedTenPullPersistsAllTenRewardsAndCleansUpSharedAnimationFrames()
+        {
+            PlayerPrefs.SetInt(RunnerShopProgress.WalletKey, 500);
+            Click("Shop");
+            yield return new WaitForSecondsRealtime(0.3f);
+            Click("Buy ten mystery eggs");
+            var menu = game.GetComponentInChildren<ForestMainMenu>();
+            Sprite frame = GameObject.Find("Ten pull reward 1").transform.Find("Sealed egg").GetComponent<Image>().sprite;
+            Texture2D source = frame.texture;
+            var totals = new int[game.DinoRoster.Count];
+            int sum = 0;
+            for (int i = 1; i < totals.Length; i++) { totals[i] = game.Shop.Fragments(i); sum += totals[i]; }
+            Assert.That(sum, Is.InRange(10, 200));
+            menu.Hide();
+            Assert.That(menu.ShopPresentation.IsShowing, Is.False);
+            yield return Reload();
+            Assert.That(game.Shop.Balance, Is.Zero);
+            for (int i = 1; i < totals.Length; i++) Assert.That(game.Shop.Fragments(i), Is.EqualTo(totals[i]));
+            Assert.That(frame == null, Is.True);
+            Assert.That(source != null, Is.True);
+        }
+
+        private static void AdvanceBatch(RunnerShopBatchPresentation batch, float dt) => typeof(RunnerShopBatchPresentation)
+            .GetMethod("Advance", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(batch, new object[] { dt });
+
+        [UnityTest]
+        public IEnumerator TenPullFinishesNaturallyAndAnotherPurchaseStartsAFreshSequenceWithoutReawarding()
+        {
+            PlayerPrefs.SetInt(RunnerShopProgress.WalletKey, 1000);
+            Click("Shop");
+            yield return new WaitForSecondsRealtime(0.3f);
+            Click("Buy ten mystery eggs");
+            var menu = game.GetComponentInChildren<ForestMainMenu>();
+            var batch = menu.ShopPresentation.Batch;
+            AdvanceBatch(batch, RunnerShopBatchPresentation.Duration + 0.1f);
+            Assert.That(batch.Complete, Is.True);
+            Assert.That(batch.RevealedCount, Is.EqualTo(10));
+            Assert.That(game.Shop.Balance, Is.EqualTo(500));
+            yield return RunnerDisplayCapture.Capture("shop-ten-pull-fragment-results", 1280, 720);
+            Click("Ten pull continue");
+            yield return null;
+            Click("Buy ten mystery eggs");
+            Assert.That(game.Shop.Balance, Is.Zero);
+            Assert.That(batch.RevealedCount, Is.Zero);
+            Assert.That(batch.Complete, Is.False);
+            Assert.That(GameObject.Find("Ten pull reward 1").transform.Find("Sealed egg").GetComponent<Image>().enabled, Is.True);
+            int before = 0;
+            for (int i = 1; i < game.DinoRoster.Count; i++) before += game.Shop.Fragments(i);
+            AdvanceBatch(batch, RunnerShopBatchPresentation.Duration + 1);
+            AdvanceBatch(batch, RunnerShopBatchPresentation.Duration);
+            int after = 0;
+            for (int i = 1; i < game.DinoRoster.Count; i++) after += game.Shop.Fragments(i);
+            Assert.That(after, Is.EqualTo(before), "Finishing or continuing a reveal never writes rewards again.");
+            Assert.That(game.Shop.Balance, Is.Zero);
+            menu.CloseDialog();
+            for (int i = 1; i < game.DinoRoster.Count; i++) PlayerPrefs.SetInt(RunnerShopProgress.FragmentKey(game.DinoRoster[i].Id), 100);
+            PlayerPrefs.SetInt(RunnerShopProgress.WalletKey, 1000);
+            menu.CloseDialog();
+            yield return new WaitForSecondsRealtime(0.3f);
+            Click("Shop");
+            yield return new WaitForSecondsRealtime(0.3f);
+            Assert.That(GameObject.Find("Buy mystery egg").GetComponent<Button>().interactable, Is.False);
+            Assert.That(GameObject.Find("Buy ten mystery eggs").GetComponent<Button>().interactable, Is.False);
         }
 
         private static void Click(string name)

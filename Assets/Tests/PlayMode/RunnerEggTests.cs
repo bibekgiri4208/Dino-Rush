@@ -198,8 +198,12 @@ namespace DinoRush.Tests
             SpriteRenderer halo = pool.Find("Pickup sparkle 1").GetComponent<SpriteRenderer>();
             SpriteRenderer delayed = pool.Find("Pickup sparkle 2").GetComponent<SpriteRenderer>();
             SpriteRenderer star = pool.Find("Pickup sparkle 3").GetComponent<SpriteRenderer>();
+            SpriteRenderer shard = pool.Find("Pickup sparkle 7").GetComponent<SpriteRenderer>();
             Assert.That(flash.gameObject.activeSelf, Is.True);
             Assert.That(halo.sprite.name, Is.EqualTo("Egg pickup halo"));
+            Assert.That(shard.sprite.name, Is.EqualTo("Egg pickup gold shard"));
+            Assert.That(shard.sprite.texture.filterMode, Is.EqualTo(FilterMode.Point));
+            Vector3 shardStart = shard.transform.position;
             Assert.That(halo.gameObject.activeSelf, Is.True);
             Assert.That(delayed.gameObject.activeSelf, Is.False, "After-glints should be staggered, not one uniform explosion.");
             float haloStartSize = halo.transform.localScale.x;
@@ -214,6 +218,7 @@ namespace DinoRush.Tests
             Assert.That(star.transform.position, Is.Not.EqualTo(starStart));
             Assert.That(star.color, Is.Not.EqualTo(starStartColor));
             Assert.That(star.transform.localRotation, Is.Not.EqualTo(Quaternion.identity));
+            Assert.That(shard.transform.position, Is.Not.EqualTo(shardStart));
             yield return RunnerDisplayCapture.Capture("egg-sparkle-burst", 1280, 720);
             yield return RunnerDisplayCapture.Capture("egg-sparkle-burst-portrait", 360, 800);
             for (int step = 0; step < 15; step++) eggs.Step(RunnerRules.SimulationStep, 0f, noPlayer);
@@ -342,8 +347,9 @@ namespace DinoRush.Tests
                     for (int step = 0; step < 60; step++)
                     {
                         flights.Tick(0.01f);
-                        foreach (Image image in layer.GetComponentsInChildren<Image>())
+                        foreach (Graphic image in layer.GetComponentsInChildren<Graphic>())
                         {
+                            if (image is Text || image.name == "Egg counter arrival") continue;
                             Vector2 position = image.rectTransform.anchoredPosition;
                             Assert.That(position.x, Is.InRange(Mathf.Min(start.x, target.x) - 0.1f,
                                 Mathf.Max(start.x, target.x) + 0.1f),
@@ -415,9 +421,12 @@ namespace DinoRush.Tests
             var flights = (RunnerEggFlights)typeof(RunnerHud).GetField("eggFlights", Private).GetValue(hud);
             Transform layer = ui.Find("Egg pickup flights");
             int images = layer.GetComponentsInChildren<Image>(true).Length;
-            Assert.That(images, Is.EqualTo(RunnerEggFlights.PoolSize * 3));
+            int objects = layer.GetComponentsInChildren<Transform>(true).Length;
+            Assert.That(images, Is.EqualTo(RunnerEggFlights.PoolSize));
+            Assert.That(layer.GetComponentsInChildren<RunnerEggPickupGraphic>(true).Length, Is.EqualTo(RunnerEggFlights.PoolSize * 6 + 1));
+            Assert.That(layer.GetComponentsInChildren<Text>(true).Length, Is.EqualTo(RunnerEggFlights.PoolSize));
             Assert.That(layer.GetComponent<CanvasGroup>().blocksRaycasts, Is.False);
-            foreach (Image image in layer.GetComponentsInChildren<Image>(true)) Assert.That(image.raycastTarget, Is.False);
+            foreach (Graphic image in layer.GetComponentsInChildren<Graphic>(true)) Assert.That(image.raycastTarget, Is.False);
             eggs.Reset(42);
             RunnerEncounter sample = new RunnerEncounterDirector(42, new[] { 1f }).Next(0f);
             RunnerEggTrail low = RunnerEggTrailDirector.Create(sample, 6.8f, RunnerEggTrailKind.Low);
@@ -428,8 +437,128 @@ namespace DinoRush.Tests
             for (int i = 0; i < 90; i++) hud.Tick(RunnerRules.SimulationStep);
             Assert.That(flights.ActiveCount, Is.Zero);
             Assert.That(layer.GetComponentsInChildren<Image>(true).Length, Is.EqualTo(images));
+            Assert.That(layer.GetComponentsInChildren<Transform>(true).Length, Is.EqualTo(objects));
             Assert.That(game.EggsCollected, Is.EqualTo(RunnerEggCollectibles.PoolSize));
             yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator PickupPopShowsFloatingPlusOneAndGoldCometThenRingsAndBouncesTheCounter()
+        {
+            CollectFirstEgg();
+            var hud = (RunnerHud)Get("hud");
+            Transform layer = ui.Find("Egg pickup flights");
+            Text popup = layer.Find("Egg pickup +1 0").GetComponent<Text>();
+            var flying = (RectTransform)layer.Find("Flying egg 0");
+            var glow = layer.Find("Egg flight glow 0").GetComponent<RunnerEggPickupGraphic>();
+            Transform ring = layer.Find("Egg counter arrival");
+            Transform icon = ui.Find("Egg counter/Egg icon");
+            Assert.That(popup.gameObject.activeInHierarchy, Is.True);
+            Assert.That(popup.text, Is.EqualTo("+1"));
+            Assert.That(popup.color.a, Is.EqualTo(1));
+            Assert.That(glow.gameObject.activeInHierarchy, Is.True);
+            Assert.That(ring.gameObject.activeSelf, Is.False);
+            float startSize = flying.localScale.x;
+            float startY = popup.rectTransform.anchoredPosition.y;
+            hud.Tick(0.06f);
+            Assert.That(flying.localScale.x, Is.GreaterThan(startSize), "The egg should pop before sweeping toward the HUD.");
+            Assert.That(popup.rectTransform.anchoredPosition.y, Is.GreaterThan(startY));
+            yield return RunnerDisplayCapture.Capture("egg-pickup-pop", 1280, 720);
+            hud.Tick(0.15f);
+            Assert.That(layer.Find("Egg flight glint 0-4").gameObject.activeInHierarchy, Is.True);
+            yield return RunnerDisplayCapture.Capture("egg-pickup-comet", 1280, 720);
+            yield return RunnerDisplayCapture.Capture("egg-pickup-comet-portrait", 360, 800);
+            hud.Tick(0.24f);
+            Assert.That(popup.gameObject.activeSelf, Is.False, "The short +1 popup must not follow the egg across the playfield.");
+            hud.Tick(0.18f);
+            Assert.That(ring.gameObject.activeInHierarchy, Is.True);
+            Assert.That(icon.localScale.x, Is.GreaterThan(1));
+            Assert.That(icon.localRotation, Is.Not.EqualTo(Quaternion.identity));
+            Vector2 target = layer.InverseTransformPoint(icon.position);
+            Assert.That(Vector2.Distance(((RectTransform)ring).anchoredPosition, target), Is.LessThan(1));
+            yield return RunnerDisplayCapture.Capture("egg-pickup-arrival", 1280, 720);
+            Vector3 arrivalScale = icon.localScale;
+            game.ApplyScreenLayout(RunnerScreenLayout.Calculate(360, 800, new Rect(0, 32, 360, 736)));
+            target = layer.InverseTransformPoint(icon.position);
+            Assert.That(Vector2.Distance(((RectTransform)ring).anchoredPosition, target), Is.LessThan(1),
+                "Arrival feedback must reflow even when no egg is still flying.");
+            Assert.That(icon.localScale, Is.EqualTo(arrivalScale));
+            yield return RunnerDisplayCapture.Capture("egg-pickup-arrival-portrait", 360, 800);
+            game.TogglePause();
+            Vector3 pausedScale = icon.localScale;
+            hud.Tick(1);
+            Assert.That(icon.localScale, Is.EqualTo(pausedScale));
+            Assert.That(ring.gameObject.activeInHierarchy, Is.False);
+            game.TogglePause();
+            hud.Tick(0.4f);
+            Assert.That(ring.gameObject.activeSelf, Is.False);
+            Assert.That(icon.localScale, Is.EqualTo(Vector3.one));
+            Assert.That(icon.localRotation, Is.EqualTo(Quaternion.identity));
+            Assert.That(game.EggsCollected, Is.EqualTo(1));
+            CollectFirstEgg();
+            hud.Tick(0.63f);
+            game.RestartRun();
+            Assert.That(ring.gameObject.activeSelf, Is.False);
+            Assert.That(popup.gameObject.activeSelf, Is.False);
+            Assert.That(glow.gameObject.activeSelf, Is.False);
+            Assert.That(icon.localScale, Is.EqualTo(Vector3.one));
+        }
+
+        [UnityTest]
+        public IEnumerator FloatingPickupLabelsStayReadableInsideTheScreenAndClearOnRotationAndRetry()
+        {
+            game.StartRun();
+            var hud = (RunnerHud)Get("hud");
+            var flights = (RunnerEggFlights)typeof(RunnerHud).GetField("eggFlights", Private).GetValue(hud);
+            var layer = (RectTransform)ui.Find("Egg pickup flights");
+            Text popup = layer.Find("Egg pickup +1 0").GetComponent<Text>();
+            foreach (Vector2Int resolution in new[] { new Vector2Int(1280, 720), new Vector2Int(360, 800) })
+            {
+                game.ApplyScreenLayout(RunnerScreenLayout.Calculate(resolution.x, resolution.y,
+                    new Rect(0, 32, resolution.x, resolution.y - 64)));
+                foreach (float height in new[] { 0.7f, 4f })
+                {
+                    flights.Clear();
+                    flights.Play(player.Feet + Vector3.up * height, Camera.main);
+                    hud.Tick(0.1f);
+                    Canvas.ForceUpdateCanvases();
+                    Assert.That(popup.cachedTextGenerator.characterCountVisible, Is.EqualTo(2));
+                    var corners = new Vector3[4];
+                    popup.rectTransform.GetWorldCorners(corners);
+                    foreach (Vector3 corner in corners)
+                    {
+                        Vector3 local = layer.InverseTransformPoint(corner);
+                        Assert.That(local.x, Is.InRange(layer.rect.xMin, layer.rect.xMax));
+                        Assert.That(local.y, Is.InRange(layer.rect.yMin, layer.rect.yMax));
+                    }
+                }
+            }
+            game.RestartRun();
+            Assert.That(popup.gameObject.activeSelf, Is.False);
+            Assert.That(flights.ActiveCount, Is.Zero);
+            yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator OriginalPickupSoundIsReusedRespectsMuteAndDisposesOnSceneExit()
+        {
+            var audio = (RunnerAudio)Get("audioCues");
+            var pickup = (AudioClip)typeof(RunnerAudio).GetField("pickup", Private).GetValue(audio);
+            Assert.That(pickup.length, Is.EqualTo(0.09f).Within(0.001f));
+            Assert.That(pickup.name, Is.EqualTo("Egg pickup"));
+            AudioSource source = game.GetComponent<AudioSource>();
+            bool wasMuted = audio.Muted;
+            try
+            {
+                if (!audio.Muted) audio.ToggleMute();
+                for (int i = 1; i <= 40; i++) audio.Pickup();
+                Assert.That(source.mute, Is.True);
+                Assert.That(typeof(RunnerAudio).GetField("pickup", Private).GetValue(audio), Is.SameAs(pickup));
+            }
+            finally { if (audio.Muted != wasMuted) audio.ToggleMute(); }
+            Object.Destroy(game.gameObject);
+            yield return null;
+            Assert.That(pickup == null, Is.True);
         }
 
         private void CollectFirstEgg()

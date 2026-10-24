@@ -48,6 +48,14 @@ namespace DinoRush.Tests
                 Assert.That(menu.ShopPresentation.Catalog.Count, Is.EqualTo(9));
                 Assert.That(menu.ShopPresentation.transform.Find("Mystery egg display/Showcase egg").GetComponent<UnityEngine.UI.Image>().sprite, Is.Not.Null);
                 Assert.That(menu.transform.Find("Hatch reveal").gameObject.activeSelf, Is.False);
+                Assert.That(menu.ShopPresentation.Batch, Is.Not.Null);
+                Assert.That(menu.transform.Find("Ten egg reveal").gameObject.activeSelf, Is.False);
+                var menuData = new SerializedObject(menu);
+                Assert.That(menuData.FindProperty("buyTenMysteryEggs").objectReferenceValue, Is.Not.Null);
+                var batchData = new SerializedObject(menu.ShopPresentation.Batch);
+                Assert.That(batchData.FindProperty("cards").arraySize, Is.EqualTo(10));
+                foreach (string field in new[] { "overlay", "panel", "fade", "heading", "subtitle", "summary", "continueButton", "flash", "summonGlow" })
+                    Assert.That(batchData.FindProperty(field).objectReferenceValue, Is.Not.Null, field);
                 foreach (RunnerHatchGlowGraphic glow in menu.GetComponentsInChildren<RunnerHatchGlowGraphic>(true))
                 {
                     Assert.That(glow.GetComponent<CanvasRenderer>(), Is.Not.Null, "Glows must have a renderer, not just a graphic component.");

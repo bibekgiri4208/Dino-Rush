@@ -8,7 +8,7 @@ namespace DinoRush
     /// <summary>Unscaled, presentation-only hatch sequence. Purchases are saved before this starts.</summary>
     public sealed class RunnerShopPresentation : MonoBehaviour
     {
-        public enum HatchStage { Idle, Wobble, Crack, Hatch, Reward }
+        public enum HatchStage { Idle, Wobble, Crack, Hatch, Reward, Batch }
         public const float CrackTime = 1.1f;
         public const float HatchTime = 1.8f;
         public const float RewardTime = 2.45f;
@@ -35,6 +35,7 @@ namespace DinoRush
         [SerializeField] private CanvasGroup rewardDetails;
         [SerializeField] private Button continueButton;
         [SerializeField] private Text continueLabel;
+        [SerializeField] private RunnerShopBatchPresentation batch;
         private readonly Dictionary<Texture2D, Sprite[]> frames = new Dictionary<Texture2D, Sprite[]>();
         private RunnerDinoRoster.Dino recipient;
         private RunnerEggHatchCatalog.Egg egg;
@@ -45,13 +46,16 @@ namespace DinoRush
         private float elapsed, idleTime, lastTick;
 
         public RunnerEggHatchCatalog Catalog => catalog;
-        public bool IsShowing => revealRoot != null && revealRoot.activeSelf;
+        private bool SingleShowing => revealRoot != null && revealRoot.activeSelf;
+        public bool IsShowing => SingleShowing || (batch != null && batch.IsShowing);
+        public RunnerShopBatchPresentation Batch => batch;
         public int DisplayedFragments { get; private set; }
-        public HatchStage Stage => !IsShowing ? HatchStage.Idle : elapsed < CrackTime ? HatchStage.Wobble :
+        public HatchStage Stage => batch != null && batch.IsShowing ? HatchStage.Batch : !SingleShowing ? HatchStage.Idle : elapsed < CrackTime ? HatchStage.Wobble :
             elapsed < HatchTime ? HatchStage.Crack : elapsed < RewardTime ? HatchStage.Hatch : HatchStage.Reward;
 
         public void SetCatalog(RunnerEggHatchCatalog value) => catalog = value;
-        public void RefreshLayout() { if (IsShowing) RenderReveal(); }
+        public void RefreshLayout() { if (SingleShowing) RenderReveal(); batch?.RefreshLayout(); }
+        public void ApplyBatchLayout(bool portrait, Vector2 available) => batch?.ApplyLayout(portrait, available);
         public void SetPreview(Sprite[] sprites)
         {
             if (sprites.Length == 0) return;
@@ -63,6 +67,7 @@ namespace DinoRush
         {
             audioCues = cues;
             closed = onClosed;
+            batch?.Initialize(this, cues, onClosed);
             if (!bound && continueButton != null)
             {
                 bound = true;
@@ -103,7 +108,8 @@ namespace DinoRush
 
         public bool HandleBack()
         {
-            if (!IsShowing) return false;
+            if (batch != null && batch.IsShowing) return batch.HandleBack();
+            if (!SingleShowing) return false;
             if (elapsed < Duration) { elapsed = Duration; Advance(0); return true; }
             CancelReveal();
             closed?.Invoke();
@@ -113,6 +119,7 @@ namespace DinoRush
         public void CancelReveal()
         {
             if (revealRoot != null) revealRoot.SetActive(false);
+            batch?.Cancel();
             if (revealFade != null) revealFade.alpha = 1;
             elapsed = 0;
         }
@@ -137,12 +144,12 @@ namespace DinoRush
                 }
                 productGlow.Animate(idleTime, 0.85f);
             }
-            if (IsShowing) Advance(dt);
+            if (SingleShowing) Advance(dt);
         }
 
         private void Advance(float dt)
         {
-            if (!IsShowing) return;
+            if (!SingleShowing) return;
             elapsed += Mathf.Max(0, dt);
             if (elapsed >= CrackTime && !crackPlayed) { crackPlayed = true; audioCues?.EggCrack(); }
             if (elapsed >= RewardTime && !hatchPlayed) { hatchPlayed = true; audioCues?.EggHatch(); }
@@ -198,7 +205,7 @@ namespace DinoRush
             unlockNote.color = unlocked ? Gold : Cream;
         }
 
-        private Sprite[] Frames(Texture2D sheet)
+        internal Sprite[] Frames(Texture2D sheet)
         {
             if (sheet == null) return Array.Empty<Sprite>();
             if (frames.TryGetValue(sheet, out Sprite[] cached)) return cached;
@@ -280,9 +287,12 @@ namespace DinoRush
             Stretch(light);
             flash = Art(light, null, Color.clear, false);
             overlay.gameObject.SetActive(false);
+            batch = GetComponent<RunnerShopBatchPresentation>();
+            if (batch == null) batch = gameObject.AddComponent<RunnerShopBatchPresentation>();
+            batch.EnsureUi(menuRoot, font, panelSprite, buttonSprite);
         }
 
-        private static Transform Node(string name, Transform parent)
+        internal static Transform Node(string name, Transform parent)
         {
             Transform node = parent.Find(name);
             if (node != null) return node;
@@ -292,7 +302,7 @@ namespace DinoRush
             return node;
         }
 
-        private static void Position(Transform node, float x, float y, float width, float height)
+        internal static void Position(Transform node, float x, float y, float width, float height)
         {
             var rect = (RectTransform)node;
             rect.anchorMin = rect.anchorMax = rect.pivot = Vector2.one * 0.5f;
@@ -300,7 +310,7 @@ namespace DinoRush
             rect.sizeDelta = new Vector2(width, height);
         }
 
-        private static void Stretch(Transform node)
+        internal static void Stretch(Transform node)
         {
             var rect = (RectTransform)node;
             rect.anchorMin = Vector2.zero;
@@ -308,7 +318,7 @@ namespace DinoRush
             rect.offsetMin = rect.offsetMax = Vector2.zero;
         }
 
-        private static Image Art(Transform node, Sprite sprite, Color color, bool sliced)
+        internal static Image Art(Transform node, Sprite sprite, Color color, bool sliced)
         {
             Image image = node.GetComponent<Image>();
             if (image == null) image = node.gameObject.AddComponent<Image>();
@@ -320,7 +330,7 @@ namespace DinoRush
             return image;
         }
 
-        private static Image Picture(string name, Transform parent, float x, float y, float size)
+        internal static Image Picture(string name, Transform parent, float x, float y, float size)
         {
             Transform node = Node(name, parent);
             Position(node, x, y, size, size);
@@ -329,7 +339,7 @@ namespace DinoRush
             return image;
         }
 
-        private static RunnerHatchGlowGraphic Glow(string name, Transform parent, float x, float y, float size)
+        internal static RunnerHatchGlowGraphic Glow(string name, Transform parent, float x, float y, float size)
         {
             Transform node = Node(name, parent);
             Position(node, x, y, size, size);
@@ -341,7 +351,7 @@ namespace DinoRush
             return glow;
         }
 
-        private static Text Label(string name, Transform parent, string caption, Font font, int size,
+        internal static Text Label(string name, Transform parent, string caption, Font font, int size,
             float x, float y, float width, float height, Color color)
         {
             Transform node = Node(name, parent);

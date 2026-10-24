@@ -177,5 +177,120 @@ namespace DinoRush.Tests
                 Assert.That(new RunnerShopProgress(roster).Fragments(i), Is.EqualTo(20));
             }
         }
+
+        [TestCase(1)]
+        [TestCase(20)]
+        public void TenPullCostsExactlyFiveHundredAndCommitsTenInclusiveRewardsBeforePresentation(int amount)
+        {
+            PlayerPrefs.SetInt(RunnerShopProgress.WalletKey, 750);
+            var shop = new RunnerShopProgress(roster, new FixedRandom(3, amount));
+            Assert.That(RunnerShopProgress.TenPullCost, Is.EqualTo(500));
+            Assert.That(shop.CanBuyTen, Is.True);
+            Assert.That(shop.TryBuyTen(out var rewards), Is.True);
+            Assert.That(rewards.Length, Is.EqualTo(10));
+            for (int i = 0; i < rewards.Length; i++)
+            {
+                Assert.That(rewards[i].DinoIndex, Is.EqualTo(4));
+                Assert.That(rewards[i].Fragments, Is.EqualTo(amount));
+                Assert.That(rewards[i].Total, Is.EqualTo((i + 1) * amount));
+                Assert.That(rewards[i].NewlyUnlocked, Is.EqualTo(amount == 20 && i == 4));
+            }
+            var reloaded = new RunnerShopProgress(roster);
+            Assert.That(reloaded.Balance, Is.EqualTo(250));
+            Assert.That(reloaded.Fragments(4), Is.EqualTo(amount * 10));
+            Assert.That(reloaded.Fragments(0), Is.Zero);
+            Assert.That(shop.CanBuyTen, Is.False);
+        }
+
+        [Test]
+        public void TenPullCannotPartiallyChargeWhenUnaffordableAllOwnedOrRosterMissing()
+        {
+            var shop = new RunnerShopProgress(roster);
+            PlayerPrefs.SetInt(RunnerShopProgress.WalletKey, 499);
+            Assert.That(shop.CanBuy, Is.True);
+            Assert.That(shop.CanBuyTen, Is.False);
+            Assert.That(shop.TryBuyTen(out var rewards), Is.False);
+            Assert.That(rewards, Is.Empty);
+            Assert.That(shop.Balance, Is.EqualTo(499));
+            for (int i = 1; i < roster.Count; i++) Assert.That(shop.Fragments(i), Is.Zero);
+            PlayerPrefs.SetInt(RunnerShopProgress.WalletKey, 500);
+            Assert.That(new RunnerShopProgress(null).TryBuyTen(out _), Is.False);
+            for (int i = 1; i < roster.Count; i++) PlayerPrefs.SetInt(RunnerShopProgress.FragmentKey(roster[i].Id), 100);
+            Assert.That(shop.CanBuyTen, Is.False);
+            Assert.That(shop.TryBuyTen(out rewards), Is.False);
+            Assert.That(rewards, Is.Empty);
+            Assert.That(shop.Balance, Is.EqualTo(500));
+        }
+
+        [Test]
+        public void LastLockedDinoStillReceivesAllTenRewardsAndUnlocksOnlyOnce()
+        {
+            PlayerPrefs.SetInt(RunnerShopProgress.WalletKey, 1000);
+            for (int i = 1; i < roster.Count; i++) PlayerPrefs.SetInt(RunnerShopProgress.FragmentKey(roster[i].Id), 100);
+            PlayerPrefs.SetInt(RunnerShopProgress.FragmentKey("sena"), 99);
+            var shop = new RunnerShopProgress(roster, new FixedRandom(0, 20));
+            Assert.That(shop.TryBuyTen(out var rewards), Is.True);
+            int unlocks = 0;
+            foreach (var reward in rewards)
+            {
+                Assert.That(roster[reward.DinoIndex].Id, Is.EqualTo("sena"));
+                if (reward.NewlyUnlocked) unlocks++;
+            }
+            Assert.That(unlocks, Is.EqualTo(1));
+            Assert.That(shop.Fragments(roster.Find("sena")), Is.EqualTo(299), "Never discard a paid egg or excess fragments.");
+            Assert.That(shop.Balance, Is.EqualTo(500));
+            Assert.That(shop.TryBuyTen(out _), Is.False);
+            Assert.That(shop.Balance, Is.EqualTo(500));
+        }
+
+        [Test]
+        public void TenPullsVaryRecipientsAndAmountsExcludeOwnedDinosAndLeaveUnityRandomAlone()
+        {
+            var shop = new RunnerShopProgress(roster, new System.Random(745));
+            PlayerPrefs.SetInt(RunnerShopProgress.FragmentKey("red"), 100);
+            PlayerPrefs.SetInt(RunnerShopProgress.WalletKey, 500);
+            var state = Random.state;
+            try
+            {
+                Random.InitState(127);
+                float expected = Random.value;
+                Random.InitState(127);
+                Assert.That(shop.TryBuyTen(out var rewards), Is.True);
+                var recipients = new HashSet<int>();
+                var amounts = new HashSet<int>();
+                foreach (var reward in rewards)
+                {
+                    Assert.That(reward.DinoIndex, Is.InRange(2, roster.Count - 1));
+                    Assert.That(reward.Fragments, Is.InRange(1, 20));
+                    recipients.Add(reward.DinoIndex);
+                    amounts.Add(reward.Fragments);
+                }
+                Assert.That(recipients.Count, Is.GreaterThan(1));
+                Assert.That(amounts.Count, Is.GreaterThan(1));
+                Assert.That(Random.value, Is.EqualTo(expected));
+            }
+            finally { Random.state = state; }
+        }
+
+        [Test]
+        public void IncompleteRewardPreparationNeverChargesOrWritesPartialFragments()
+        {
+            PlayerPrefs.SetInt(RunnerShopProgress.WalletKey, 500);
+            var shop = new RunnerShopProgress(roster, new FailingRandom());
+            Assert.Throws<System.InvalidOperationException>(() => shop.TryBuyTen(out _));
+            Assert.That(shop.Balance, Is.EqualTo(500));
+            for (int i = 1; i < roster.Count; i++) Assert.That(shop.Fragments(i), Is.Zero);
+        }
+
+        private sealed class FailingRandom : System.Random
+        {
+            private int draws;
+            public override int Next(int maxValue) => 0;
+            public override int Next(int minValue, int maxValue)
+            {
+                if (++draws == 4) throw new System.InvalidOperationException("Simulated incomplete reward preparation");
+                return 20;
+            }
+        }
     }
 }

@@ -10,7 +10,7 @@ namespace DinoRush
     {
         public const int PoolSize = 64;
         public const int SparklePoolSize = 72;
-        private enum SparkleKind { Star, Flash, Halo }
+        private enum SparkleKind { Star, Flash, Halo, Shard }
         private sealed class Egg
         {
             public SpriteRenderer renderer;
@@ -34,7 +34,7 @@ namespace DinoRush
         private RunnerEggTrailDirector director;
         private float animationTime;
         private int sparkleCursor;
-        private readonly Sprite sparkleSprite, haloSprite;
+        private readonly Sprite sparkleSprite, haloSprite, shardSprite;
         public Sprite EggSprite { get; }
         public int Collected { get; private set; }
         public int ActiveCount { get; private set; }
@@ -47,6 +47,7 @@ namespace DinoRush
             EggSprite = RunnerEggArt.CreateEgg(assets);
             sparkleSprite = RunnerEggArt.CreateSparkle(assets);
             haloSprite = RunnerEggArt.CreatePickupHalo(assets);
+            shardSprite = RunnerEggArt.CreatePickupShard(assets);
             for (int i = 0; i < eggs.Length; i++)
                 eggs[i] = new Egg { renderer = Renderer("Pooled egg " + i, EggSprite, material, 25) };
             for (int i = 0; i < sparkles.Length; i++)
@@ -109,6 +110,7 @@ namespace DinoRush
                 sparkle.renderer.transform.position += (Vector3)(sparkle.velocity * dt + Vector2.left * travel * 0.12f);
                 sparkle.velocity *= Mathf.Exp(-dt * 4.5f);
                 if (sparkle.kind == SparkleKind.Star) sparkle.velocity += Vector2.down * (dt * 0.8f);
+                if (sparkle.kind == SparkleKind.Shard) sparkle.velocity += Vector2.down * (dt * 2.4f);
                 sparkle.rotation += sparkle.spin * dt;
                 RenderSparkle(sparkle);
             }
@@ -144,7 +146,7 @@ namespace DinoRush
             {
                 Sparkle sparkle = sparkles[sparkleCursor];
                 sparkleCursor = (sparkleCursor + 1) % sparkles.Length;
-                sparkle.kind = i == 0 ? SparkleKind.Flash : i == 1 ? SparkleKind.Halo : SparkleKind.Star;
+                sparkle.kind = i == 0 ? SparkleKind.Flash : i == 1 ? SparkleKind.Halo : i >= 6 ? SparkleKind.Shard : SparkleKind.Star;
                 float angle = (i - 2) * Mathf.PI / 4f + Collected * 2.39996f;
                 bool small = i % 2 == 0;
                 sparkle.duration = i == 0 ? 0.16f : i == 1 ? 0.32f : small ? 0.56f : 0.42f;
@@ -158,7 +160,7 @@ namespace DinoRush
                     small ? new Color(1f, 0.76f, 0.24f) : new Color(1f, 0.94f, 0.63f);
                 sparkle.velocity = i < 2 ? Vector2.zero :
                     new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * (small ? 2.8f : 3.6f) + Vector2.up * 0.9f;
-                sparkle.renderer.sprite = i == 1 ? haloSprite : sparkleSprite;
+                sparkle.renderer.sprite = i == 1 ? haloSprite : i >= 6 ? shardSprite : sparkleSprite;
                 sparkle.renderer.transform.position = position;
                 RenderSparkle(sparkle);
             }
@@ -179,6 +181,8 @@ namespace DinoRush
             }
             else if (sparkle.kind == SparkleKind.Flash)
                 size = Mathf.Lerp(1f, 0.15f, age);
+            else if (sparkle.kind == SparkleKind.Shard)
+                size = Mathf.Lerp(0.9f, 0.05f, age);
             else
             {
                 float twinkle = 0.82f + 0.18f * Mathf.Sin(age * Mathf.PI * 4f + sparkle.phase);

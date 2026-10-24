@@ -7,12 +7,27 @@ namespace DinoRush
     {
         public const string WalletKey = "DinoRush.Shop.Eggs";
         public const int MysteryEggCost = 50;
+        public const int TenPullCount = 10;
+        public const int TenPullCost = MysteryEggCost * TenPullCount;
         public const int RequiredFragments = 100;
         public const int MinFragments = 1;
         public const int MaxFragments = 20;
 
         private readonly RunnerDinoRoster roster;
         private readonly System.Random random;
+
+        public readonly struct Reward
+        {
+            public readonly int DinoIndex, Fragments, Total;
+            public readonly bool NewlyUnlocked;
+            public Reward(int dinoIndex, int fragments, int total, bool newlyUnlocked)
+            {
+                DinoIndex = dinoIndex;
+                Fragments = fragments;
+                Total = total;
+                NewlyUnlocked = newlyUnlocked;
+            }
+        }
 
         public RunnerShopProgress(RunnerDinoRoster roster, System.Random random = null)
         {
@@ -39,6 +54,7 @@ namespace DinoRush
         }
 
         public bool CanBuy => Balance >= MysteryEggCost && LockedCount > 0;
+        public bool CanBuyTen => Balance >= TenPullCost && LockedCount > 0;
 
         public void CollectEgg()
         {
@@ -52,21 +68,45 @@ namespace DinoRush
             dinoIndex = -1;
             fragments = 0;
             unlocked = false;
-            if (!CanBuy) return false;
+            if (!TryBuyBatch(1, out Reward[] rewards)) return false;
+            dinoIndex = rewards[0].DinoIndex;
+            fragments = rewards[0].Fragments;
+            unlocked = rewards[0].NewlyUnlocked;
+            return true;
+        }
 
-            int choice = random.Next(LockedCount);
+        public bool TryBuyTen(out Reward[] rewards) => TryBuyBatch(TenPullCount, out rewards);
+
+        private bool TryBuyBatch(int count, out Reward[] rewards)
+        {
+            rewards = System.Array.Empty<Reward>();
+            int cost = count * MysteryEggCost;
+            if (Balance < cost || LockedCount == 0) return false;
+            // Eligibility is fixed before any rewards are applied: all ten paid eggs deliver,
+            // even when the last locked dino crosses 100 partway through the batch.
+            var eligible = new int[LockedCount];
+            var totals = new int[roster.Count];
+            int cursor = 0;
             for (int i = 1; i < roster.Count; i++)
             {
-                if (IsUnlocked(i) || choice-- != 0) continue;
-                dinoIndex = i;
-                break;
+                totals[i] = Fragments(i);
+                if (!IsUnlocked(i)) eligible[cursor++] = i;
             }
-            fragments = random.Next(MinFragments, MaxFragments + 1);
-            int total = Fragments(dinoIndex) + fragments;
-            PlayerPrefs.SetInt(WalletKey, Balance - MysteryEggCost);
-            PlayerPrefs.SetInt(FragmentKey(roster[dinoIndex].Id), total);
-            unlocked = total >= RequiredFragments;
+            var pending = new Reward[count];
+            for (int i = 0; i < count; i++)
+            {
+                int index = eligible[random.Next(eligible.Length)];
+                int amount = random.Next(MinFragments, MaxFragments + 1);
+                int before = totals[index];
+                totals[index] += amount;
+                pending[i] = new Reward(index, amount, totals[index], before < RequiredFragments && totals[index] >= RequiredFragments);
+            }
+            // No preferences are touched until every reward is prepared. Animation is presentation only.
+            PlayerPrefs.SetInt(WalletKey, Balance - cost);
+            foreach (int index in eligible)
+                if (totals[index] != Fragments(index)) PlayerPrefs.SetInt(FragmentKey(roster[index].Id), totals[index]);
             PlayerPrefs.Save();
+            rewards = pending;
             return true;
         }
     }
