@@ -299,7 +299,9 @@ namespace DinoRush.Editor
         private static void UpdateControlsHelp(ForestMainMenu main)
         {
             Transform help = main.transform.Find("Menu dialog/Moss framed dialog/Options page/Controls help");
-            Label(help, "SPACE / UP / W / TAP : JUMP\nPRESS AGAIN : DOUBLE JUMP\nDOWN / S : DUCK / FAST DROP\nSWIPE DOWN + HOLD : TOUCH DUCK\nESC / P : PAUSE     M : SFX", 0, -49, 480, 112, 12, Sage);
+            if (help == null) return;
+            Label(help, string.Empty, 0, -49, 480, 112, 12, Sage);
+            help.gameObject.SetActive(false);
         }
 
         private static Transform Key(Transform guide, string name, string caption, float x, float width, float y = 0)

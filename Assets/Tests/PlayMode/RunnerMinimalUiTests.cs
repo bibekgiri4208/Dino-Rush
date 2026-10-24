@@ -132,7 +132,7 @@ namespace DinoRush.Tests
         }
 
         [UnityTest]
-        public IEnumerator InstructionsStayInOptionsRatherThanOverTheGameOrModals()
+        public IEnumerator InstructionsStayHiddenInOptionsAsWellAsTheGameAndModals()
         {
             game.StartRun();
             AssertRunningWithoutHints();
@@ -142,8 +142,9 @@ namespace DinoRush.Tests
             yield return null;
             Click("Forest Main Menu/Main menu buttons/Options");
             Text help = root.Find("Forest Main Menu/Menu dialog/Moss framed dialog/Options page/Controls help").GetComponent<Text>();
-            Assert.That(help.gameObject.activeInHierarchy, Is.True);
-            Assert.That(help.text, Does.Contain("DOUBLE JUMP").And.Contain("DUCK").And.Contain("PAUSE"));
+            Assert.That(help.gameObject.activeSelf, Is.False);
+            Assert.That(help.text, Is.Empty);
+            yield return ForestRunTests.Capture("options-without-instructions");
         }
 
         [UnityTest]
@@ -164,6 +165,7 @@ namespace DinoRush.Tests
                 var sfx = (RectTransform)dialog.Find("Options page/Toggle sound effects");
                 var redeem = (RectTransform)dialog.Find("Options page/Redeem gift");
                 var optionsBack = (RectTransform)dialog.Find("Back to main menu");
+                Assert.That(dialog.Find("Options page/Controls help").gameObject.activeSelf, Is.False);
                 Assert.That(redeem.sizeDelta, Is.EqualTo(sfx.sizeDelta), "Redeem belongs in the same full-width action list as SFX.");
                 Assert.That(redeem.anchoredPosition.x, Is.Zero);
                 Assert.That(optionsBack.anchoredPosition.x, Is.Zero);

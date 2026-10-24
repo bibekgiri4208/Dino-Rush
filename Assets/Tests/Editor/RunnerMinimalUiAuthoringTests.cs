@@ -75,6 +75,9 @@ namespace DinoRush.Tests
                 Assert.That(code.placeholder.raycastTarget, Is.False);
                 Assert.That(code.characterLimit, Is.EqualTo(64));
                 Assert.That(menu.transform.Find("Menu dialog/Moss framed dialog/Options page/Redeem gift").GetComponent<Button>(), Is.Not.Null);
+                var help = menu.transform.Find("Menu dialog/Moss framed dialog/Options page/Controls help").GetComponent<Text>();
+                Assert.That(help.gameObject.activeSelf, Is.False);
+                Assert.That(help.text, Is.Empty);
                 Transform modes = root.Find("Forest Main Menu/Menu dialog/Moss framed dialog/Mode selection page");
                 foreach (string name in new[] { "Story mode", "Endless mode" })
                 {
