@@ -293,7 +293,8 @@ namespace DinoRush.Tests
                 {
                     Bounds a = RectTransformUtility.CalculateRelativeRectTransformBounds(button.transform, icon);
                     Bounds b = RectTransformUtility.CalculateRelativeRectTransformBounds(button.transform, label);
-                    Assert.That(a.max.x, Is.LessThan(b.min.x), button.name + " icon overlaps its label");
+                    Assert.That(a.max.x < b.min.x || a.min.y > b.max.y, Is.True,
+                        button.name + " icon overlaps its label (horizontal buttons and stacked corner controls must both fit)");
                 }
             }
         }

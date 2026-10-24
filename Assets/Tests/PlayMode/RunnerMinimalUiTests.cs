@@ -185,7 +185,7 @@ namespace DinoRush.Tests
                 NativeLayout();
                 Click("Forest Main Menu/Menu dialog/Moss framed dialog/Back to main menu");
                 yield return null; // Re-enabled title buttons register with the raycaster on the next UI frame.
-                Click("Forest Main Menu/Main menu buttons/Quit");
+                Click("Forest Main Menu/Quit");
                 game.ApplyScreenLayout(layout);
                 yield return new WaitForSecondsRealtime(0.3f);
                 Assert.That(((RectTransform)dialog).sizeDelta, Is.EqualTo(portrait ? new Vector2(560, 320) : new Vector2(448, 272)));

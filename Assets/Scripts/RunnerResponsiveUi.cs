@@ -118,6 +118,7 @@ namespace DinoRush
                 foreach (string path in new[] { "Jump", "Duck", "Trail stats frame", "Gameplay bottom fade", "Controls", "Keyboard controls" })
                     ShiftVertical(path, -extra);
             }
+            MirrorMenuCorners();
             Fit("Forest Main Menu/Hatch reveal/Hatch reward panel", layout.UiSize);
             root.Find("Forest Main Menu")?.GetComponent<ForestMainMenu>()?.ApplyDialogLayout(layout.Portrait, layout.UiSize);
             RunnerCompactMenus.ApplyPause(root.Find("Forest Pause Menu"), layout.Portrait, layout.UiSize);
@@ -141,6 +142,14 @@ namespace DinoRush
         {
             if (placements.TryGetValue(path, out Placement placement))
                 placement.SetPosition(placement.position + Vector2.up * offset);
+        }
+        private void MirrorMenuCorners()
+        {
+            if (!placements.TryGetValue("Forest Main Menu/Quit", out Placement quit) ||
+                !placements.TryGetValue("Forest Main Menu/SFX toggle", out Placement sound)) return;
+            quit.rect.sizeDelta = sound.rect.sizeDelta;
+            Vector2 position = sound.rect.anchoredPosition;
+            quit.SetPosition(new Vector2(-position.x, position.y));
         }
 
         private void Portrait(Vector2 size)
@@ -167,9 +176,11 @@ namespace DinoRush
             Scale("Forest Main Menu/Dino Rush Logo", logoScale);
             Place("Forest Main Menu/Main menu buttons", 0, bottom + 360);
             bool missions = root.Find("Forest Main Menu/Main menu buttons/Missions") != null;
-            string[] menuButtons = missions ? new[] { "Play", "Shop", "Missions", "Options", "Quit" } : new[] { "Play", "Shop", "Options", "Quit" };
+            bool cornerQuit = placements.ContainsKey("Forest Main Menu/Quit");
+            string[] menuButtons = missions ? (cornerQuit ? new[] { "Play", "Shop", "Missions", "Options" } : new[] { "Play", "Shop", "Missions", "Options", "Quit" }) :
+                cornerQuit ? new[] { "Play", "Shop", "Options" } : new[] { "Play", "Shop", "Options", "Quit" };
             for (int i = 0; i < menuButtons.Length; i++)
-                Place("Forest Main Menu/Main menu buttons/" + menuButtons[i], 0, (missions ? 204 : 84) - i * 120, 520, 104);
+                Place("Forest Main Menu/Main menu buttons/" + menuButtons[i], 0, 84 + (menuButtons.Length - 4) * 120 - i * 120, 520, 104);
 
             const string hatch = "Forest Main Menu/Hatch reveal/Hatch reward panel";
             Place(hatch, 0, 0, 620, 820);

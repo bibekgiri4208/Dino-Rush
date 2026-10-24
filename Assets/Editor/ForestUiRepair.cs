@@ -41,6 +41,18 @@ namespace DinoRush.Editor
             EditorSceneManager.SaveScene(scene);
         }
 
+        [MenuItem("Dino Rush/Move Quit to Menu Corner")]
+        public static void MoveQuitToCorner()
+        {
+            if (Application.isPlaying) return;
+            if (!Application.isBatchMode && !EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
+            var scene = EditorSceneManager.OpenScene("Assets/Scenes/ForestRun.unity");
+            var menu = Object.FindAnyObjectByType<ForestMainMenu>();
+            if (menu == null) throw new System.InvalidOperationException("Forest main menu is missing.");
+            menu.EnsureCornerQuitUi();
+            EditorSceneManager.MarkSceneDirty(scene); EditorSceneManager.SaveScene(scene);
+        }
+
         [MenuItem("Dino Rush/Repair UI Layout")]
         public static void RepairScene()
         {
@@ -90,6 +102,7 @@ namespace DinoRush.Editor
             Rect(sound.Find("Speaker icon"), 0, 14, 36, 36);
             sound.Find("Speaker icon").GetComponent<Image>().preserveAspect = true;
             TextLayout(sound.Find("SFX label"), 0, -23, 72, 28, 12);
+            menu.EnsureCornerQuitUi();
 
             Transform card = root.Find("Menu dialog/Moss framed dialog");
             Rect(card, 0, 0, 560, 400);
@@ -152,7 +165,7 @@ namespace DinoRush.Editor
         private static void RepairMainMenuButtons(Transform root)
         {
             bool missions = root.Find("Main menu buttons/Missions") != null;
-            string[] names = missions ? new[] { "Play", "Shop", "Missions", "Options", "Quit" } : new[] { "Play", "Shop", "Options", "Quit" };
+            string[] names = missions ? new[] { "Play", "Shop", "Missions", "Options" } : new[] { "Play", "Shop", "Options" };
             for (int i = 0; i < names.Length; i++)
             {
                 Transform button = root.Find("Main menu buttons/" + names[i]);
@@ -192,6 +205,7 @@ namespace DinoRush.Editor
                 EditorUtility.SetDirty(text.rectTransform);
                 EditorUtility.SetDirty(text);
             }
+            root.GetComponent<ForestMainMenu>()?.EnsureCornerQuitUi();
             Canvas.ForceUpdateCanvases();
         }
 

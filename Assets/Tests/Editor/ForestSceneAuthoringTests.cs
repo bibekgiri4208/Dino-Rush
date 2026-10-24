@@ -87,6 +87,12 @@ namespace DinoRush.Tests
                 var subtitle = menu.transform.Find("Dino Rush Logo/Forest subtitle plaque/Forest subtitle").GetComponent<UnityEngine.UI.Text>();
                 Assert.That(subtitle.text, Is.EqualTo("A JOURNEY HOME"));
                 var menuData = new SerializedObject(menu);
+                var cornerQuit = (RectTransform)menu.transform.Find("Quit");
+                var titleSound = (RectTransform)menu.transform.Find("SFX toggle");
+                Assert.That(menuData.FindProperty("quit").objectReferenceValue, Is.EqualTo(cornerQuit.GetComponent<UnityEngine.UI.Button>()));
+                Assert.That(menu.transform.Find("Main menu buttons/Quit"), Is.Null);
+                Assert.That(cornerQuit.anchoredPosition, Is.EqualTo(new Vector2(-titleSound.anchoredPosition.x, titleSound.anchoredPosition.y)));
+                Assert.That(cornerQuit.sizeDelta, Is.EqualTo(titleSound.sizeDelta));
                 Assert.That(((GameObject)menuData.FindProperty("customizePage").objectReferenceValue).activeSelf, Is.False);
                 Assert.That(((GameObject)menuData.FindProperty("optionsPage").objectReferenceValue).activeSelf, Is.True);
                 Assert.That(((GameObject)menuData.FindProperty("quitPage").objectReferenceValue).activeSelf, Is.False);

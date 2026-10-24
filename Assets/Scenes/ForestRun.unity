@@ -4067,7 +4067,6 @@ RectTransform:
   - {fileID: 1931949822}
   - {fileID: 255695971}
   - {fileID: 1220372146}
-  - {fileID: 682769784}
   - {fileID: 1748446643}
   - {fileID: 1338433651}
   m_Father: {fileID: 312448097}
@@ -5892,6 +5891,7 @@ RectTransform:
   - {fileID: 416743748}
   - {fileID: 1198101811}
   - {fileID: 225588395}
+  - {fileID: 682769784}
   - {fileID: 1888866014}
   - {fileID: 65507848}
   - {fileID: 503595392}
@@ -10316,12 +10316,12 @@ RectTransform:
   m_Children:
   - {fileID: 2118689730}
   - {fileID: 1161305175}
-  m_Father: {fileID: 225588395}
+  m_Father: {fileID: 312448097}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -308}
-  m_SizeDelta: {x: 360, y: 68}
+  m_AnchoredPosition: {x: -568, y: 296}
+  m_SizeDelta: {x: 88, y: 88}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &682769785
 MonoBehaviour:
@@ -10333,7 +10333,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -10343,7 +10343,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 882ad33ae79ab3145aa2bebb4d60e5fb, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 0962694eb3be7c44da654f2b3924ed99, type: 3}
   m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -16071,8 +16071,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 18, y: 0}
-  m_SizeDelta: {x: 104, y: 52}
+  m_AnchoredPosition: {x: 0, y: -23}
+  m_SizeDelta: {x: 72, y: 28}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1161305176
 MonoBehaviour:
@@ -16099,10 +16099,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5f7201a12d95ffc409449d95f23cf332, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Text
   m_Material: {fileID: 0}
-  m_Color: {r: 0.9411765, g: 0.9490196, b: 0.8117647, a: 1}
+  m_Color: {r: 0.68235296, g: 0.79607844, b: 0.59607846, a: 1}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -16111,7 +16111,7 @@ MonoBehaviour:
       m_Calls: []
   m_FontData:
     m_Font: {fileID: 12800000, guid: 2520567bd2a84015bb27a82499aa9fa6, type: 3}
-    m_FontSize: 24
+    m_FontSize: 12
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 10
@@ -16138,10 +16138,10 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1161305174}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d9b47e23ac8546eaa684d0afafe3dc18, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: DinoRush::DinoRush.ButtonLetterSpacing
   spacing: 2
 --- !u!1 &1162279709
@@ -28687,8 +28687,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -56, y: 0}
-  m_SizeDelta: {x: 28, y: 28}
+  m_AnchoredPosition: {x: 0, y: 14}
+  m_SizeDelta: {x: 36, y: 36}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2118689731
 MonoBehaviour:

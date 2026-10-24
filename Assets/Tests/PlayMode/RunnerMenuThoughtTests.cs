@@ -82,7 +82,7 @@ namespace DinoRush.Tests
             foreach (string name in new[] { "Options", "Shop", "Quit" })
             {
                 yield return WaitForAlpha(true);
-                menu.transform.Find("Main menu buttons/" + name).GetComponent<Button>().onClick.Invoke();
+                menu.transform.Find(name == "Quit" ? "Quit" : "Main menu buttons/" + name).GetComponent<Button>().onClick.Invoke();
                 Assert.That(thought.IsShowing, Is.False, name);
                 menu.CloseDialog();
                 Assert.That(group.alpha, Is.Zero);

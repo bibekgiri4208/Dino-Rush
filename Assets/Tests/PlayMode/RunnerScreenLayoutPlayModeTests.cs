@@ -239,8 +239,8 @@ namespace DinoRush.Tests
                 Assert.That(pixels.xMax, Is.LessThanOrEqualTo(layout.SafeArea.xMax + 1f), button.name);
                 Assert.That(pixels.yMin, Is.GreaterThanOrEqualTo(layout.SafeArea.yMin - 1f), button.name);
                 Assert.That(pixels.yMax, Is.LessThanOrEqualTo(layout.SafeArea.yMax + 1f), button.name);
-                // The title SFX button intentionally sits behind a submenu's blocking scrim.
-                if (button.name == "SFX toggle" && hud.MainMenuDialogOpen) continue;
+                // Both title corner buttons intentionally sit behind a submenu's blocking scrim.
+                if ((button.name == "SFX toggle" || button.name == "Quit") && hud.MainMenuDialogOpen) continue;
                 var hits = new List<RaycastResult>();
                 EventSystem.current.RaycastAll(new PointerEventData(EventSystem.current) { position = pixels.center }, hits);
                 Assert.That(hits.Count, Is.GreaterThan(0), button.name + " must remain tappable.");

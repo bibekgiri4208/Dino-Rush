@@ -218,18 +218,50 @@ namespace DinoRush
             missions.targetGraphic = art; missions.navigation = new Navigation { mode = Navigation.Mode.None };
             var label = RunnerShopPresentation.Label("Label", node, "MISSIONS", font, 24, 0, 0, 320, 48, new Color32(240, 242, 207, 255));
             if (label.GetComponent<ButtonLetterSpacing>() == null) label.gameObject.AddComponent<ButtonLetterSpacing>();
-            string[] names = { "Play", "Shop", "Missions", "Options", "Quit" };
+            string[] names = { "Play", "Shop", "Missions", "Options" };
             for (int i = 0; i < names.Length; i++)
             {
                 Transform button = choices.transform.Find(names[i]);
                 RunnerShopPresentation.Position(button, 0, -12 - i * 74, 360, 68);
                 button.GetComponent<RunnerUiButtonFeedback>()?.RefreshContentLayout();
             }
+            EnsureCornerQuitUi();
             Transform page = RunnerShopPresentation.Node("Daily missions page", dialogTitle.transform.parent);
             page.gameObject.SetActive(false);
             missionsPage = page.GetComponent<RunnerDailyMissionsPanel>();
             if (missionsPage == null) missionsPage = page.gameObject.AddComponent<RunnerDailyMissionsPanel>();
             missionsPage.EnsureUi(font, dialogTitle.transform.parent.GetComponent<Image>().sprite, buttonSprite);
+        }
+        public void EnsureCornerQuitUi()
+        {
+            if (quit == null || sound == null) return;
+            // Keep the existing button and binding, but take it out of the animated central stack.
+            quit.transform.SetParent(transform, false);
+            int soundIndex = sound.transform.GetSiblingIndex();
+            quit.transform.SetSiblingIndex(quit.transform.GetSiblingIndex() < soundIndex ? soundIndex - 1 : soundIndex);
+            var reference = (RectTransform)sound.transform;
+            RunnerShopPresentation.Position(quit.transform, -reference.anchoredPosition.x, reference.anchoredPosition.y,
+                reference.sizeDelta.x, reference.sizeDelta.y);
+            Image frame = quit.GetComponent<Image>(), theme = sound.GetComponent<Image>();
+            frame.sprite = theme.sprite; frame.type = theme.type; frame.color = theme.color;
+            frame.pixelsPerUnitMultiplier = theme.pixelsPerUnitMultiplier;
+            quit.colors = sound.colors;
+            Transform icon = quit.transform.Find("Icon");
+            var speakerRect = (RectTransform)speaker.transform;
+            RunnerShopPresentation.Position(icon, speakerRect.anchoredPosition.x, speakerRect.anchoredPosition.y,
+                speakerRect.sizeDelta.x, speakerRect.sizeDelta.y);
+            icon.GetComponent<Image>().preserveAspect = true;
+            icon.GetComponent<Image>().raycastTarget = false;
+            var caption = quit.transform.Find("Label").GetComponent<Text>();
+            var captionRect = soundCaption.rectTransform;
+            RunnerShopPresentation.Position(caption.transform, captionRect.anchoredPosition.x, captionRect.anchoredPosition.y,
+                captionRect.sizeDelta.x, captionRect.sizeDelta.y);
+            caption.text = "QUIT"; caption.font = soundCaption.font; caption.fontSize = soundCaption.fontSize;
+            caption.color = soundCaption.color; caption.alignment = soundCaption.alignment;
+            caption.lineSpacing = soundCaption.lineSpacing; caption.resizeTextForBestFit = false;
+            var tracking = caption.GetComponent<ButtonLetterSpacing>();
+            if (tracking != null) tracking.enabled = false;
+            quit.GetComponent<RunnerUiButtonFeedback>()?.RefreshContentLayout();
         }
 
         public void EnsureRedeemUi()

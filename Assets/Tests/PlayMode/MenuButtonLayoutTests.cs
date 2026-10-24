@@ -1,6 +1,7 @@
 using System.Collections;
 using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 using UnityEngine.UI;
@@ -26,6 +27,53 @@ namespace DinoRush.Tests
         }
 
         [UnityTest]
+        public IEnumerator CornerQuitMirrorsSfxAcrossScreenSizesAndStillOpensConfirmation()
+        {
+            yield return SceneManager.LoadSceneAsync("ForestRun");
+            var game = Object.FindAnyObjectByType<ForestRunnerGame>(); game.enabled = false;
+            var menu = game.GetComponentInChildren<ForestMainMenu>(true);
+            yield return new WaitForSecondsRealtime(0.35f);
+            var quit = (RectTransform)menu.transform.Find("Quit");
+            var sound = (RectTransform)menu.transform.Find("SFX toggle");
+            Assert.That(menu.transform.Find("Main menu buttons/Quit"), Is.Null);
+            Assert.That(menu.transform.Find("Main menu buttons").GetComponentsInChildren<Button>().Length, Is.EqualTo(4));
+            foreach (Vector2Int size in new[] { new Vector2Int(1280, 720), new Vector2Int(320, 568),
+                new Vector2Int(360, 800), new Vector2Int(1024, 768), new Vector2Int(1920, 820), new Vector2Int(1280, 720) })
+            {
+                game.ApplyScreenLayout(RunnerScreenLayout.Calculate(size.x, size.y, new Rect(0, 24, size.x, size.y - 48)));
+                Canvas.ForceUpdateCanvases();
+                Assert.That(quit.anchoredPosition, Is.EqualTo(new Vector2(-sound.anchoredPosition.x, sound.anchoredPosition.y)));
+                Assert.That(quit.sizeDelta, Is.EqualTo(sound.sizeDelta));
+                Assert.That(quit.GetComponent<Image>().sprite, Is.EqualTo(sound.GetComponent<Image>().sprite));
+                Assert.That(quit.GetComponent<Image>().type, Is.EqualTo(sound.GetComponent<Image>().type));
+                var caption = quit.Find("Label").GetComponent<Text>();
+                var sfxCaption = sound.Find("SFX label").GetComponent<Text>();
+                Assert.That(caption.text, Is.EqualTo("QUIT"));
+                Assert.That(caption.fontSize, Is.EqualTo(sfxCaption.fontSize));
+                Assert.That(caption.rectTransform.anchoredPosition, Is.EqualTo(sfxCaption.rectTransform.anchoredPosition));
+                Assert.That(caption.rectTransform.sizeDelta, Is.EqualTo(sfxCaption.rectTransform.sizeDelta));
+                Assert.That(((RectTransform)quit.Find("Icon")).anchoredPosition, Is.EqualTo(((RectTransform)sound.Find("Speaker icon")).anchoredPosition));
+                Assert.That(((RectTransform)quit.Find("Icon")).sizeDelta, Is.EqualTo(((RectTransform)sound.Find("Speaker icon")).sizeDelta));
+            }
+            game.ApplyScreenLayout(RunnerScreenLayout.Calculate(Screen.width, Screen.height, Screen.safeArea));
+            yield return ForestRunTests.Capture("corner-quit-landscape");
+            yield return ForestRunTests.Capture("corner-quit-portrait", 720, 1280);
+            Canvas.ForceUpdateCanvases();
+            var pointer = new PointerEventData(EventSystem.current) { button = PointerEventData.InputButton.Left,
+                position = RectTransformUtility.WorldToScreenPoint(null, quit.position) };
+            var hits = new System.Collections.Generic.List<RaycastResult>(); EventSystem.current.RaycastAll(pointer, hits);
+            Assert.That(hits[0].gameObject, Is.EqualTo(quit.gameObject), "Quit must remain clickable in its new corner.");
+            ExecuteEvents.Execute(quit.gameObject, pointer, ExecuteEvents.pointerClickHandler);
+            Assert.That(menu.DialogOpen, Is.True);
+            Assert.That(menu.transform.Find("Menu dialog/Moss framed dialog/Quit confirmation page").gameObject.activeInHierarchy, Is.True);
+            yield return ForestRunTests.Capture("corner-quit-confirmation");
+            menu.CloseDialog();
+            Assert.That(menu.DialogOpen, Is.False);
+            game.StartRun(); Assert.That(quit.gameObject.activeInHierarchy, Is.False);
+            game.ReturnToMenu(); Assert.That(quit.gameObject.activeInHierarchy, Is.True);
+        }
+
+        [UnityTest]
         public IEnumerator MainButtonsShareShapeSpacingAndTypography()
         {
             yield return SceneManager.LoadSceneAsync("ForestRun");
@@ -41,7 +89,7 @@ namespace DinoRush.Tests
             canvas.scaleFactor = 1;
             foreach (Text label in menu.GetComponentsInChildren<Text>()) label.SetVerticesDirty();
             Canvas.ForceUpdateCanvases();
-            string[] names = { "Play", "Shop", "Missions", "Options", "Quit" };
+            string[] names = { "Play", "Shop", "Missions", "Options" };
             for (int i = 0; i < names.Length; i++)
             {
                 Transform button = menu.transform.Find("Main menu buttons/" + names[i]);
