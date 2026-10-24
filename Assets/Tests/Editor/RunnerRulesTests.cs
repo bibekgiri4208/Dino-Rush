@@ -101,15 +101,29 @@ namespace DinoRush.Tests
                 Assert.That(textures.Count, Is.EqualTo(1));
                 Assert.That(canopy.texture.filterMode, Is.EqualTo(FilterMode.Point));
                 Assert.That(canopy.pivot.y, Is.Zero);
-                Assert.That(RunnerRules.CanopyHeight, Is.EqualTo(16f / canopy.pixelsPerUnit));
+                Assert.That(RunnerRules.CanopyHeight, Is.EqualTo(32f / canopy.pixelsPerUnit));
                 Assert.That(canopy.texture.GetPixel(0, 0).a, Is.Zero);
-                Assert.That(canopy.texture.GetPixel(5, 0).a, Is.EqualTo(1f));
-                Assert.That(canopy.texture.GetPixel(24, 40).a, Is.Zero, "Clear air must replace the old screen-height plank.");
-                for (int y = 16; y < canopy.texture.height; y++)
+                Assert.That(canopy.texture.GetPixel(14, 0).a, Is.EqualTo(1f), "The thorn tips mark the bottom of the unchanged collision band.");
+                Assert.That(canopy.texture.GetPixel(48, 80).a, Is.Zero, "No screen-height plank may block the view.");
+                var palette = new System.Collections.Generic.HashSet<Color32>();
+                int branchPixels = 0, tipPixels = 0;
+                for (int y = 0; y < 46; y++)
+                for (int x = 0; x < canopy.texture.width; x++)
+                {
+                    Color32 color = canopy.texture.GetPixel(x, y);
+                    if (color.a == 0) continue;
+                    palette.Add(color);
+                    if (y < 32) branchPixels++;
+                    if (y < 10) tipPixels++;
+                }
+                Assert.That(palette.Count, Is.GreaterThanOrEqualTo(12), "Layered bark, knots, moss, foliage and thorns need distinct shades.");
+                Assert.That(branchPixels, Is.GreaterThan(1400));
+                Assert.That(tipPixels, Is.GreaterThan(50));
+                for (int y = 46; y < canopy.texture.height; y++)
                 {
                     int opaque = 0;
                     for (int x = 0; x < canopy.texture.width; x++) if (canopy.texture.GetPixel(x, y).a > 0f) opaque++;
-                    Assert.That(opaque, Is.LessThanOrEqualTo(14), "Only thin vines and small leaves may appear above the branch.");
+                    Assert.That(opaque, Is.LessThanOrEqualTo(22), "Only thin vines and small leaves may appear above the branch.");
                 }
             }
             finally

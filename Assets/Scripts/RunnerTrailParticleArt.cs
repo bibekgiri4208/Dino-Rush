@@ -6,7 +6,7 @@ namespace DinoRush
     internal static class RunnerTrailParticleArt
     {
         private const int Size = 64;
-        private static readonly Texture2D[] textures = new Texture2D[3];
+        private static readonly Texture2D[] textures = new Texture2D[RunnerTrailProgress.Count];
         private static int users;
         internal static void Acquire() => users++;
         internal static Texture2D Get(RunnerTrailKind kind)
@@ -33,6 +33,38 @@ namespace DinoRush
                         distance = Mathf.Min(distance, Segment(p, new Vector2(32, 19), new Vector2(55, 12)));
                         distance = Mathf.Min(distance, Segment(p, new Vector2(39, 30), new Vector2(50, 39)));
                     }
+                    else if (kind == RunnerTrailKind.Frost)
+                    {
+                        distance = 100;
+                        Vector2 center = new Vector2(32, 32);
+                        for (int arm = 0; arm < 6; arm++)
+                        {
+                            float angle = arm * Mathf.PI / 3;
+                            Vector2 direction = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle));
+                            Vector2 side = new Vector2(-direction.y, direction.x);
+                            distance = Mathf.Min(distance, Segment(p, center, center + direction * 24));
+                            for (int branch = 0; branch < 2; branch++)
+                            {
+                                Vector2 join = center + direction * (12 + branch * 6);
+                                distance = Mathf.Min(distance, Segment(p, join, join - direction * 5 + side * 5));
+                                distance = Mathf.Min(distance, Segment(p, join, join - direction * 5 - side * 5));
+                            }
+                        }
+                    }
+                    else if (kind == RunnerTrailKind.Blossom)
+                    {
+                        Vector2 d = p - new Vector2(32, 32);
+                        float outline = Mathf.Sqrt(d.x * d.x / 225 + d.y * d.y / 529);
+                        distance = Mathf.Max(0, outline - 0.75f) * 22;
+                    }
+                    else if (kind == RunnerTrailKind.Cosmic)
+                    {
+                        Vector2 d = p - new Vector2(32, 32);
+                        float diamond = Mathf.Abs(d.x) + Mathf.Abs(d.y);
+                        distance = Mathf.Min(Mathf.Abs(d.x) * 2 + Mathf.Abs(d.y) * 0.15f,
+                            Mathf.Abs(d.y) * 2 + Mathf.Abs(d.x) * 0.15f);
+                        distance = Mathf.Max(distance, (diamond - 24) * 2);
+                    }
                     else
                     {
                         distance = 100;
@@ -46,10 +78,12 @@ namespace DinoRush
                             previous = next;
                         }
                     }
-                    float core = Mathf.Exp(-distance * distance / (kind == RunnerTrailKind.Fire ? 35 : 2.3f));
-                    float glow = Mathf.Exp(-distance * distance / (kind == RunnerTrailKind.Fire ? 85 : 19));
-                    Color edge = kind == RunnerTrailKind.Fire ? new Color(1, 0.38f, 0.055f) : kind == RunnerTrailKind.Electric ? new Color(0.22f, 0.62f, 1) : new Color(0.7f, 0.88f, 1);
+                    float core = Mathf.Exp(-distance * distance / (kind == RunnerTrailKind.Fire ? 35 : kind == RunnerTrailKind.Cosmic ? 8 : 2.3f));
+                    float glow = Mathf.Exp(-distance * distance / (kind == RunnerTrailKind.Fire ? 85 : kind == RunnerTrailKind.Cosmic ? 36 : 19));
+                    Color edge = kind == RunnerTrailKind.Fire ? new Color(1, 0.38f, 0.055f) : kind == RunnerTrailKind.Electric ? new Color(0.22f, 0.62f, 1) :
+                        kind == RunnerTrailKind.Blossom ? new Color(1, 0.38f, 0.65f) : kind == RunnerTrailKind.Cosmic ? new Color(0.9f, 0.65f, 1) : new Color(0.7f, 0.88f, 1);
                     Color color = Color.Lerp(edge, Color.white, Mathf.Clamp01(core * 1.5f));
+                    if (kind == RunnerTrailKind.Blossom) color = Color.Lerp(edge, new Color(1, 0.83f, 0.91f), Mathf.Clamp01((p.x + p.y) / 80));
                     color.a = Mathf.Clamp01(core * 0.92f + glow * 0.22f);
                     if (color.a < 0.008f) color = Color.clear;
                     pixels[y * Size + x] = color;

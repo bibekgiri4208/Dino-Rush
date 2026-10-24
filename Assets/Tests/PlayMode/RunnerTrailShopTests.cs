@@ -30,7 +30,7 @@ namespace DinoRush.Tests
             PlayerPrefs.SetString(RunnerDinoRoster.SelectionKey, "blue");
             PlayerPrefs.SetString(RunnerMapCatalog.SelectionKey, "forest");
             var keys = new List<string>(RunnerMapPreferenceScope.ShopKeys) { RunnerTrailProgress.SelectionKey, "DinoRush.Forest.HighScore" };
-            for (int i = 1; i <= 3; i++) keys.Add(RunnerTrailProgress.OwnershipKey((RunnerTrailKind)i));
+            for (int i = 1; i <= RunnerTrailProgress.Count; i++) keys.Add(RunnerTrailProgress.OwnershipKey((RunnerTrailKind)i));
             foreach (string key in keys)
             {
                 if (PlayerPrefs.HasKey(key)) existing.Add(key);
@@ -118,6 +118,37 @@ namespace DinoRush.Tests
             Assert.That(GameObject.Find("Buy or equip trail 1").GetComponent<Button>().interactable, Is.True);
         }
         [UnityTest]
+        public IEnumerator NewTrailPageHasThreeDistinctLiveEffectsAndPurchasesPersistAcrossPagesAndReloads()
+        {
+            PlayerPrefs.SetInt(RunnerShopProgress.WalletKey, 6500);
+            yield return Open();
+            Click("Next trails page");
+            yield return new WaitForSecondsRealtime(0.2f);
+            Assert.That(menu.TrailShop.Page, Is.EqualTo(1));
+            Assert.That(GameObject.Find("Buy or equip trail 1"), Is.Null);
+            yield return RunnerDisplayCapture.Capture("trail-shop-new-effects", 1280, 720);
+            yield return RunnerDisplayCapture.Capture("trail-shop-new-effects-portrait", 360, 800);
+            game.ApplyScreenLayout(RunnerScreenLayout.Calculate(Screen.width, Screen.height, Screen.safeArea));
+            for (int i = 4; i <= RunnerTrailProgress.Count; i++)
+            {
+                var preview = GameObject.Find("Trail card " + i).GetComponentInChildren<RunnerTrailPreview>();
+                Assert.That(preview.Kind, Is.EqualTo((RunnerTrailKind)i));
+                Assert.That(preview.ActiveCount, Is.GreaterThan(2));
+                Click("Buy or equip trail " + i);
+                Assert.That(RunnerTrailProgress.Equipped, Is.EqualTo((RunnerTrailKind)i));
+                Assert.That(game.Shop.Balance, Is.EqualTo(6500 - (i - 3) * 2000));
+            }
+            Click("Previous trails page");
+            Assert.That(menu.TrailShop.Page, Is.Zero);
+            Assert.That(RunnerTrailProgress.Equipped, Is.EqualTo(RunnerTrailKind.Cosmic));
+            Click("Next trails page");
+            Click("Buy or equip trail 4");
+            Assert.That(game.Shop.Balance, Is.EqualTo(500));
+            yield return Reload();
+            Assert.That(RunnerTrailProgress.Equipped, Is.EqualTo(RunnerTrailKind.Frost));
+            for (int i = 4; i <= RunnerTrailProgress.Count; i++) Assert.That(RunnerTrailProgress.Owned((RunnerTrailKind)i), Is.True);
+        }
+        [UnityTest]
         public IEnumerator PoorWalletCannotBuyAndCategoriesAreBlockedDuringHatchReveal()
         {
             PlayerPrefs.SetInt(RunnerShopProgress.WalletKey, 1999);
@@ -142,8 +173,8 @@ namespace DinoRush.Tests
         [UnityTest]
         public IEnumerator WorldTrailsFollowAirborneDuckingPosesFreezeOnPauseAndClearOnRestartAndMenu()
         {
-            PlayerPrefs.SetInt(RunnerShopProgress.WalletKey, 6000);
-            foreach (RunnerTrailKind kind in new[] { RunnerTrailKind.Smoke, RunnerTrailKind.Fire, RunnerTrailKind.Electric })
+            PlayerPrefs.SetInt(RunnerShopProgress.WalletKey, RunnerTrailProgress.Count * RunnerTrailProgress.Cost);
+            foreach (RunnerTrailKind kind in new[] { RunnerTrailKind.Smoke, RunnerTrailKind.Fire, RunnerTrailKind.Electric, RunnerTrailKind.Frost, RunnerTrailKind.Blossom, RunnerTrailKind.Cosmic })
             {
                 Assert.That(RunnerTrailProgress.Buy(kind), Is.True);
                 RunnerTrailProgress.Equip(kind);
@@ -192,7 +223,11 @@ namespace DinoRush.Tests
         {
             yield return Open();
             foreach (Vector2Int size in new[] { new Vector2Int(1280, 720), new Vector2Int(320, 568), new Vector2Int(360, 800), new Vector2Int(1024, 768) })
+            for (int page = 0; page < menu.TrailShop.PageCount; page++)
             {
+                // Pointer tests need the real display's viewport; virtual sizes below are for bounds checks.
+                game.ApplyScreenLayout(RunnerScreenLayout.Calculate(Screen.width, Screen.height, Screen.safeArea));
+                if (menu.TrailShop.Page != page) Click(page == 0 ? "Previous trails page" : "Next trails page");
                 game.ApplyScreenLayout(RunnerScreenLayout.Calculate(size.x, size.y, new Rect(0, 24, size.x, size.y - 48)));
                 Canvas.ForceUpdateCanvases();
                 Transform panel = menu.transform.Find("Menu dialog/Moss framed dialog");
@@ -215,14 +250,14 @@ namespace DinoRush.Tests
         {
             foreach (string id in new[] { "red", "yellow", "green", "cole", "kira", "kuro", "loki", "mono", "sena" })
                 PlayerPrefs.SetInt(RunnerShopProgress.FragmentKey(id), RunnerShopProgress.RequiredFragments);
-            PlayerPrefs.SetInt(RunnerShopProgress.WalletKey, 6000);
-            for (int i = 1; i <= 3; i++) RunnerTrailProgress.Buy((RunnerTrailKind)i);
+            PlayerPrefs.SetInt(RunnerShopProgress.WalletKey, RunnerTrailProgress.Count * RunnerTrailProgress.Cost);
+            for (int i = 1; i <= RunnerTrailProgress.Count; i++) RunnerTrailProgress.Buy((RunnerTrailKind)i);
             for (int map = 0; map < 5; map++)
                 for (int dino = 0; dino < game.DinoRoster.Count; dino++)
                 {
                     game.SelectMap(map);
                     game.SelectDino(dino);
-                    RunnerTrailKind kind = (RunnerTrailKind)(1 + (map + dino) % 3);
+                    RunnerTrailKind kind = (RunnerTrailKind)(1 + (map + dino) % RunnerTrailProgress.Count);
                     RunnerTrailProgress.Equip(kind);
                     game.StartRun();
                     Assert.That(game.SelectedDinoIndex, Is.EqualTo(dino));

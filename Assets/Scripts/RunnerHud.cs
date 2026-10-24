@@ -272,7 +272,7 @@ namespace DinoRush
         public void UpdateLevel(int level)
         {
             movementLevel = level;
-            if (duckButton != null) duckButton.SetActive(level >= 3 && lifeBar != null && lifeBar.activeSelf);
+            if (duckButton != null) duckButton.SetActive(false);
             if (levelLabel != null) levelLabel.text = level > 0 ? $"LEVEL {level:00}" : "ENDLESS";
         }
 
@@ -383,10 +383,9 @@ namespace DinoRush
             if (pausePanel != null) pausePanel.SetActive(false);
             shade.SetActive(visible);
             panel.SetActive(visible);
-            // Jump stays on the playfield. Duck becomes essential with low canopies,
-            // so expose its existing hold control for touch players from stage three.
+            // Gameplay stays button-free: tap to jump, swipe down and hold to duck on touch.
             jumpButton.SetActive(false);
-            if (duckButton != null) duckButton.SetActive(!visible && movementLevel >= 3);
+            if (duckButton != null) duckButton.SetActive(false);
             pauseButton.SetActive(!visible);
             if (lifeBar != null) lifeBar.SetActive(!visible);
             if (stageDisplay != null) stageDisplay.SetActive(!visible);

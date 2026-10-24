@@ -15,11 +15,15 @@ namespace DinoRush.Tests
         private RunnerPlayer player;
         private bool hadBest, hadSound;
         private int previousBest, previousSound;
+        private bool hadWallet;
+        private int previousWallet;
         private const BindingFlags Private = BindingFlags.Instance | BindingFlags.NonPublic;
 
         [UnitySetUp]
         public IEnumerator LoadForest()
         {
+            hadWallet = PlayerPrefs.HasKey(RunnerShopProgress.WalletKey);
+            previousWallet = PlayerPrefs.GetInt(RunnerShopProgress.WalletKey);
             hadBest = PlayerPrefs.HasKey("DinoRush.Forest.HighScore");
             previousBest = PlayerPrefs.GetInt("DinoRush.Forest.HighScore");
             hadSound = PlayerPrefs.HasKey("DinoRush.Muted");
@@ -42,6 +46,8 @@ namespace DinoRush.Tests
             else PlayerPrefs.DeleteKey("DinoRush.Forest.HighScore");
             if (hadSound) PlayerPrefs.SetInt("DinoRush.Muted", previousSound);
             else PlayerPrefs.DeleteKey("DinoRush.Muted");
+            if (hadWallet) PlayerPrefs.SetInt(RunnerShopProgress.WalletKey, previousWallet);
+            else PlayerPrefs.DeleteKey(RunnerShopProgress.WalletKey);
             PlayerPrefs.Save();
         }
 
@@ -217,6 +223,72 @@ namespace DinoRush.Tests
             InputSystem.QueueStateEvent(keyboard, new KeyboardState(keys));
             InputSystem.Update();
             Invoke("ReadInput");
+        }
+
+        [UnityTest]
+        public IEnumerator TouchSwipeDucksWithoutAButtonOrAccidentalJumpAndTapStillJumps()
+        {
+            Touchscreen original = Touchscreen.current;
+            var background = InputSystem.settings.backgroundBehavior;
+            var editor = InputSystem.settings.editorInputBehaviorInPlayMode;
+            InputSystem.settings.backgroundBehavior = InputSettings.BackgroundBehavior.IgnoreFocus;
+            InputSystem.settings.editorInputBehaviorInPlayMode = InputSettings.EditorInputBehaviorInPlayMode.AllDeviceInputAlwaysGoesToGameView;
+            Touchscreen screen = InputSystem.AddDevice<Touchscreen>();
+            InputSystem.EnableDevice(screen);
+            screen.MakeCurrent();
+            try
+            {
+                Vector2 point = Camera.main.WorldToScreenPoint(Vector3.zero);
+                Vector2 down = point - Vector2.up * Mathf.Max(60, Mathf.Min(Screen.width, Screen.height) * 0.2f);
+                Touch(UnityEngine.InputSystem.TouchPhase.Began, point);
+                Assert.That(Touchscreen.current, Is.EqualTo(screen));
+                Assert.That(screen.primaryTouch.press.isPressed, Is.True, "Synthetic touch-down must reach the primary touch: enabled=" + screen.enabled + ", primary=" + screen.primaryTouch.phase.ReadValue() + ", finger=" + screen.touches[0].phase.ReadValue());
+                Assert.That((bool)typeof(ForestRunnerGame).GetField("touchGestureActive", Private).GetValue(game), Is.True,
+                    "Gesture must start on the playfield: " + point + " / " + Camera.main.pixelRect + " / " + screen.primaryTouch.phase.ReadValue());
+                Step(1);
+                Assert.That(player.Grounded, Is.True, "A potential swipe must not consume a jump on touch-down.");
+                Touch(UnityEngine.InputSystem.TouchPhase.Moved, down);
+                Assert.That(screen.primaryTouch.position.ReadValue().y, Is.EqualTo(down.y));
+                Step(1);
+                Assert.That(player.IsDucking, Is.True);
+                Assert.That(player.Grounded, Is.True);
+                AssertMovementButtonsHidden();
+                Touch(UnityEngine.InputSystem.TouchPhase.Ended, down);
+                Step(1);
+                Assert.That(player.IsDucking, Is.False);
+                Assert.That(player.Grounded, Is.True, "Finishing a duck gesture must not jump.");
+                Touch(UnityEngine.InputSystem.TouchPhase.Began, point);
+                Touch(UnityEngine.InputSystem.TouchPhase.Moved, down);
+                Assert.That(player.IsDucking, Is.True);
+                game.TogglePause();
+                Assert.That(player.IsDucking, Is.False);
+                Touch(UnityEngine.InputSystem.TouchPhase.Ended, down);
+                game.TogglePause();
+                Touch(UnityEngine.InputSystem.TouchPhase.Began, point);
+                Touch(UnityEngine.InputSystem.TouchPhase.Canceled, point);
+                Step(1);
+                Assert.That(player.Grounded, Is.True);
+                Touch(UnityEngine.InputSystem.TouchPhase.Began, point);
+                Touch(UnityEngine.InputSystem.TouchPhase.Ended, point);
+                Step(1);
+                Assert.That(player.Grounded, Is.False, "A normal world tap must still jump.");
+                Assert.That(player.JumpsRemaining, Is.EqualTo(1));
+            }
+            finally
+            {
+                InputSystem.RemoveDevice(screen);
+                if (original != null && original.added) original.MakeCurrent();
+                InputSystem.settings.backgroundBehavior = background;
+                InputSystem.settings.editorInputBehaviorInPlayMode = editor;
+            }
+            yield return null;
+
+            void Touch(UnityEngine.InputSystem.TouchPhase phase, Vector2 position)
+            {
+                InputSystem.QueueStateEvent(screen, new TouchState { touchId = 1, phase = phase, position = position });
+                InputSystem.Update();
+                Invoke("ReadInput");
+            }
         }
 
         private void Step(int count)

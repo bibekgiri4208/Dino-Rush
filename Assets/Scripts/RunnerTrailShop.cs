@@ -12,11 +12,14 @@ namespace DinoRush
     {
         private static readonly Color Cream = new Color32(240, 242, 207, 255);
         private static readonly Color Gold = new Color32(255, 210, 117, 255);
-        private static readonly string[] Names = { "WIND", "INFERNO", "VOLTAGE" };
-        private static readonly string[] Descriptions = { "Drifting blades\nand wind swirls", "Rising fire embers\nand warm particles", "Electric sparks\nand current flickers" };
+        private static readonly string[] Names = { "WIND", "INFERNO", "VOLTAGE", "FROST", "BLOSSOM", "COSMIC" };
+        private static readonly string[] Descriptions = { "Drifting blades\nand wind swirls", "Rising fire embers\nand warm particles", "Electric sparks\nand current flickers",
+            "Tumbling snowflakes\nand ice crystals", "Fluttering petals\non a soft breeze", "Twinkling stars\nand violet stardust" };
+        private const int PageSize = 3;
         [SerializeField] private GameObject content;
         [SerializeField] private GameObject[] dinoContent;
         [SerializeField] private Button dinosTab, trailsTab, unequip;
+        [SerializeField] private Button previousPage, nextPage;
         [SerializeField] private Button[] purchases = new Button[3];
         [SerializeField] private Text[] states = new Text[3];
         [SerializeField] private Text wallet, hint;
@@ -25,6 +28,9 @@ namespace DinoRush
         private RunnerShopPresentation hatch;
         private Action changed;
         private bool bound, portrait;
+        private int page;
+        public int Page => page;
+        public int PageCount => (RunnerTrailProgress.Count + PageSize - 1) / PageSize;
         public bool IsTrails { get; private set; }
 
         public void Initialize(RunnerShopProgress progress, RunnerShopPresentation presentation, RunnerAudio audio, Action refresh)
@@ -33,6 +39,8 @@ namespace DinoRush
             if (!bound)
             {
                 bound = true;
+                previousPage.onClick.AddListener(() => ChangePage(-1));
+                nextPage.onClick.AddListener(() => ChangePage(1));
                 dinosTab.onClick.AddListener(() => ShowTrails(false));
                 trailsTab.onClick.AddListener(() => ShowTrails(true));
                 unequip.onClick.AddListener(() =>
@@ -51,6 +59,14 @@ namespace DinoRush
             ShowTrails(false);
         }
         private bool CanInteract => shop != null && gameObject.activeInHierarchy && (hatch == null || !hatch.IsShowing);
+        private void ChangePage(int direction)
+        {
+            if (!CanInteract || !IsTrails) return;
+            page = Mathf.Clamp(page + direction, 0, PageCount - 1);
+            hint.text = "PAGE " + (page + 1) + " / " + PageCount + " / PREVIEW LIVE";
+            EventSystem.current?.SetSelectedGameObject(null);
+            Refresh();
+        }
         public void ShowTrails(bool show)
         {
             if (hatch != null && hatch.IsShowing) return;
@@ -61,7 +77,7 @@ namespace DinoRush
         }
         private void PurchaseOrEquip(int index)
         {
-            if (!CanInteract || !IsTrails) return;
+            if (!CanInteract || !IsTrails || index < 0 || index >= purchases.Length || index / PageSize != page) return;
             var kind = (RunnerTrailKind)(index + 1);
             bool purchased = false;
             if (!RunnerTrailProgress.Owned(kind))
@@ -85,8 +101,9 @@ namespace DinoRush
                     (!portrait || node.name != "Selected status" && node.name != "Map selection"));
             wallet.text = "EGGS: " + (shop != null ? shop.Balance : Mathf.Max(0, PlayerPrefs.GetInt(RunnerShopProgress.WalletKey))).ToString("N0");
             RunnerTrailKind equipped = RunnerTrailProgress.Equipped;
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < purchases.Length; i++)
             {
+                purchases[i].transform.parent.gameObject.SetActive(i / PageSize == page);
                 var kind = (RunnerTrailKind)(i + 1);
                 bool owned = RunnerTrailProgress.Owned(kind), selected = equipped == kind;
                 states[i].text = selected ? "EQUIPPED" : owned ? "OWNED / FOREVER" : "2,000 EGGS / PERMANENT";
@@ -97,6 +114,8 @@ namespace DinoRush
                 edge.gameObject.SetActive(selected);
             }
             unequip.interactable = equipped != RunnerTrailKind.None;
+            previousPage.interactable = page > 0;
+            nextPage.interactable = page < PageCount - 1;
             dinosTab.GetComponentInChildren<Text>(true).color = IsTrails ? Cream : Gold;
             trailsTab.GetComponentInChildren<Text>(true).color = IsTrails ? Gold : Cream;
         }
@@ -115,7 +134,11 @@ namespace DinoRush
             wallet = Label("Trail egg balance", content.transform, "EGGS: 0", font, 16, 0, 226, 840, 32, Gold);
             hint = Label("Trail shop hint", content.transform, "PREVIEW LIVE / BUY ONCE / EQUIP ON ANY DINO", font, 11, 0, -224, 840, 40, Cream);
             unequip = Control("Remove trail", content.transform, "NO TRAIL", font, buttonSprite);
-            for (int i = 0; i < 3; i++)
+            previousPage = Control("Previous trails page", content.transform, "< PREV", font, buttonSprite);
+            nextPage = Control("Next trails page", content.transform, "NEXT >", font, buttonSprite);
+            Array.Resize(ref purchases, RunnerTrailProgress.Count);
+            Array.Resize(ref states, RunnerTrailProgress.Count);
+            for (int i = 0; i < RunnerTrailProgress.Count; i++)
             {
                 Transform card = Node("Trail card " + (i + 1), content.transform);
                 Art(card, panelSprite, Color.white, true);
@@ -131,14 +154,8 @@ namespace DinoRush
                 effect.raycastTarget = false;
                 Image dino = Art(Node("Preview dino", card), dinoPortrait, Color.white, false);
                 dino.preserveAspect = true;
-                Transform front = Node("Live aura foreground", card);
-                var frontEffect = front.GetComponent<RunnerTrailPreview>();
-                if (frontEffect == null) frontEffect = front.gameObject.AddComponent<RunnerTrailPreview>();
-                frontEffect.Kind = (RunnerTrailKind)(i + 1);
-                frontEffect.Foreground = true;
-                frontEffect.raycastTarget = false;
-                front.SetSiblingIndex(dino.transform.GetSiblingIndex() + 1);
-                front.gameObject.SetActive(false); // Old saved binding only; particles do not need a foreground shell.
+                Transform front = card.Find("Live aura foreground");
+                if (front != null) front.gameObject.SetActive(false); // Retain old bindings, never create more shells.
                 Label("Trail description", card, Descriptions[i], font, 11, 0, -40, 244, 52, Cream);
                 states[i] = Label("Trail ownership", card, "2,000 EGGS / PERMANENT", font, 10, 0, -94, 244, 28, Cream);
                 purchases[i] = Control("Buy or equip trail " + (i + 1), card, "BUY - 2,000 EGGS", font, buttonSprite);
@@ -156,10 +173,13 @@ namespace DinoRush
             TextSize(dinosTab.transform.Find("Label"), portrait ? 20 : 18);
             TextSize(trailsTab.transform.Find("Label"), portrait ? 20 : 18);
             Position(wallet.transform, 0, portrait ? 492 : 226, portrait ? 560 : 840, 32);
-            for (int i = 0; i < 3; i++)
+            Place(previousPage.transform, portrait ? -226 : -350, portrait ? 492 : 226, portrait ? 112 : 132, portrait ? 64 : 44);
+            Place(nextPage.transform, portrait ? 226 : 350, portrait ? 492 : 226, portrait ? 112 : 132, portrait ? 64 : 44);
+            for (int i = 0; i < purchases.Length; i++)
             {
                 Transform card = purchases[i].transform.parent;
-                Position(card, portrait ? 0 : (i - 1) * 294, portrait ? 310 - i * 300 : 0, portrait ? 560 : 278, portrait ? 270 : 400);
+                int slot = i % PageSize;
+                Position(card, portrait ? 0 : (slot - 1) * 294, portrait ? 310 - slot * 300 : 0, portrait ? 560 : 278, portrait ? 270 : 400);
                 Position(card.Find("Equipped accent"), 0, portrait ? 128 : 192, portrait ? 512 : 238, 3);
                 Position(card.Find("Trail name"), portrait ? 100 : 0, portrait ? 82 : 164, portrait ? 320 : 248, 30);
                 Position(card.Find("Preview backdrop"), portrait ? -158 : 0, portrait ? 10 : 66, portrait ? 204 : 244, portrait ? 186 : 150);

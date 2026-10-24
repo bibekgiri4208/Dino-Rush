@@ -15,7 +15,7 @@ namespace DinoRush.Tests
         {
             old.Clear(); existing.Clear();
             var keys = new List<string> { RunnerTrailProgress.SelectionKey, RunnerShopProgress.WalletKey };
-            for (int i = 1; i <= 3; i++) keys.Add(RunnerTrailProgress.OwnershipKey((RunnerTrailKind)i));
+            for (int i = 1; i <= RunnerTrailProgress.Count; i++) keys.Add(RunnerTrailProgress.OwnershipKey((RunnerTrailKind)i));
             foreach (string key in keys)
             {
                 if (PlayerPrefs.HasKey(key)) existing.Add(key);
@@ -32,6 +32,9 @@ namespace DinoRush.Tests
         [TestCase(RunnerTrailKind.Smoke)]
         [TestCase(RunnerTrailKind.Fire)]
         [TestCase(RunnerTrailKind.Electric)]
+        [TestCase(RunnerTrailKind.Frost)]
+        [TestCase(RunnerTrailKind.Blossom)]
+        [TestCase(RunnerTrailKind.Cosmic)]
         public void EachTrailCostsExactlyTwoThousandAndCanOnlyBeBoughtOnce(RunnerTrailKind kind)
         {
             PlayerPrefs.SetInt(RunnerShopProgress.WalletKey, 1999);
@@ -54,7 +57,7 @@ namespace DinoRush.Tests
         }
         [TestCase(-1)]
         [TestCase(0)]
-        [TestCase(4)]
+        [TestCase(7)]
         [TestCase(999)]
         public void UnknownOrUnownedSavedTrailsSafelyFallBackToNone(int id)
         {
@@ -86,22 +89,27 @@ namespace DinoRush.Tests
                 foreach (var root in scene.GetRootGameObjects())
                     if (root.GetComponentInChildren<RunnerTrailShop>(true) != null) shop = root.GetComponentInChildren<RunnerTrailShop>(true);
                 Assert.That(shop, Is.Not.Null);
-                Assert.That(shop.GetComponentsInChildren<RunnerTrailPreview>(true).Length, Is.EqualTo(6));
+                Assert.That(shop.GetComponentsInChildren<RunnerTrailPreview>(true).Length, Is.EqualTo(9));
                 Assert.That(shop.transform.Find("Trails section").gameObject.activeSelf, Is.False);
-                for (int i = 0; i < 3; i++)
+                for (int i = 0; i < RunnerTrailProgress.Count; i++)
                 {
                     var previews = shop.transform.Find("Trails section/Trail card " + (i + 1)).GetComponentsInChildren<RunnerTrailPreview>(true);
-                    Assert.That(previews.Length, Is.EqualTo(2));
+                    Assert.That(previews.Length, Is.EqualTo(i < 3 ? 2 : 1));
                     Assert.That(previews[0].Kind, Is.EqualTo((RunnerTrailKind)(i + 1)));
-                    Assert.That(previews[1].Kind, Is.EqualTo((RunnerTrailKind)(i + 1)));
                     Assert.That(previews[0].Foreground, Is.False);
-                    Assert.That(previews[1].Foreground, Is.True);
-                    Assert.That(previews[1].gameObject.activeSelf, Is.False, "Legacy foreground shells must stay disabled.");
+                    if (i < 3)
+                    {
+                        Assert.That(previews[1].Kind, Is.EqualTo((RunnerTrailKind)(i + 1)));
+                        Assert.That(previews[1].Foreground, Is.True);
+                        Assert.That(previews[1].gameObject.activeSelf, Is.False, "Legacy foreground shells must stay disabled.");
+                    }
                     string name = shop.transform.Find("Trails section/Trail card " + (i + 1) + "/Trail name").GetComponent<Text>().text;
-                    Assert.That(name, Is.EqualTo(new[] { "WIND", "INFERNO", "VOLTAGE" }[i]));
+                    Assert.That(name, Is.EqualTo(new[] { "WIND", "INFERNO", "VOLTAGE", "FROST", "BLOSSOM", "COSMIC" }[i]));
                 }
                 Assert.That(shop.transform.Find("Dinos category").GetComponent<Button>(), Is.Not.Null);
                 Assert.That(shop.transform.Find("Trails category").GetComponent<Button>(), Is.Not.Null);
+                Assert.That(shop.PageCount, Is.EqualTo(2));
+                Assert.That(shop.transform.Find("Trails section/Next trails page").GetComponent<Button>(), Is.Not.Null);
             }
             finally { EditorSceneManager.CloseScene(scene, true); }
         }

@@ -17,11 +17,15 @@ namespace DinoRush.Tests
         private bool hadBest, hadMap;
         private string previousMap;
         private int previousBest;
+        private bool hadWallet;
+        private int previousWallet;
         private MethodInfo step;
 
         [UnitySetUp]
         public IEnumerator LoadForest()
         {
+            hadWallet = PlayerPrefs.HasKey(RunnerShopProgress.WalletKey);
+            previousWallet = PlayerPrefs.GetInt(RunnerShopProgress.WalletKey);
             hadBest = PlayerPrefs.HasKey("DinoRush.Forest.HighScore");
             previousBest = PlayerPrefs.GetInt("DinoRush.Forest.HighScore");
             hadMap = PlayerPrefs.HasKey(RunnerMapCatalog.SelectionKey);
@@ -43,6 +47,8 @@ namespace DinoRush.Tests
             else PlayerPrefs.DeleteKey("DinoRush.Forest.HighScore");
             if (hadMap) PlayerPrefs.SetString(RunnerMapCatalog.SelectionKey, previousMap);
             else PlayerPrefs.DeleteKey(RunnerMapCatalog.SelectionKey);
+            if (hadWallet) PlayerPrefs.SetInt(RunnerShopProgress.WalletKey, previousWallet);
+            else PlayerPrefs.DeleteKey(RunnerShopProgress.WalletKey);
             PlayerPrefs.Save();
         }
 
@@ -185,7 +191,7 @@ namespace DinoRush.Tests
         }
 
         [UnityTest]
-        public IEnumerator CanopiesAreReadableAndTheTouchDuckControlClearsThemOnEveryMap()
+        public IEnumerator ImprovedCanopiesClearWithDuckOnEveryMapWithoutShowingADuckButton()
         {
             var sprites = (List<Sprite>)Get("obstacleSprites");
             var aspects = new float[sprites.Count];
@@ -206,15 +212,14 @@ namespace DinoRush.Tests
                 Set("spawnTimer", 0f);
                 step.Invoke(game, new object[] { RunnerRules.SimulationStep });
                 Set("spawnTimer", float.MaxValue);
-                Assert.That(duck.activeInHierarchy, Is.True, "Touch players need an explicit hold-to-duck control.");
+                Assert.That(duck.activeInHierarchy, Is.False, "Approaching canopies must not reveal a duck button.");
                 SpriteRenderer canopy = null;
                 foreach (SpriteRenderer renderer in game.transform.Find("Obstacle pool").GetComponentsInChildren<SpriteRenderer>())
                     if (renderer.sprite.name == "Low thorn canopy") canopy = renderer;
                 Assert.That(canopy, Is.Not.Null);
                 Assert.That(canopy.sprite.texture.filterMode, Is.EqualTo(FilterMode.Point));
                 Assert.That(canopy.transform.position.y, Is.EqualTo(RunnerRules.GroundY + RunnerRules.CanopyBottom));
-                var pointer = new PointerEventData(EventSystem.current) { pointerId = 7, button = PointerEventData.InputButton.Left };
-                ExecuteEvents.Execute(duck, pointer, ExecuteEvents.pointerDownHandler);
+                game.SetDuckHeld(true);
                 RunnerPlayer player = (RunnerPlayer)Get("player");
                 Assert.That(player.IsDucking, Is.True);
                 bool captured = false;
@@ -232,12 +237,12 @@ namespace DinoRush.Tests
                 Assert.That(captured, Is.True);
                 Assert.That(game.Lives, Is.EqualTo(5), game.SelectedMapName);
                 Assert.That(game.ObstaclesCleared, Is.EqualTo(1));
-                ExecuteEvents.Execute(duck, pointer, ExecuteEvents.pointerUpHandler);
+                game.SetDuckHeld(false);
                 Assert.That(player.IsDucking, Is.False);
                 game.TogglePause();
                 Assert.That(duck.activeInHierarchy, Is.False);
                 game.TogglePause();
-                Assert.That(duck.activeInHierarchy, Is.True);
+                Assert.That(duck.activeInHierarchy, Is.False);
                 game.RestartRun();
                 Assert.That(duck.activeInHierarchy, Is.False, "The opening remains uncluttered before duck hazards unlock.");
             }

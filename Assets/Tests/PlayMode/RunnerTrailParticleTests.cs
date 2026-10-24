@@ -20,7 +20,7 @@ namespace DinoRush.Tests
         [UnityTest]
         public IEnumerator ExistingParticlesStayAtTheirOwnAltitudeWhileJumpAndLandingSpawnNewParticles()
         {
-            foreach (RunnerTrailKind kind in new[] { RunnerTrailKind.Smoke, RunnerTrailKind.Fire, RunnerTrailKind.Electric })
+            foreach (RunnerTrailKind kind in new[] { RunnerTrailKind.Smoke, RunnerTrailKind.Fire, RunnerTrailKind.Electric, RunnerTrailKind.Frost, RunnerTrailKind.Blossom, RunnerTrailKind.Cosmic })
             {
                 var root = new GameObject("Particle jump regression");
                 using (var effect = new RunnerTrailParticles(root.transform))
@@ -46,7 +46,7 @@ namespace DinoRush.Tests
                         Assert.That(old, Is.GreaterThan(0));
                         Assert.That(high, Is.GreaterThan(0), kind + " must create fresh particles at the airborne dino");
                         effect.Advance(0.1f, Vector2.zero, true, 5, true);
-                        effect.Advance(0.055f, Vector2.zero, true, 5, true); // A full emission interval after touching down.
+                        effect.Advance(0.07f, Vector2.zero, true, 5, true); // A full emission interval after touching down.
                         var landing = Snapshot(effect);
                         int retainedHigh = 0, newLow = 0;
                         foreach (var pair in landing)
@@ -71,7 +71,7 @@ namespace DinoRush.Tests
         [UnityTest]
         public IEnumerator NativeParticlesDriftIndividuallyFreezeWithoutSimulationAndEventuallyDisappear()
         {
-            foreach (RunnerTrailKind kind in new[] { RunnerTrailKind.Smoke, RunnerTrailKind.Fire, RunnerTrailKind.Electric })
+            foreach (RunnerTrailKind kind in new[] { RunnerTrailKind.Smoke, RunnerTrailKind.Fire, RunnerTrailKind.Electric, RunnerTrailKind.Frost, RunnerTrailKind.Blossom, RunnerTrailKind.Cosmic })
             {
                 var root = new GameObject("Particle motion regression");
                 Random.State random = Random.state;

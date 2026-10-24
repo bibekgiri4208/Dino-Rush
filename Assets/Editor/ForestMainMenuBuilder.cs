@@ -91,7 +91,7 @@ namespace DinoRush.Editor
             RectTransform optionsPage = Rect("Options page", card.transform, Vector2.zero, new Vector2(480, 220));
             Button optionsSound = MenuButton("Toggle sound effects", optionsPage, new Vector2(0, 45), "SFX: ON", "Speaker", false, new Vector2(330, 64));
             Text optionsSoundCaption = optionsSound.transform.Find("Label").GetComponent<Text>();
-            Label("Controls help", optionsPage, "SPACE / UP / W / TAP : JUMP\nPRESS AGAIN : DOUBLE JUMP\nDOWN / S : DUCK / FAST DROP\nESC / P : PAUSE     M : SFX", new Vector2(0, -49), new Vector2(480, 90), 12, Sage);
+            Label("Controls help", optionsPage, "SPACE / UP / W / TAP : JUMP\nPRESS AGAIN : DOUBLE JUMP\nDOWN / S : DUCK / FAST DROP\nSWIPE DOWN + HOLD : TOUCH DUCK\nESC / P : PAUSE     M : SFX", new Vector2(0, -49), new Vector2(480, 112), 12, Sage);
 
             RectTransform quitPage = Rect("Quit confirmation page", card.transform, Vector2.zero, new Vector2(480, 220));
             Label("Quit question", quitPage, "LEAVING THE FOREST?\nYOUR BEST SCORE IS SAVED.", new Vector2(0, 45), new Vector2(460, 60), 12, Sage);

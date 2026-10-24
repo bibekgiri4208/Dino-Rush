@@ -127,6 +127,8 @@ namespace DinoRush
         private int preparedInputFrame;
         private bool keyboardDuckHeld;
         private bool pointerDuckHeld;
+        private bool touchGestureActive, touchGestureDucking;
+        private Vector2 touchGestureStart;
         private int nextDirtParticle;
         private static readonly Color[] DirtColors =
         {
@@ -661,7 +663,7 @@ namespace DinoRush
             {
                 announcedLevel = Level;
                 hud.UpdateLevel(Level);
-                hud.Toast(Level == 3 ? "LEVEL 03 / HOLD DUCK" : Level == 4 ?
+                hud.Toast(Level == 3 ? "LEVEL 03 / LOW CANOPY" : Level == 4 ?
                     "LEVEL 04 / JUMP, DROP, DUCK" : $"LEVEL {Level:00} / {RunnerRules.LevelHint(Level)}");
                 stageBannerTime = 3f;
                 audioCues.Milestone();
@@ -920,15 +922,49 @@ namespace DinoRush
             }
             if (waitingForStart && State == RunState.Running) return; // Starting must not also queue a jump.
 
-            Touchscreen touchscreen = Touchscreen.current;
-            if (touchscreen != null && touchscreen.primaryTouch.press.wasPressedThisFrame)
-            {
-                PointerAction(touchscreen.primaryTouch.position.ReadValue());
-            }
-            else if (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
+            if (!ReadTouchInput() && Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
             {
                 PointerAction(Mouse.current.position.ReadValue());
             }
+        }
+
+        private bool ReadTouchInput()
+        {
+            Touchscreen touchscreen = Touchscreen.current;
+            if (touchscreen == null) return false;
+            var touch = touchscreen.primaryTouch;
+            UnityEngine.InputSystem.TouchPhase phase = touch.phase.ReadValue();
+            Vector2 point = touch.position.ReadValue();
+            if (phase == UnityEngine.InputSystem.TouchPhase.Began && !touchGestureActive)
+            {
+                touchGestureActive = touchGestureDucking = false;
+                if (State == RunState.Running && !hud.IsOverButton(point) && gameCamera.pixelRect.Contains(point))
+                {
+                    touchGestureStart = point;
+                    touchGestureActive = true;
+                }
+                else PointerAction(point); // Tap-to-start and UI retain their existing behavior.
+            }
+            float threshold = Mathf.Max(24, Mathf.Min(Screen.width, Screen.height) * 0.08f);
+            if (touchGestureActive && State == RunState.Running && touch.press.isPressed)
+            {
+                Vector2 delta = point - touchGestureStart;
+                if (!touchGestureDucking && delta.y < -threshold && -delta.y > Mathf.Abs(delta.x))
+                {
+                    touchGestureDucking = true;
+                    SetDuckHeld(true);
+                }
+            }
+            if (phase == UnityEngine.InputSystem.TouchPhase.Ended || phase == UnityEngine.InputSystem.TouchPhase.Canceled)
+            {
+                bool tap = touchGestureActive && !touchGestureDucking && State == RunState.Running &&
+                    phase != UnityEngine.InputSystem.TouchPhase.Canceled && Vector2.Distance(point, touchGestureStart) < threshold;
+                if (touchGestureDucking) SetDuckHeld(false);
+                touchGestureActive = touchGestureDucking = false;
+                if (tap) PointerAction(point); // Distinguish a tap from a duck swipe before spending a jump.
+                return true;
+            }
+            return touch.press.isPressed || touch.press.wasPressedThisFrame;
         }
 
         private void PointerAction(Vector2 screenPoint)
@@ -1006,6 +1042,7 @@ namespace DinoRush
 
         private void ResetRun()
         {
+            touchGestureActive = touchGestureDucking = false;
             keyboardDuckHeld = pointerDuckHeld = false;
             hud.FeedbackDuck(false);
             nextEncounterDistance = 0f;
@@ -1085,6 +1122,7 @@ namespace DinoRush
 
         private void ReleaseDuckInput()
         {
+            touchGestureActive = touchGestureDucking = false;
             keyboardDuckHeld = pointerDuckHeld = false;
             ApplyDuckInput();
         }

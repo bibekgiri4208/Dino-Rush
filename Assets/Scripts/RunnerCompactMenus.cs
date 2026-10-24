@@ -18,12 +18,14 @@ namespace DinoRush
                 Panel(panel, portrait ? new Vector2(560, 568) : new Vector2(480, 432), available);
                 Label(heading, 0, portrait ? 236 : 164, portrait ? 488 : 416, 40, portrait ? 24 : 22);
                 Transform options = panel.Find("Options page");
+                Text help = options.Find("Controls help")?.GetComponent<Text>();
+                if (help != null) help.text = "SPACE / UP / W / TAP : JUMP\nPRESS AGAIN : DOUBLE JUMP\nDOWN / S : DUCK / FAST DROP\nSWIPE DOWN + HOLD : TOUCH DUCK\nESC / P : PAUSE     M : SFX";
                 Control(options.Find("Toggle sound effects"), 0, portrait ? 158 : 104, portrait ? 472 : 328,
                     portrait ? 100 : 52, portrait ? 22 : 18, null, true);
                 Control(options.Find("Redeem gift"), 0, portrait ? 46 : 40, portrait ? 472 : 328,
                     portrait ? 100 : 52, portrait ? 22 : 18, "REDEEM", true);
                 Label(options.Find("Controls help"), 0, portrait ? -86 : -54, portrait ? 488 : 420,
-                    portrait ? 112 : 100, portrait ? 12 : 10);
+                    portrait ? 126 : 112, portrait ? 12 : 10);
                 Control(back, 0, portrait ? -210 : -164, portrait ? 472 : 328, portrait ? 100 : 52, 18, "BACK");
             }
             else if (kind == DialogKind.Quit)
