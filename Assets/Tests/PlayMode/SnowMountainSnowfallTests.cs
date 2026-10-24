@@ -97,7 +97,7 @@ namespace DinoRush.Tests
                 if (flake.color.a > 0.05f) visible++;
             }
             Assert.That(visible, Is.GreaterThan(30));
-            Assert.That(game.Lives, Is.EqualTo(5));
+            Assert.That(game.Lives, Is.EqualTo(RunnerHealth.MaximumLives));
             yield return new WaitForSecondsRealtime(0.35f);
             yield return ForestRunTests.Capture("mountain-snowfall");
             yield return ForestRunTests.Capture("mountain-snowfall-16-by-10", 1280, 800);

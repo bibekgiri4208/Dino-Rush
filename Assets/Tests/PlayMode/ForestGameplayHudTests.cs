@@ -49,7 +49,7 @@ namespace DinoRush.Tests
             var hearts = (RectTransform)root.Find("Life hearts");
             Assert.That(hearts.gameObject.activeInHierarchy, Is.True);
             Assert.That(hearts.anchoredPosition, Is.EqualTo(new Vector2(-492, ((RectTransform)root).rect.yMax - 51f)));
-            Assert.That(hearts.GetComponentsInChildren<RunnerHeartGraphic>().Length, Is.EqualTo(5));
+            Assert.That(hearts.GetComponentsInChildren<RunnerHeartGraphic>().Length, Is.EqualTo(3));
             Transform scoreCard = root.Find("Scoreboard/Score card");
             Transform bestCard = root.Find("Scoreboard/Best card");
             Assert.That(((RectTransform)scoreCard).anchoredPosition.y, Is.GreaterThan(((RectTransform)bestCard).anchoredPosition.y));

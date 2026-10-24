@@ -5,7 +5,7 @@ namespace DinoRush
     /// <summary>Per-run hearts and a simulation-time grace period after each hit.</summary>
     public sealed class RunnerHealth
     {
-        public const int MaximumLives = 5;
+        public const int MaximumLives = 3;
         // Protect overlapping pieces of one cluster, not the next separate decision.
         public const float InvulnerabilityDuration = 0.55f;
 

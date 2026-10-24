@@ -19,7 +19,7 @@ Open **Assets/Scenes/ForestRun.unity** (or **Dino Rush → Open Forest Run**) an
 | Restart / leave run | Pause menu: Restart or Quit to Menu |
 | Mute sound cues | M or SFX |
 
-Jump over rocks, stumps, and crates, but **duck beneath low thorn branches**. Each run starts with **five hearts**, shown in the top-left corner instead of the former map/level panel. An obstacle hit removes one heart; the run ends only when all five are gone. A **0.55-second grace period** (previously 1.2 seconds) protects against overlapping pieces without skipping as much of the next sequence, and the same obstacle cannot damage you twice. Hits flash the selected dino's supplied white silhouette and crying pose, with a floating **−1 + heart** above it. Hit obstacles do not count as cleared. Pause freezes damage feedback and grace time; Retry/Restart restores all five hearts and clears the effects. Your distance is your score; speed gradually increases to a cap. Each dino can **double jump**: a fresh press/tap in midair gives one more upward boost, with no third airborne jump. Landing or restarting restores both jumps; holding a key does not automatically use the second jump. The small pre-landing input buffer is retained. Duck/fast-drop blocks jumping until landing, and air jumps do not emit ground dirt. Ground obstacles remain clearable with a single jump. Ducking is the safe route beneath a low branch, while a sufficiently high, well-timed jump can also pass above its visible body; there is no invisible wall above it. Switching away from the game automatically pauses it.
+Jump over rocks, stumps, and crates, but **duck beneath low thorn branches**. Each run starts with **three hearts**, shown in the top-left corner instead of the former map/level panel. An obstacle hit removes one heart; the run ends only when all three are gone. A **0.55-second grace period** (previously 1.2 seconds) protects against overlapping pieces without skipping as much of the next sequence, and the same obstacle cannot damage you twice. Hits flash the selected dino's supplied white silhouette and crying pose, with a floating **−1 + heart** above it. Hit obstacles do not count as cleared. Pause freezes damage feedback and grace time; Retry/Restart restores all three hearts and clears the effects. Your distance is your score; speed gradually increases to a cap. Each dino can **double jump**: a fresh press/tap in midair gives one more upward boost, with no third airborne jump. Landing or restarting restores both jumps; holding a key does not automatically use the second jump. The small pre-landing input buffer is retained. Duck/fast-drop blocks jumping until landing, and air jumps do not emit ground dirt. Ground obstacles remain clearable with a single jump. Ducking is the safe route beneath a low branch, while a sufficiently high, well-timed jump can also pass above its visible body; there is no invisible wall above it. Switching away from the game automatically pauses it.
 
 The trail advances through **six designed stages** at 0, 12, 28, 48, 75, and 105 seconds of active running:
 
@@ -78,6 +78,22 @@ The Shop has separate **DINOS**, **TRAILS**, and **SLASHES** categories. Trails 
 - **Cosmic:** bright stars that twinkle into violet stardust.
 
 The six effects are split into two pages of three cards. A balance/currently-equipped header sits above larger, color-accented preview cards. Each card shows its price once, or a clear **OWNED / IN USE** badge, with a separate **BUY TRAIL / EQUIP / EQUIPPED** action. **PREV / NEXT** and a persistent page counter have their own row below the cards; Back and Remove Trail are separate footer actions. Paging never spends eggs or changes equipment, and hidden-page previews stop simulating. Both pages have stacked phone cards with larger labels, buttons, and live hopping dino previews. Prices and saved ownership are unchanged.
+
+### Daily missions
+
+The main menu's **MISSIONS** button opens three daily goals, with progress bars, an egg balance, individual **CLAIM** buttons, and a reset countdown:
+
+| Goal (across matches, on any map) | Reward |
+| --- | --- |
+| Run 500 metres | 100 eggs |
+| Collect 30 eggs during runs | 200 eggs |
+| Clear 25 obstacles | 300 eggs |
+
+All three goals are available each day for a total of **600 eggs**. Clearing means passing an obstacle without hitting it, or shattering it with a slash; paid attacks and unlocked dinos are never required. Distance and pickups count only during actual running, not menus, the start prompt, pause, or results. Claimed mission rewards do not count as egg pickups. Completion never automatically credits the wallet: claim each reward once, with the claim flag and wallet saved before feedback. Duplicate clicks/reloads cannot pay twice, and a full wallet leaves the reward available to claim after spending eggs.
+
+Goals reset at **local midnight**, including during a run or while viewing Missions. Unclaimed rewards expire; missed days do not bank rewards. An offline local-date high-water mark prevents clock rollback from reopening previously claimed days; this is not server-verified anti-cheat. Progress survives matches and app restarts. Pickups/clears save immediately, distance checkpoints every five simulation seconds, and pause, focus loss, run resets, results, menu transitions, and orderly shutdown flush remaining progress. Existing wallet, dino, trail, and slash save keys are unchanged.
+
+`RunnerDailyMissions.cs` owns the separate versioned JSON preference, goals, date rollover, and guarded claims. `RunnerDailyMissionsPanel.cs` presents the same shared game progress with responsive desktop/phone cards. **Dino Rush → Add Daily Missions** authors the editable button and page in place without rebuilding existing UI artwork. Permanent achievements are not part of this first version.
 
 ### Slash attacks
 
@@ -233,7 +249,7 @@ The four main-menu buttons share the same size, symmetric pixel-cut frame, mirro
 
 Open **Window → General → Test Runner**. EditMode tests check pace limits, jump feasibility, obstacle spacing, collision bounds, double-jump boosts/limits/reset, saved scene/UI/dirt references, and frame slicing. PlayMode tests load the actual scene and check start/pause/jump, collision, saved best, retry, and clearing obstacles. They also verify keyboard/tap double jumps across maps, the running dirt trail, no midair emission, larger landing bursts, particle pooling/cleanup, that pause freezes the world, Resume preserves progress, Restart clears the previous run, and both pause/results menus return to the title without losing the best score. UI tests raycast buttons (rather than bypassing them), check fonts, label/icon bounds and multiline spacing, and capture menus at normal, tablet, and wide aspect ratios when `DINO_RUSH_CAPTURE_DIR` is set. Tests restore the prior high score and sound preference when finished.
 
-Health tests check all five hearts, one loss per obstacle, cluster grace time, white/crying frames, floating heart-loss text, pause freezing, final-heart game over, and clean restart/menu state. The clean-course regression also requires keeping all five hearts.
+Health tests check all three hearts, one loss per obstacle, cluster grace time, white/crying frames, floating heart-loss text, pause freezing, final-heart game over, and clean restart/menu state. The clean-course regression also requires keeping all three hearts.
 
 Egg tests check safe placement and playable routes across stages/speeds, high arcs requiring double jump, seeded variety independent of gameplay randomness, real single/double-jump collection, every map/dino, exact-once awards, pool reuse/exhaustion, offscreen expiry, pause/results/restart state, non-blocking responsive HUD, mute-compatible audio, and runtime-art cleanup. Optional captures include `eggs-Low`, `eggs-Risky`, `eggs-HighArc`, `eggs-high-portrait`, `eggs-collected`, and `eggs-results`.
 

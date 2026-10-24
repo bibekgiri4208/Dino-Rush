@@ -86,7 +86,7 @@ namespace DinoRush.Tests
                 Assert.That(tile.position, Is.EqualTo(position), "The course must stay still while waiting.");
                 Assert.That(game.Score, Is.Zero);
                 Assert.That(Get("elapsed"), Is.EqualTo(0f));
-                Assert.That(game.Lives, Is.EqualTo(5));
+                Assert.That(game.Lives, Is.EqualTo(RunnerHealth.MaximumLives));
                 Assert.That(player.Grounded, Is.True);
                 Assert.That(game.SelectedMapIndex, Is.EqualTo(map));
                 Assert.That(game.SelectedDinoIndex, Is.EqualTo(2));

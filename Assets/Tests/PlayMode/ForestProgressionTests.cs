@@ -122,7 +122,7 @@ namespace DinoRush.Tests
                 }
             }
             Assert.That(game.Level, Is.EqualTo(6));
-            Assert.That(game.Lives, Is.EqualTo(5), "A clean course must not consume any hearts.");
+            Assert.That(game.Lives, Is.EqualTo(RunnerHealth.MaximumLives), "A clean course must not consume any hearts.");
             Assert.That(game.transform.Find("Forest runner UI/16 by 9 safe content/Top left badge/Map").GetComponent<Text>().text,
                 Is.EqualTo("LEVEL 06"));
             Assert.That(patterns.Count, Is.EqualTo(8));
@@ -135,7 +135,7 @@ namespace DinoRush.Tests
         }
 
         [UnityTest]
-        public IEnumerator FiveHeartsCannotCarryAJumpOnlyStrategyThroughTheMixedStagesOnAnyMap()
+        public IEnumerator ThreeHeartsCannotCarryAJumpOnlyStrategyThroughTheMixedStagesOnAnyMap()
         {
             var sprites = (List<Sprite>)Get("obstacleSprites");
             var aspects = new float[sprites.Count];
@@ -151,15 +151,15 @@ namespace DinoRush.Tests
                 var targets = new List<float>();
                 var player = (RunnerPlayer)Get("player");
                 int target = 0;
-                bool reachedCanopiesWithFiveHearts = false;
+                bool reachedCanopiesWithFullHearts = false;
                 for (int frame = 0; frame < 105 * 120 && game.State == ForestRunnerGame.RunState.Running; frame++)
                 {
                     float elapsed = (float)Get("elapsed");
                     float distance = (float)Get("distance");
-                    if (elapsed >= 28f && !reachedCanopiesWithFiveHearts)
+                    if (elapsed >= 28f && !reachedCanopiesWithFullHearts)
                     {
-                        Assert.That(game.Lives, Is.EqualTo(5), "This strategy times ground jumps correctly before the new skill is introduced.");
-                        reachedCanopiesWithFiveHearts = true;
+                        Assert.That(game.Lives, Is.EqualTo(RunnerHealth.MaximumLives), "This strategy times ground jumps correctly before the new skill is introduced.");
+                        reachedCanopiesWithFullHearts = true;
                     }
                     float apex = RunnerRules.JumpSpeed / RunnerRules.Gravity;
                     float lead = (RunnerRules.Speed(elapsed) + RunnerRules.Speed(elapsed + apex)) * 0.5f * apex;
@@ -182,9 +182,9 @@ namespace DinoRush.Tests
                         targets.Add(origin + (first.Offset - first.Width * 0.5f + last.Offset + last.Width * 0.5f) * 0.5f);
                     }
                 }
-                Assert.That(reachedCanopiesWithFiveHearts, Is.True);
+                Assert.That(reachedCanopiesWithFullHearts, Is.True);
                 Assert.That(game.State, Is.EqualTo(ForestRunnerGame.RunState.GameOver),
-                    "Ignoring duck/landing decisions must exhaust all five hearts before Wild Run: " + game.SelectedMapName);
+                    "Ignoring duck/landing decisions must exhaust all three hearts before Wild Run: " + game.SelectedMapName);
                 Assert.That(game.Lives, Is.Zero);
                 yield return null;
             }
@@ -235,7 +235,7 @@ namespace DinoRush.Tests
                     }
                 }
                 Assert.That(captured, Is.True);
-                Assert.That(game.Lives, Is.EqualTo(5), game.SelectedMapName);
+                Assert.That(game.Lives, Is.EqualTo(RunnerHealth.MaximumLives), game.SelectedMapName);
                 Assert.That(game.ObstaclesCleared, Is.EqualTo(1));
                 game.SetDuckHeld(false);
                 Assert.That(player.IsDucking, Is.False);

@@ -130,6 +130,7 @@ namespace DinoRush
         private bool touchGestureActive, touchGestureDucking;
         private Vector2 touchGestureStart;
         private int nextDirtParticle;
+        private float missionSaveTimer;
         private static readonly Color[] DirtColors =
         {
             new Color32(100, 76, 48, 255), new Color32(137, 105, 64, 255),
@@ -142,6 +143,7 @@ namespace DinoRush
         public int ObstaclesCleared => cleared;
         public int EggsCollected => eggs != null ? eggs.Collected : 0;
         public RunnerShopProgress Shop { get; private set; }
+        public RunnerDailyMissions DailyMissions { get; private set; }
         public int Lives => health.Lives;
         public bool IsInvulnerable => health.IsInvulnerable;
         public int Level => RunnerRules.Level(elapsed);
@@ -193,6 +195,7 @@ namespace DinoRush
             playerTrail = trailObject.AddComponent<RunnerPlayerTrail>();
             playerTrail.Initialize(dinoRenderer);
             Shop = new RunnerShopProgress(dinoRoster);
+            DailyMissions = new RunnerDailyMissions();
             if (dinoRoster != null && dinoRoster.Count > 0)
             {
                 SelectedDinoIndex = dinoRoster.Find(PlayerPrefs.GetString(RunnerDinoRoster.SelectionKey, "blue"));
@@ -218,11 +221,13 @@ namespace DinoRush
             eggs = new RunnerEggCollectibles(transform, spriteMaterial, position =>
             {
                 Shop.CollectEgg();
+                if (State == RunState.Running) { DailyMissions.RecordEgg(); DailyMissions.Flush(); }
                 audioCues.Pickup();
                 hud.CollectEgg(eggs.Collected, position, gameCamera);
             });
             hud.InitializeShop(Shop, audioCues);
             hud.Initialize(PrimaryAction, TogglePause, Jump, ToggleMute, RestartRun, ReturnToMenu, SetDuckHeld, eggs.EggSprite);
+            GetComponentInChildren<ForestMainMenu>(true)?.InitializeDailyMissions(DailyMissions);
             hud.UpdateLives(Lives);
             hud.InitializeDinos(dinoRoster, SelectedDinoIndex, SelectDino);
             hud.InitializeMaps(mapCatalog, SelectedMapIndex, SelectMap, PrepareRun);
@@ -684,6 +689,9 @@ namespace DinoRush
             float speed = RunnerRules.Speed(elapsed);
             float travel = speed * dt;
             distance += travel;
+            DailyMissions?.RecordDistance(travel);
+            missionSaveTimer += dt;
+            if (missionSaveTimer >= 5f) { DailyMissions?.Flush(); missionSaveTimer = 0; }
             bool wasGrounded = player.Grounded;
             player.Step(dt, out bool jumped, out bool landed);
             if (jumped)
@@ -719,7 +727,7 @@ namespace DinoRush
                     SlashAttack.Shatter(obstacle.renderer);
                     obstacle.active = false;
                     obstacle.renderer.gameObject.SetActive(false);
-                    if (!obstacle.passed && !obstacle.hitPlayer) cleared++;
+                    if (!obstacle.passed && !obstacle.hitPlayer) RecordObstacleClear();
                     continue;
                 }
                 if (!obstacle.hitPlayer && playerBox.Overlaps(obstacleBox))
@@ -732,7 +740,7 @@ namespace DinoRush
                 if (!obstacle.passed && x + obstacle.width * 0.5f < RunnerRules.PlayerX - RunnerRules.PlayerWidth * 0.5f)
                 {
                     obstacle.passed = true;
-                    if (!obstacle.hitPlayer) cleared++;
+                    if (!obstacle.hitPlayer) RecordObstacleClear();
                 }
                 if (x < -12f)
                 {
@@ -757,6 +765,13 @@ namespace DinoRush
                 if (stageBannerTime <= 0f) hud.Toast($"{milestone * 100} METRES  /  KEEP GOING!");
                 SaveBest();
             }
+        }
+
+        private void RecordObstacleClear()
+        {
+            cleared++;
+            DailyMissions?.RecordClear();
+            DailyMissions?.Flush();
         }
 
         private void SpawnEncounter()
@@ -1058,6 +1073,8 @@ namespace DinoRush
 
         private void ResetRun()
         {
+            DailyMissions?.Flush();
+            missionSaveTimer = 0;
             touchGestureActive = touchGestureDucking = false;
             keyboardDuckHeld = pointerDuckHeld = false;
             hud.FeedbackDuck(false);
@@ -1206,6 +1223,7 @@ namespace DinoRush
 
         private void SaveBest()
         {
+            DailyMissions?.Flush();
             if (Score <= best) return;
             best = Score;
             PlayerPrefs.SetInt(HighScoreKey, best);
@@ -1214,11 +1232,13 @@ namespace DinoRush
 
         private void OnApplicationFocus(bool hasFocus)
         {
+            if (!hasFocus) DailyMissions?.Flush();
             if (!hasFocus && initialized && State == RunState.Running) TogglePause();
         }
 
         private void OnApplicationPause(bool paused)
         {
+            if (paused) DailyMissions?.Flush();
             if (paused && initialized && State == RunState.Running) TogglePause();
         }
 

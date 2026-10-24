@@ -146,7 +146,7 @@ namespace DinoRush.Tests
                 Set("spawnTimer", float.MaxValue);
                 Step(195);
                 Assert.That(game.EggsCollected, Is.EqualTo(4), game.SelectedMapName);
-                Assert.That(game.Lives, Is.EqualTo(5));
+                Assert.That(game.Lives, Is.EqualTo(RunnerHealth.MaximumLives));
                 game.ReturnToMenu();
                 yield return null;
             }

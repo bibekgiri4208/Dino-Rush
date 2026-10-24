@@ -6,7 +6,7 @@ namespace DinoRush
     /// <summary>Content-sized utility dialogs, independent of the larger Shop and reward layouts.</summary>
     public static class RunnerCompactMenus
     {
-        public enum DialogKind { Shop, Options, Quit, Mode }
+        public enum DialogKind { Shop, Options, Quit, Mode, Missions }
 
         public static void ApplyDialog(Transform panel, DialogKind kind, bool portrait, Vector2 available)
         {
@@ -44,6 +44,12 @@ namespace DinoRush
                 ModeCard(modes.Find("Story mode"), true, portrait);
                 ModeCard(modes.Find("Endless mode"), false, portrait);
                 Control(back, 0, portrait ? -252 : -152, portrait ? 512 : 320, portrait ? 100 : 52, 18, "BACK");
+            }
+            else if (kind == DialogKind.Missions)
+            {
+                Panel(panel, portrait ? new Vector2(640, 1120) : new Vector2(800, 660), available);
+                Label(heading, 0, portrait ? 504 : 280, portrait ? 560 : 704, 40, 24);
+                Control(back, 0, portrait ? -490 : -280, portrait ? 560 : 360, portrait ? 100 : 52, 18, "BACK");
             }
             else
             {

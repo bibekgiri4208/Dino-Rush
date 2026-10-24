@@ -65,7 +65,7 @@ namespace DinoRush.Tests
             Assert.That(leaves[0].transform.rotation, Is.Not.EqualTo(rotation));
             Assert.That(leaves[0].transform.localScale, Is.Not.EqualTo(scale));
             Assert.That(game.Score, Is.Zero);
-            Assert.That(game.Lives, Is.EqualTo(5));
+            Assert.That(game.Lives, Is.EqualTo(RunnerHealth.MaximumLives));
             yield return new WaitForSecondsRealtime(0.35f);
             yield return ForestRunTests.Capture("forest-wind-leaves");
             for (int i = 0; i < 1800; i++) wind.Simulate(0.1f);

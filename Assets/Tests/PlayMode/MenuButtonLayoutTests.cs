@@ -41,13 +41,13 @@ namespace DinoRush.Tests
             canvas.scaleFactor = 1;
             foreach (Text label in menu.GetComponentsInChildren<Text>()) label.SetVerticesDirty();
             Canvas.ForceUpdateCanvases();
-            string[] names = { "Play", "Shop", "Options", "Quit" };
+            string[] names = { "Play", "Shop", "Missions", "Options", "Quit" };
             for (int i = 0; i < names.Length; i++)
             {
                 Transform button = menu.transform.Find("Main menu buttons/" + names[i]);
                 var rect = (RectTransform)button;
                 Assert.That(rect.sizeDelta, Is.EqualTo(new Vector2(360, 68)), names[i]);
-                Assert.That(rect.anchoredPosition, Is.EqualTo(new Vector2(0, -12 - i * 78)));
+                Assert.That(rect.anchoredPosition, Is.EqualTo(new Vector2(0, -12 - i * 74)));
                 Image background = button.GetComponent<Image>();
                 Assert.That(background.type, Is.EqualTo(Image.Type.Sliced));
                 Assert.That(background.sprite.rect.size, Is.EqualTo(new Vector2(180, 34)));
@@ -71,6 +71,11 @@ namespace DinoRush.Tests
                         + text.rectTransform.anchoredPosition.x;
                     textLeft = Mathf.Min(textLeft, x);
                     textRight = Mathf.Max(textRight, x);
+                }
+                if (names[i] == "Missions")
+                {
+                    Assert.That(text.rectTransform.anchoredPosition.x, Is.Zero);
+                    continue;
                 }
                 Image icon = button.Find("Icon").GetComponent<Image>();
                 var texture = new Texture2D(2, 2);

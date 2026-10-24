@@ -333,7 +333,7 @@ namespace DinoRush.Tests
 
         private IEnumerator RunToGameOver()
         {
-            // Simulate the longer five-heart run without adding half a minute to UI regressions.
+            // Simulate the run to its final heart without adding long waits to UI regressions.
             var step = typeof(ForestRunnerGame).GetMethod("Step",
                 System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
             var parameters = new object[] { RunnerRules.SimulationStep };

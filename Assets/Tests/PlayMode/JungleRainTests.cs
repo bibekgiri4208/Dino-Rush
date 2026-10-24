@@ -64,7 +64,7 @@ namespace DinoRush.Tests
             }
             Assert.That(falling, Is.GreaterThan(70));
             Assert.That(game.Score, Is.Zero);
-            Assert.That(game.Lives, Is.EqualTo(5));
+            Assert.That(game.Lives, Is.EqualTo(RunnerHealth.MaximumLives));
             game.StartRun();
             var slowTravel = new float[drops.Length];
             for (int i = 0; i < drops.Length; i++) before[i] = drops[i].transform.position;

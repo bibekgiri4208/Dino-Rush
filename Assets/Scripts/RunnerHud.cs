@@ -521,12 +521,13 @@ namespace DinoRush
                 frame.color = themedFrame.color;
             }
             lifeBar = frame.gameObject;
-            Label("Life caption", frame.transform, "LIFE", new Vector2(-79, 0), new Vector2(52, 26), 12, Cream);
+            Label("Life caption", frame.transform, "LIFE", new Vector2(-76, 0), new Vector2(48, 26), 12, Cream);
             hearts = new RunnerHeartGraphic[RunnerHealth.MaximumLives];
             for (int i = 0; i < hearts.Length; i++)
             {
                 hearts[i] = Rect("Heart " + (i + 1), frame.transform,
-                    new Vector2(-36 + i * 32, 0), new Vector2(28, 28)).gameObject.AddComponent<RunnerHeartGraphic>();
+                    new Vector2(Mathf.Lerp(-24, 84, hearts.Length == 1 ? 0.5f : (float)i / (hearts.Length - 1)), 0),
+                    new Vector2(28, 28)).gameObject.AddComponent<RunnerHeartGraphic>();
                 hearts[i].raycastTarget = false;
             }
             lifeBar.SetActive(false);

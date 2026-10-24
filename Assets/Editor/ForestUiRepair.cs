@@ -151,7 +151,8 @@ namespace DinoRush.Editor
 
         private static void RepairMainMenuButtons(Transform root)
         {
-            string[] names = { "Play", "Shop", "Options", "Quit" };
+            bool missions = root.Find("Main menu buttons/Missions") != null;
+            string[] names = missions ? new[] { "Play", "Shop", "Missions", "Options", "Quit" } : new[] { "Play", "Shop", "Options", "Quit" };
             for (int i = 0; i < names.Length; i++)
             {
                 Transform button = root.Find("Main menu buttons/" + names[i]);
@@ -161,7 +162,7 @@ namespace DinoRush.Editor
                     button.name = "Shop";
                 }
                 if (names[i] == "Shop") button.Find("Label").GetComponent<Text>().text = "SHOP";
-                RepairButton(button, 0, -12 - i * 78, 360, 68, 24);
+                RepairButton(button, 0, -12 - i * (missions ? 74 : 78), 360, 68, 24);
                 Transform label = button.Find("Label");
                 TextLayout(label, 32, 0, 240, 52, 24);
                 Text text = label.GetComponent<Text>();
@@ -176,6 +177,12 @@ namespace DinoRush.Editor
                 text.rectTransform.sizeDelta = new Vector2(Mathf.Ceil(tracking.PreferredWidth) + 2, 52);
                 Vector2 caption = CaptionBounds(text, tracking.Spacing);
                 Transform icon = button.Find("Icon");
+                if (names[i] == "Missions")
+                {
+                    text.rectTransform.anchoredPosition = Vector2.zero;
+                    EditorUtility.SetDirty(text.rectTransform); EditorUtility.SetDirty(text);
+                    continue;
+                }
                 Vector2 artwork = IconBounds(icon.GetComponent<Image>());
                 const float gap = 12;
                 float left = -(artwork.y - artwork.x + gap + caption.y - caption.x) * 0.5f;

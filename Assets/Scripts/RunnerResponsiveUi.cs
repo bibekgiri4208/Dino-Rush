@@ -166,9 +166,10 @@ namespace DinoRush
             Place("Forest Main Menu/Dino Rush Logo", 0, top - 32f - 320.5f * logoScale);
             Scale("Forest Main Menu/Dino Rush Logo", logoScale);
             Place("Forest Main Menu/Main menu buttons", 0, bottom + 360);
-            string[] menuButtons = { "Play", "Shop", "Options", "Quit" };
+            bool missions = root.Find("Forest Main Menu/Main menu buttons/Missions") != null;
+            string[] menuButtons = missions ? new[] { "Play", "Shop", "Missions", "Options", "Quit" } : new[] { "Play", "Shop", "Options", "Quit" };
             for (int i = 0; i < menuButtons.Length; i++)
-                Place("Forest Main Menu/Main menu buttons/" + menuButtons[i], 0, 84 - i * 120, 520, 104);
+                Place("Forest Main Menu/Main menu buttons/" + menuButtons[i], 0, (missions ? 204 : 84) - i * 120, 520, 104);
 
             const string hatch = "Forest Main Menu/Hatch reveal/Hatch reward panel";
             Place(hatch, 0, 0, 620, 820);

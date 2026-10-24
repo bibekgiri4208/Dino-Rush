@@ -164,7 +164,7 @@ namespace DinoRush.Tests
             Assert.That(root.Find("Jump").gameObject.activeInHierarchy, Is.False);
             Assert.That(root.Find("Duck").gameObject.activeInHierarchy, Is.False);
             Assert.That(root.Find("Top left badge").gameObject.activeInHierarchy, Is.False);
-            Assert.That(game.Lives, Is.EqualTo(4));
+            Assert.That(game.Lives, Is.EqualTo(RunnerHealth.MaximumLives - 1));
             yield return RunnerDisplayCapture.Capture("responsive-ultrawide", 2560, 1080);
         }
 

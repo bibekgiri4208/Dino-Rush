@@ -10,6 +10,8 @@ namespace DinoRush.Tests
     {
         private bool hadMap;
         private string previousMap;
+        private bool hadMissions;
+        private string previousMissions;
         private readonly Dictionary<string, int> shopPrefs = new Dictionary<string, int>();
         private readonly HashSet<string> existingShopPrefs = new HashSet<string>();
         internal static IEnumerable<string> ShopKeys
@@ -25,6 +27,9 @@ namespace DinoRush.Tests
         [OneTimeSetUp]
         public void UseForestForRegressions()
         {
+            hadMissions = PlayerPrefs.HasKey(RunnerDailyMissions.SaveKey);
+            previousMissions = PlayerPrefs.GetString(RunnerDailyMissions.SaveKey);
+            PlayerPrefs.DeleteKey(RunnerDailyMissions.SaveKey);
             hadMap = PlayerPrefs.HasKey(RunnerMapCatalog.SelectionKey);
             previousMap = PlayerPrefs.GetString(RunnerMapCatalog.SelectionKey);
             PlayerPrefs.SetString(RunnerMapCatalog.SelectionKey, "forest");
@@ -40,6 +45,10 @@ namespace DinoRush.Tests
         [OneTimeTearDown]
         public void RestorePlayerChoice()
         {
+            foreach (var game in Object.FindObjectsByType<ForestRunnerGame>(FindObjectsInactive.Include))
+                game.DailyMissions?.Flush();
+            if (hadMissions) PlayerPrefs.SetString(RunnerDailyMissions.SaveKey, previousMissions);
+            else PlayerPrefs.DeleteKey(RunnerDailyMissions.SaveKey);
             if (hadMap) PlayerPrefs.SetString(RunnerMapCatalog.SelectionKey, previousMap);
             else PlayerPrefs.DeleteKey(RunnerMapCatalog.SelectionKey);
             foreach (var preference in shopPrefs)

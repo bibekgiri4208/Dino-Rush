@@ -55,6 +55,8 @@ namespace DinoRush
         [SerializeField] private Button redeemGift;
         [SerializeField] private RunnerRedeemPresentation redeemPresentation;
         [SerializeField] private RunnerTrailShop trailShop;
+        [SerializeField] private Button missions;
+        [SerializeField] private RunnerDailyMissionsPanel missionsPage;
         private int pendingRewardIndex = -1;
         private RunnerShopProgress shop;
         private int selectedDino;
@@ -73,6 +75,7 @@ namespace DinoRush
         public RunnerShopCollection ShopCollection => shopCollection;
         public RunnerRedeemPresentation RedeemPresentation => redeemPresentation;
         public RunnerTrailShop TrailShop => trailShop;
+        public RunnerDailyMissionsPanel MissionsPage => missionsPage;
 
         public void ApplyDialogLayout(bool portrait, Vector2 available)
         {
@@ -81,11 +84,13 @@ namespace DinoRush
             if (dialogTitle == null) return;
             var kind = quitPage != null && quitPage.activeSelf ? RunnerCompactMenus.DialogKind.Quit :
                 customizePage != null && customizePage.activeSelf ? RunnerCompactMenus.DialogKind.Shop :
+                missionsPage != null && missionsPage.gameObject.activeSelf ? RunnerCompactMenus.DialogKind.Missions :
                 modePage != null && modePage.activeSelf ? RunnerCompactMenus.DialogKind.Mode : RunnerCompactMenus.DialogKind.Options;
             RunnerCompactMenus.ApplyDialog(dialogTitle.transform.parent, kind, portrait, available);
             shopPresentation?.ApplyBatchLayout(portrait, available);
             redeemPresentation?.ApplyLayout(portrait, available);
             trailShop?.ApplyLayout(portrait);
+            missionsPage?.ApplyLayout(portrait);
         }
 
         public void OpenModeSelector()
@@ -155,6 +160,7 @@ namespace DinoRush
                 trailShop?.ShowTrails(false);
             });
             Bind(options, () => OpenDialog("OPTIONS", optionsPage));
+            if (missions != null) Bind(missions, OpenDailyMissions);
             Bind(quit, () => OpenDialog("QUIT GAME?", quitPage));
             Bind(back, CloseDialog);
             Bind(sound, toggleSound);
@@ -194,6 +200,36 @@ namespace DinoRush
             trailShop.EnsureUi(selectedDinoLabel.font, dialogTitle.transform.parent.GetComponent<Image>().sprite,
                 back.GetComponent<Image>().sprite, dinoPortraits[0].sprite);
             ApplyDialogLayout(dialogPortrait, dialogAvailable);
+        }
+        public void InitializeDailyMissions(RunnerDailyMissions progress) => missionsPage?.Initialize(progress, RefreshShop);
+        public void OpenDailyMissions()
+        {
+            if (missionsPage == null || !choices.activeInHierarchy) return;
+            OpenDialog("DAILY MISSIONS", missionsPage.gameObject);
+            missionsPage.Refresh();
+        }
+        public void EnsureDailyMissionsUi()
+        {
+            Font font = selectedDinoLabel.font;
+            Sprite buttonSprite = back.GetComponent<Image>().sprite;
+            Transform node = RunnerShopPresentation.Node("Missions", choices.transform);
+            Image art = RunnerShopPresentation.Art(node, buttonSprite, Color.white, true); art.raycastTarget = true;
+            missions = node.GetComponent<Button>(); if (missions == null) missions = node.gameObject.AddComponent<Button>();
+            missions.targetGraphic = art; missions.navigation = new Navigation { mode = Navigation.Mode.None };
+            var label = RunnerShopPresentation.Label("Label", node, "MISSIONS", font, 24, 0, 0, 320, 48, new Color32(240, 242, 207, 255));
+            if (label.GetComponent<ButtonLetterSpacing>() == null) label.gameObject.AddComponent<ButtonLetterSpacing>();
+            string[] names = { "Play", "Shop", "Missions", "Options", "Quit" };
+            for (int i = 0; i < names.Length; i++)
+            {
+                Transform button = choices.transform.Find(names[i]);
+                RunnerShopPresentation.Position(button, 0, -12 - i * 74, 360, 68);
+                button.GetComponent<RunnerUiButtonFeedback>()?.RefreshContentLayout();
+            }
+            Transform page = RunnerShopPresentation.Node("Daily missions page", dialogTitle.transform.parent);
+            page.gameObject.SetActive(false);
+            missionsPage = page.GetComponent<RunnerDailyMissionsPanel>();
+            if (missionsPage == null) missionsPage = page.gameObject.AddComponent<RunnerDailyMissionsPanel>();
+            missionsPage.EnsureUi(font, dialogTitle.transform.parent.GetComponent<Image>().sprite, buttonSprite);
         }
 
         public void EnsureRedeemUi()
@@ -433,6 +469,7 @@ namespace DinoRush
             optionsPage.SetActive(page == optionsPage);
             quitPage.SetActive(page == quitPage);
             if (modePage != null) modePage.SetActive(page == modePage);
+            if (missionsPage != null) missionsPage.gameObject.SetActive(page == missionsPage.gameObject);
             dialogTitle.text = heading;
             ApplyDialogLayout(dialogPortrait, dialogAvailable);
         }
@@ -449,6 +486,7 @@ namespace DinoRush
             optionsPage.SetActive(true);
             quitPage.SetActive(false);
             if (modePage != null) modePage.SetActive(false);
+            if (missionsPage != null) missionsPage.gameObject.SetActive(false);
             dialogTitle.text = "OPTIONS";
             ApplyDialogLayout(dialogPortrait, dialogAvailable);
         }
