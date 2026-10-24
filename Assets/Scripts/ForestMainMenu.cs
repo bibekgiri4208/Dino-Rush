@@ -313,7 +313,7 @@ namespace DinoRush
 
         private void BuyMysteryEgg()
         {
-            if (shop == null || !customizePage.activeInHierarchy || (trailShop != null && trailShop.IsTrails) || (shopPresentation != null && shopPresentation.IsShowing)) return;
+            if (shop == null || !customizePage.activeInHierarchy || (trailShop != null && trailShop.IsEffects) || (shopPresentation != null && shopPresentation.IsShowing)) return;
             if (shop.TryBuy(out int index, out int fragments, out bool unlocked))
             {
                 shopResult.text = "+" + fragments + " " + dinoRoster[index].DisplayName.ToUpperInvariant() + " FRAGMENTS!\n" +
@@ -339,7 +339,7 @@ namespace DinoRush
 
         private void BuyTenMysteryEggs()
         {
-            if (shop == null || !customizePage.activeInHierarchy || (trailShop != null && trailShop.IsTrails) || shopPresentation == null || shopPresentation.IsShowing) return;
+            if (shop == null || !customizePage.activeInHierarchy || (trailShop != null && trailShop.IsEffects) || shopPresentation == null || shopPresentation.IsShowing) return;
             if (shop.TryBuyTen(out RunnerShopProgress.Reward[] rewards))
             {
                 int total = 0, unlocks = 0;

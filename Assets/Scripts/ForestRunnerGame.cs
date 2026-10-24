@@ -171,6 +171,7 @@ namespace DinoRush
 
         private void Awake()
         {
+            SlashAttack = GetComponent<RunnerSlashAttack>();
             if (!AssetsAssigned())
             {
                 Debug.LogError("Forest runner is missing art references. Open Assets/Scenes/ForestRun.unity.", this);
@@ -438,6 +439,7 @@ namespace DinoRush
             gameCamera.orthographicSize = layout.OrthographicSize;
             FitSceneryToViewport();
             hud?.ApplyScreenLayout(layout);
+            GetComponentInChildren<RunnerSlashHud>(true)?.ApplyLayout(layout.Portrait);
         }
 
         private void FitSceneryToViewport()
@@ -703,6 +705,7 @@ namespace DinoRush
             }
 
             Rect playerBox = player.Hitbox;
+            SlashAttack?.Tick(dt);
             foreach (Obstacle obstacle in obstacles)
             {
                 if (!obstacle.active) continue;
@@ -711,6 +714,14 @@ namespace DinoRush
                 float x = obstacleTransform.position.x;
                 Rect obstacleBox = obstacle.overhead ? RunnerRules.CanopyHitbox(x, obstacle.width) :
                     RunnerRules.ObstacleHitbox(x, obstacle.width, obstacle.height);
+                if (SlashAttack != null && SlashAttack.Active && SlashAttack.Hitbox.Overlaps(obstacleBox))
+                {
+                    SlashAttack.Shatter(obstacle.renderer);
+                    obstacle.active = false;
+                    obstacle.renderer.gameObject.SetActive(false);
+                    if (!obstacle.passed && !obstacle.hitPlayer) cleared++;
+                    continue;
+                }
                 if (!obstacle.hitPlayer && playerBox.Overlaps(obstacleBox))
                 {
                     // Remember the contact even during grace time: one obstacle cannot drain multiple hearts.
@@ -915,8 +926,12 @@ namespace DinoRush
                     return;
                 }
                 if (keyboard.spaceKey.wasPressedThisFrame || keyboard.upArrowKey.wasPressedThisFrame ||
-                    keyboard.wKey.wasPressedThisFrame || keyboard.enterKey.wasPressedThisFrame)
+                    keyboard.wKey.wasPressedThisFrame)
                     PrimaryAction();
+                if (keyboard.enterKey.wasPressedThisFrame || keyboard.numpadEnterKey.wasPressedThisFrame)
+                {
+                    if (State == RunState.Running) Attack(); else PrimaryAction();
+                }
                 if (keyboard.rKey.wasPressedThisFrame && State == RunState.GameOver) PrimaryAction();
                 if (keyboard.mKey.wasPressedThisFrame) ToggleMute();
             }
@@ -1030,6 +1045,7 @@ namespace DinoRush
 
         private void BeginRun()
         {
+            SlashesUsed = 0;
             State = RunState.Running;
             eggs.SpawnIntro();
             hud.ShowRunning();
@@ -1073,6 +1089,7 @@ namespace DinoRush
             }
             player.Reset();
             playerTrail?.Clear();
+            SlashAttack?.Clear();
             health.Reset();
             hud.UpdateLives(Lives);
             hud.ClearDamage();
@@ -1105,6 +1122,18 @@ namespace DinoRush
             if (State != RunState.Running) return;
             player.QueueJump();
             hud.FeedbackJump();
+        }
+        public RunnerSlashAttack SlashAttack { get; private set; }
+        public int SlashesUsed { get; private set; }
+        public bool Attack()
+        {
+            if (State != RunState.Running || SlashesUsed >= RunnerSlashProgress.MaxCharges ||
+                SlashAttack == null || SlashAttack.Active || RunnerSlashProgress.Charges <= 0 ||
+                RunnerSlashProgress.Equipped == RunnerSlashKind.None) return false;
+            if (!SlashAttack.Launch(RunnerSlashProgress.Equipped, player.Feet)) return false;
+            if (!RunnerSlashProgress.Consume()) { SlashAttack.Clear(); return false; }
+            SlashesUsed++;
+            return true;
         }
 
         public void SetDuckHeld(bool held)
@@ -1164,6 +1193,7 @@ namespace DinoRush
 
         private void EndRun()
         {
+            SlashAttack?.Clear();
             bool record = Score > bestAtRunStart;
             State = RunState.GameOver;
             ReleaseDuckInput();

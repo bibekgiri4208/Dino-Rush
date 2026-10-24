@@ -35,10 +35,15 @@ namespace DinoRush
         public int Page => page;
         public int PageCount => (RunnerTrailProgress.Count + PageSize - 1) / PageSize;
         public bool IsTrails { get; private set; }
+        [SerializeField] private RunnerSlashShop slashShop;
+        [SerializeField] private Button slashesTab;
+        public bool IsSlashes { get; private set; }
+        public bool IsEffects => IsTrails || IsSlashes;
 
         public void Initialize(RunnerShopProgress progress, RunnerShopPresentation presentation, RunnerAudio audio, Action refresh)
         {
             shop = progress; hatch = presentation; audioCues = audio; changed = refresh;
+            slashShop?.Initialize(refresh);
             if (!bound)
             {
                 bound = true;
@@ -46,6 +51,7 @@ namespace DinoRush
                 nextPage.onClick.AddListener(() => ChangePage(1));
                 dinosTab.onClick.AddListener(() => ShowTrails(false));
                 trailsTab.onClick.AddListener(() => ShowTrails(true));
+                if (slashesTab != null) slashesTab.onClick.AddListener(ShowSlashes);
                 unequip.onClick.AddListener(() =>
                 {
                     if (!CanInteract) return;
@@ -75,8 +81,16 @@ namespace DinoRush
             if (hatch != null && hatch.IsShowing) return;
             EventSystem.current?.SetSelectedGameObject(null);
             IsTrails = show;
+            IsSlashes = false;
             Refresh();
             ApplyLayout(portrait);
+        }
+        public void ShowSlashes()
+        {
+            if (!CanInteract) return;
+            IsTrails = false; IsSlashes = true;
+            EventSystem.current?.SetSelectedGameObject(null);
+            Refresh(); ApplyLayout(portrait);
         }
         private void PurchaseOrEquip(int index)
         {
@@ -99,8 +113,9 @@ namespace DinoRush
         {
             if (content == null) return;
             content.SetActive(IsTrails);
+            slashShop?.Show(IsSlashes);
             foreach (GameObject node in dinoContent)
-                if (node != null) node.SetActive(!IsTrails && node.name != "Mystery egg rules" && node.name != "Single adventure" &&
+                if (node != null) node.SetActive(!IsEffects && node.name != "Mystery egg rules" && node.name != "Single adventure" &&
                     (!portrait || node.name != "Selected status" && node.name != "Map selection"));
             wallet.text = "EGGS: " + (shop != null ? shop.Balance : Mathf.Max(0, PlayerPrefs.GetInt(RunnerShopProgress.WalletKey))).ToString("N0");
             RunnerTrailKind equipped = RunnerTrailProgress.Equipped;
@@ -122,15 +137,16 @@ namespace DinoRush
             unequip.GetComponentInChildren<Text>(true).text = equipped == RunnerTrailKind.None ? "NO TRAIL ACTIVE" : "REMOVE TRAIL";
             previousPage.interactable = page > 0;
             nextPage.interactable = page < PageCount - 1;
-            dinosTab.GetComponentInChildren<Text>(true).color = IsTrails ? Cream : Gold;
+            dinosTab.GetComponentInChildren<Text>(true).color = IsEffects ? Cream : Gold;
             trailsTab.GetComponentInChildren<Text>(true).color = IsTrails ? Gold : Cream;
+            if (slashesTab != null) slashesTab.GetComponentInChildren<Text>(true).color = IsSlashes ? Gold : Cream;
         }
         public void EnsureUi(Font font, Sprite panelSprite, Sprite buttonSprite, Sprite dinoPortrait)
         {
             // Record only the existing immediate children. No hierarchy names or Shop bindings change.
             var nodes = new List<GameObject>();
             foreach (Transform child in transform)
-                if (child.name != "Trails section" && child.name != "Dinos category" && child.name != "Trails category") nodes.Add(child.gameObject);
+                if (child.name != "Trails section" && child.name != "Dinos category" && child.name != "Trails category" && child.name != "Slashes section" && child.name != "Slashes category") nodes.Add(child.gameObject);
             // Retain intentionally hidden legacy labels and per-layout elements by restoring them from layout below.
             dinoContent = nodes.ToArray();
             dinosTab = Control("Dinos category", transform, "DINOS", font, buttonSprite);
@@ -177,6 +193,14 @@ namespace DinoRush
             ApplyLayout(false);
             Refresh();
         }
+        public void EnsureSlashUi(Font font, Sprite panel, Sprite button, RunnerSlashCatalog catalog)
+        {
+            slashShop = GetComponent<RunnerSlashShop>();
+            if (slashShop == null) slashShop = gameObject.AddComponent<RunnerSlashShop>();
+            slashShop.EnsureUi(font, panel, button, catalog);
+            slashesTab = Control("Slashes category", transform, "SLASHES", font, button);
+            ApplyLayout(portrait);
+        }
         public void ApplyLayout(bool isPortrait)
         {
             portrait = isPortrait;
@@ -185,6 +209,15 @@ namespace DinoRush
             Place(trailsTab.transform, portrait ? 146 : 174, portrait ? 566 : 280, portrait ? 268 : 328, portrait ? 76 : 52);
             TextSize(dinosTab.transform.Find("Label"), portrait ? 20 : 18);
             TextSize(trailsTab.transform.Find("Label"), portrait ? 20 : 18);
+            if (slashesTab != null)
+            {
+                Place(dinosTab.transform, portrait ? -194 : -294, portrait ? 566 : 280, portrait ? 180 : 278, portrait ? 76 : 52);
+                Place(trailsTab.transform, 0, portrait ? 566 : 280, portrait ? 180 : 278, portrait ? 76 : 52);
+                Place(slashesTab.transform, portrait ? 194 : 294, portrait ? 566 : 280, portrait ? 180 : 278, portrait ? 76 : 52);
+                TextSize(dinosTab.transform.Find("Label"), portrait ? 16 : 18);
+                TextSize(trailsTab.transform.Find("Label"), portrait ? 16 : 18);
+                TextSize(slashesTab.transform.Find("Label"), portrait ? 16 : 18);
+            }
             Position(wallet.transform, portrait ? -142 : -254, portrait ? 492 : 226, portrait ? 280 : 340, 32);
             Position(equippedLabel.transform, portrait ? 142 : 216, portrait ? 492 : 226, portrait ? 280 : 408, 32);
             equippedLabel.fontSize = portrait ? 14 : 12;
@@ -230,7 +263,8 @@ namespace DinoRush
                 portrait ? (IsTrails ? 276 : 560) : IsTrails ? 360 : 340, portrait ? (IsTrails ? 88 : 100) : 52);
             // Refresh may be called by dino selection/layout; the category always owns its visibility.
             Refresh();
-            if (!IsTrails)
+            slashShop?.ApplyLayout(portrait);
+            if (!IsEffects)
             {
                 transform.Find("Mystery egg rules")?.gameObject.SetActive(false);
                 transform.Find("Selected status")?.gameObject.SetActive(!portrait);

@@ -68,7 +68,7 @@ The purchase is committed **once before the animation**, so interruption or scen
 
 ### Trail effects Shop
 
-The Shop has separate **DINOS** and **TRAILS** categories. Trails have animated, free-to-view previews and cost **2,000 eggs each** from the same saved wallet as mystery eggs:
+The Shop has separate **DINOS**, **TRAILS**, and **SLASHES** categories. Trails have animated, free-to-view previews and cost **2,000 eggs each** from the same saved wallet as mystery eggs:
 
 - **Wind:** small pale wind blades that curl, rotate, and float behind the dino.
 - **Inferno:** warm fire embers that drift backward, rise, tumble, and fade.
@@ -78,6 +78,14 @@ The Shop has separate **DINOS** and **TRAILS** categories. Trails have animated,
 - **Cosmic:** bright stars that twinkle into violet stardust.
 
 The six effects are split into two pages of three cards. A balance/currently-equipped header sits above larger, color-accented preview cards. Each card shows its price once, or a clear **OWNED / IN USE** badge, with a separate **BUY TRAIL / EQUIP / EQUIPPED** action. **PREV / NEXT** and a persistent page counter have their own row below the cards; Back and Remove Trail are separate footer actions. Paging never spends eggs or changes equipment, and hidden-page previews stop simulating. Both pages have stacked phone cards with larger labels, buttons, and live hopping dino previews. Prices and saved ownership are unchanged.
+
+### Slash attacks
+
+**SLASHES** previews the supplied twelve-frame **Fire, Lightning, and Water** animations. Each style costs **5,000 eggs** to unlock permanently; unlocking selects the style but does not give free attacks. Unlocked styles can be swapped freely and all have the same power. **+1 Charge** costs **1,000 eggs**, with a shared magazine of at most **3 charges**. Paid, unused charges persist through menus, retries, and app restarts; only firing consumes one, saved immediately. No automatic refills or retry refunds occur.
+
+During a run, press **Enter / Numpad Enter**, or tap the **Slash indicator**, to fire forward at the dino's current height. Enter no longer jumps during gameplay; Space/Up/W and playfield taps still jump. A strike can shatter multiple ground obstacles or low canopies along its path, leaving texture-matched tumbling fragments. Distant or vertically missed targets remain dangerous. Attacks and debris freeze on pause and clear on retry, game over, or returning to the menu. The indicator shows remaining usable charges and the equipped style; at most **three attacks per match**, with no charge consumed for blocked or paused inputs. Shop controls cannot refill during a run.
+
+**Dino Rush → Add Slash Attacks and Shop** saves the new editable UI, attack component, HUD binding, and `Assets/RunnerSlashCatalog.asset`. The catalog references the original PNG textures via common-canvas sprite subassets, avoiding size jumps from differently trimmed source sprites without changing their importers. Debris is pooled (at most 90 pieces), generated fragments are disposed on scene teardown, and attack visuals do not consume gameplay RNG. `RunnerSlashProgress.cs` owns the separate saved unlock/style/charge keys; existing dino/trail progress is untouched.
 
 Buying permanently unlocks and immediately equips a trail. Owned trails can be equipped again for free; **No Trail** removes the effect without losing ownership. Only one trail is active at a time. Ownership and selection survive scene/app reloads; invalid/unowned selections safely show no trail. Insufficient funds and repeated purchase events cannot deduct eggs or grant an unowned cosmetic. Dino hatching and its existing prices/rewards are unchanged.
 

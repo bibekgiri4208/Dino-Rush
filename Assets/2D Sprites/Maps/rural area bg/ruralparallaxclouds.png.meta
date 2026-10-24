@@ -1,0 +1,2886 @@
+fileFormatVersion: 2
+guid: 2969d407746300341b8a5b135b9bf72c
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 8942991293557307055
+    second: ruralparallaxclouds_0
+  - first:
+      213: -5566492814865817119
+    second: ruralparallaxclouds_1
+  - first:
+      213: -5768893228824953137
+    second: ruralparallaxclouds_2
+  - first:
+      213: -8690635777097468966
+    second: ruralparallaxclouds_3
+  - first:
+      213: -9159468518021593504
+    second: ruralparallaxclouds_4
+  - first:
+      213: -6463606267518886325
+    second: ruralparallaxclouds_5
+  - first:
+      213: -8614539490384112234
+    second: ruralparallaxclouds_6
+  - first:
+      213: -5404970785098542905
+    second: ruralparallaxclouds_7
+  - first:
+      213: 4078516128848237550
+    second: ruralparallaxclouds_8
+  - first:
+      213: 7834406264465698794
+    second: ruralparallaxclouds_9
+  - first:
+      213: 4348279478976554743
+    second: ruralparallaxclouds_10
+  - first:
+      213: 5762319747737700714
+    second: ruralparallaxclouds_11
+  - first:
+      213: -8401713400019025617
+    second: ruralparallaxclouds_12
+  - first:
+      213: 4427922972771802374
+    second: ruralparallaxclouds_13
+  - first:
+      213: -1662507888896447845
+    second: ruralparallaxclouds_14
+  - first:
+      213: 4009171122943992652
+    second: ruralparallaxclouds_15
+  - first:
+      213: -7633497074526112613
+    second: ruralparallaxclouds_16
+  - first:
+      213: 6790534181857978317
+    second: ruralparallaxclouds_17
+  - first:
+      213: -8106755882088008750
+    second: ruralparallaxclouds_18
+  - first:
+      213: -1406857113816941262
+    second: ruralparallaxclouds_19
+  - first:
+      213: 6178278567618462963
+    second: ruralparallaxclouds_20
+  - first:
+      213: -4746478305027414192
+    second: ruralparallaxclouds_21
+  - first:
+      213: -2026712992190044370
+    second: ruralparallaxclouds_22
+  - first:
+      213: 2703466697996959880
+    second: ruralparallaxclouds_23
+  - first:
+      213: -4756068366744486352
+    second: ruralparallaxclouds_24
+  - first:
+      213: 1097600998355954316
+    second: ruralparallaxclouds_25
+  - first:
+      213: -7976573293760285904
+    second: ruralparallaxclouds_26
+  - first:
+      213: 1575098537023998287
+    second: ruralparallaxclouds_27
+  - first:
+      213: -6856690226847286028
+    second: ruralparallaxclouds_28
+  - first:
+      213: -573508178875086660
+    second: ruralparallaxclouds_29
+  - first:
+      213: -1706075143589786539
+    second: ruralparallaxclouds_30
+  - first:
+      213: 5826750835224889741
+    second: ruralparallaxclouds_31
+  - first:
+      213: 8232440858479672425
+    second: ruralparallaxclouds_32
+  - first:
+      213: -2093679228842265831
+    second: ruralparallaxclouds_33
+  - first:
+      213: 6264462034228625925
+    second: ruralparallaxclouds_34
+  - first:
+      213: -6440492515890479644
+    second: ruralparallaxclouds_35
+  - first:
+      213: 4609702398004881981
+    second: ruralparallaxclouds_36
+  - first:
+      213: 3237402958323753256
+    second: ruralparallaxclouds_37
+  - first:
+      213: -364069461280231100
+    second: ruralparallaxclouds_38
+  - first:
+      213: 2149557379599915923
+    second: ruralparallaxclouds_39
+  - first:
+      213: 4304600112583992521
+    second: ruralparallaxclouds_40
+  - first:
+      213: -7309484290799269575
+    second: ruralparallaxclouds_41
+  - first:
+      213: -7125462175743484355
+    second: ruralparallaxclouds_42
+  - first:
+      213: -4720036141709458904
+    second: ruralparallaxclouds_43
+  - first:
+      213: -1038193670165636990
+    second: ruralparallaxclouds_44
+  - first:
+      213: -1832628099864868859
+    second: ruralparallaxclouds_45
+  - first:
+      213: 1128252783203905311
+    second: ruralparallaxclouds_46
+  - first:
+      213: 6792612169937883863
+    second: ruralparallaxclouds_47
+  - first:
+      213: -1316256919479732141
+    second: ruralparallaxclouds_48
+  - first:
+      213: 2819032537984381732
+    second: ruralparallaxclouds_49
+  - first:
+      213: -3128275932955370802
+    second: ruralparallaxclouds_50
+  - first:
+      213: 2126936742121470400
+    second: ruralparallaxclouds_51
+  - first:
+      213: 7217308400265584822
+    second: ruralparallaxclouds_52
+  - first:
+      213: -5282735926269725523
+    second: ruralparallaxclouds_53
+  - first:
+      213: 901240341416759629
+    second: ruralparallaxclouds_54
+  - first:
+      213: 8287013500213366846
+    second: ruralparallaxclouds_55
+  - first:
+      213: -3074732795264195285
+    second: ruralparallaxclouds_56
+  - first:
+      213: -6862171452130223321
+    second: ruralparallaxclouds_57
+  - first:
+      213: 1705250950011090340
+    second: ruralparallaxclouds_58
+  - first:
+      213: -3214309876785220667
+    second: ruralparallaxclouds_59
+  - first:
+      213: -7932520062650662934
+    second: ruralparallaxclouds_60
+  - first:
+      213: 1020042385048870323
+    second: ruralparallaxclouds_61
+  - first:
+      213: -3637297401016644648
+    second: ruralparallaxclouds_62
+  - first:
+      213: 2714166599160635239
+    second: ruralparallaxclouds_63
+  - first:
+      213: -6919001355666360524
+    second: ruralparallaxclouds_64
+  - first:
+      213: -7027511409581438883
+    second: ruralparallaxclouds_65
+  - first:
+      213: -5057743246664504902
+    second: ruralparallaxclouds_66
+  - first:
+      213: -1945544307242210420
+    second: ruralparallaxclouds_67
+  - first:
+      213: 2861877351773643824
+    second: ruralparallaxclouds_68
+  - first:
+      213: -8422029969528683861
+    second: ruralparallaxclouds_69
+  - first:
+      213: 5402712596321899104
+    second: ruralparallaxclouds_70
+  - first:
+      213: -5503736635200248344
+    second: ruralparallaxclouds_71
+  - first:
+      213: 227172006119908858
+    second: ruralparallaxclouds_72
+  - first:
+      213: -5729544645650681793
+    second: ruralparallaxclouds_73
+  - first:
+      213: -2252774882855213219
+    second: ruralparallaxclouds_74
+  - first:
+      213: -7320526295144333461
+    second: ruralparallaxclouds_75
+  - first:
+      213: -4486661765899985287
+    second: ruralparallaxclouds_76
+  - first:
+      213: 1888433835716840761
+    second: ruralparallaxclouds_77
+  - first:
+      213: -1877307013292198927
+    second: ruralparallaxclouds_78
+  - first:
+      213: -8217716000658292663
+    second: ruralparallaxclouds_79
+  - first:
+      213: -3569953121276027325
+    second: ruralparallaxclouds_80
+  - first:
+      213: -877651289911324448
+    second: ruralparallaxclouds_81
+  - first:
+      213: -5040272301721525030
+    second: ruralparallaxclouds_82
+  - first:
+      213: -2895157681098931862
+    second: ruralparallaxclouds_83
+  - first:
+      213: -4511696501162122956
+    second: ruralparallaxclouds_84
+  - first:
+      213: -6091333337230354040
+    second: ruralparallaxclouds_85
+  - first:
+      213: -1313771119427872760
+    second: ruralparallaxclouds_86
+  - first:
+      213: -9025295801760936275
+    second: ruralparallaxclouds_87
+  - first:
+      213: -7512113191279218836
+    second: ruralparallaxclouds_88
+  - first:
+      213: -6725420078386698126
+    second: ruralparallaxclouds_89
+  - first:
+      213: -8379542643751993149
+    second: ruralparallaxclouds_90
+  - first:
+      213: -898966013924024522
+    second: ruralparallaxclouds_91
+  - first:
+      213: -9053279459946822404
+    second: ruralparallaxclouds_92
+  - first:
+      213: -1218877079330422991
+    second: ruralparallaxclouds_93
+  - first:
+      213: -4483863884609467124
+    second: ruralparallaxclouds_94
+  - first:
+      213: -5021184363217271847
+    second: ruralparallaxclouds_95
+  - first:
+      213: 199781321349458770
+    second: ruralparallaxclouds_96
+  - first:
+      213: 3736582561662829815
+    second: ruralparallaxclouds_97
+  - first:
+      213: -3569683672420825584
+    second: ruralparallaxclouds_98
+  - first:
+      213: -7241380960489390068
+    second: ruralparallaxclouds_99
+  - first:
+      213: 939959099650595258
+    second: ruralparallaxclouds_100
+  - first:
+      213: -7191321415995176111
+    second: ruralparallaxclouds_101
+  - first:
+      213: -4814531055827122498
+    second: ruralparallaxclouds_102
+  - first:
+      213: 5611428285387446471
+    second: ruralparallaxclouds_103
+  - first:
+      213: -1180461119626108288
+    second: ruralparallaxclouds_104
+  - first:
+      213: -989674532526796648
+    second: ruralparallaxclouds_105
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: ruralparallaxclouds_0
+      rect:
+        serializedVersion: 2
+        x: 173
+        y: 1135
+        width: 96
+        height: 65
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fa6f4e11333eb1c70800000000000000
+      internalID: 8942991293557307055
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_1
+      rect:
+        serializedVersion: 2
+        x: 255
+        y: 1161
+        width: 22
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1e1a8250748dfb2b0800000000000000
+      internalID: -5566492814865817119
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_2
+      rect:
+        serializedVersion: 2
+        x: 271
+        y: 1175
+        width: 32
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fce7bbc5c26c0ffa0800000000000000
+      internalID: -5768893228824953137
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_3
+      rect:
+        serializedVersion: 2
+        x: 321
+        y: 1140
+        width: 111
+        height: 42
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ad3fdc14ec8a46780800000000000000
+      internalID: -8690635777097468966
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_4
+      rect:
+        serializedVersion: 2
+        x: 1777
+        y: 1140
+        width: 48
+        height: 35
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 06603fb69e703e080800000000000000
+      internalID: -9159468518021593504
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_5
+      rect:
+        serializedVersion: 2
+        x: 1832
+        y: 1136
+        width: 65
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b4e5c886858ac46a0800000000000000
+      internalID: -6463606267518886325
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_6
+      rect:
+        serializedVersion: 2
+        x: 2070
+        y: 1135
+        width: 96
+        height: 65
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 695941ca9f1037880800000000000000
+      internalID: -8614539490384112234
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_7
+      rect:
+        serializedVersion: 2
+        x: 2152
+        y: 1161
+        width: 22
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7c056dc25bfadf4b0800000000000000
+      internalID: -5404970785098542905
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_8
+      rect:
+        serializedVersion: 2
+        x: 2168
+        y: 1175
+        width: 32
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ee353be6fccc99830800000000000000
+      internalID: 4078516128848237550
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_9
+      rect:
+        serializedVersion: 2
+        x: 2218
+        y: 1140
+        width: 111
+        height: 42
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: aefa2933df669bc60800000000000000
+      internalID: 7834406264465698794
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_10
+      rect:
+        serializedVersion: 2
+        x: 3674
+        y: 1140
+        width: 48
+        height: 35
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7f6a480e521385c30800000000000000
+      internalID: 4348279478976554743
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_11
+      rect:
+        serializedVersion: 2
+        x: 3729
+        y: 1136
+        width: 65
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a69cf1ec74fd7ff40800000000000000
+      internalID: 5762319747737700714
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_12
+      rect:
+        serializedVersion: 2
+        x: 1
+        y: 1107
+        width: 49
+        height: 55
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f210a374d2e176b80800000000000000
+      internalID: -8401713400019025617
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_13
+      rect:
+        serializedVersion: 2
+        x: 39
+        y: 1002
+        width: 180
+        height: 172
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 60ddadccb74237d30800000000000000
+      internalID: 4427922972771802374
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_14
+      rect:
+        serializedVersion: 2
+        x: 119
+        y: 872
+        width: 420
+        height: 287
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b9aea0622e59de8e0800000000000000
+      internalID: -1662507888896447845
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_15
+      rect:
+        serializedVersion: 2
+        x: 533
+        y: 932
+        width: 170
+        height: 208
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c43a4d215ef63a730800000000000000
+      internalID: 4009171122943992652
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_16
+      rect:
+        serializedVersion: 2
+        x: 1191
+        y: 1121
+        width: 30
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b9433eecade501690800000000000000
+      internalID: -7633497074526112613
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_17
+      rect:
+        serializedVersion: 2
+        x: 1544
+        y: 855
+        width: 335
+        height: 277
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dc7eac05cd2dc3e50800000000000000
+      internalID: 6790534181857978317
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_18
+      rect:
+        serializedVersion: 2
+        x: 1660
+        y: 1111
+        width: 49
+        height: 51
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2d3f5570a740f7f80800000000000000
+      internalID: -8106755882088008750
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_19
+      rect:
+        serializedVersion: 2
+        x: 1898
+        y: 1107
+        width: 49
+        height: 55
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 23db539a8e6d97ce0800000000000000
+      internalID: -1406857113816941262
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_20
+      rect:
+        serializedVersion: 2
+        x: 1936
+        y: 1002
+        width: 180
+        height: 172
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3f4ce429f97adb550800000000000000
+      internalID: 6178278567618462963
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_21
+      rect:
+        serializedVersion: 2
+        x: 2016
+        y: 872
+        width: 420
+        height: 287
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0572eb6212f112eb0800000000000000
+      internalID: -4746478305027414192
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_22
+      rect:
+        serializedVersion: 2
+        x: 2430
+        y: 932
+        width: 170
+        height: 208
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e27e7d6854bafd3e0800000000000000
+      internalID: -2026712992190044370
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_23
+      rect:
+        serializedVersion: 2
+        x: 3088
+        y: 1121
+        width: 30
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 880053463a4a48520800000000000000
+      internalID: 2703466697996959880
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_24
+      rect:
+        serializedVersion: 2
+        x: 3441
+        y: 855
+        width: 335
+        height: 277
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 03ef8b8e40d0ffdb0800000000000000
+      internalID: -4756068366744486352
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_25
+      rect:
+        serializedVersion: 2
+        x: 3557
+        y: 1111
+        width: 49
+        height: 51
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c8aee1cea467b3f00800000000000000
+      internalID: 1097600998355954316
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_26
+      rect:
+        serializedVersion: 2
+        x: 1293
+        y: 1024
+        width: 178
+        height: 73
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 033fc8cd9d48d4190800000000000000
+      internalID: -7976573293760285904
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_27
+      rect:
+        serializedVersion: 2
+        x: 1541
+        y: 1094
+        width: 25
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f498d8136cfdbd510800000000000000
+      internalID: 1575098537023998287
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_28
+      rect:
+        serializedVersion: 2
+        x: 3190
+        y: 1024
+        width: 178
+        height: 73
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4fcffd5219428d0a0800000000000000
+      internalID: -6856690226847286028
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_29
+      rect:
+        serializedVersion: 2
+        x: 3438
+        y: 1094
+        width: 25
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cb88e52995d7a08f0800000000000000
+      internalID: -573508178875086660
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_30
+      rect:
+        serializedVersion: 2
+        x: 2
+        y: 1065
+        width: 38
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 55c053232bdc258e0800000000000000
+      internalID: -1706075143589786539
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_31
+      rect:
+        serializedVersion: 2
+        x: 698
+        y: 1057
+        width: 33
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d894a406307ccd050800000000000000
+      internalID: 5826750835224889741
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_32
+      rect:
+        serializedVersion: 2
+        x: 740
+        y: 1062
+        width: 23
+        height: 26
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 96cb71ce7518f3270800000000000000
+      internalID: 8232440858479672425
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_33
+      rect:
+        serializedVersion: 2
+        x: 960
+        y: 1055
+        width: 36
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9133e3b85d1c1f2e0800000000000000
+      internalID: -2093679228842265831
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_34
+      rect:
+        serializedVersion: 2
+        x: 995
+        y: 1060
+        width: 21
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5024e139707dfe650800000000000000
+      internalID: 6264462034228625925
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_35
+      rect:
+        serializedVersion: 2
+        x: 1284
+        y: 1073
+        width: 21
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4ed39c31e26ce96a0800000000000000
+      internalID: -6440492515890479644
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_36
+      rect:
+        serializedVersion: 2
+        x: 1461
+        y: 1055
+        width: 46
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d3ae85168e3f8ff30800000000000000
+      internalID: 4609702398004881981
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_37
+      rect:
+        serializedVersion: 2
+        x: 1499
+        y: 1075
+        width: 21
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 821afad86d09dec20800000000000000
+      internalID: 3237402958323753256
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_38
+      rect:
+        serializedVersion: 2
+        x: 1528
+        y: 1070
+        width: 35
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 441f2def0c092faf0800000000000000
+      internalID: -364069461280231100
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_39
+      rect:
+        serializedVersion: 2
+        x: 1899
+        y: 1065
+        width: 38
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 39b5f534c03c4dd10800000000000000
+      internalID: 2149557379599915923
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_40
+      rect:
+        serializedVersion: 2
+        x: 2595
+        y: 1057
+        width: 33
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9c4eca2eef20dbb30800000000000000
+      internalID: 4304600112583992521
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_41
+      rect:
+        serializedVersion: 2
+        x: 2637
+        y: 1062
+        width: 23
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9398c9bc3ce7f8a90800000000000000
+      internalID: -7309484290799269575
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_42
+      rect:
+        serializedVersion: 2
+        x: 2857
+        y: 1055
+        width: 36
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d3ed35a47e54d1d90800000000000000
+      internalID: -7125462175743484355
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_43
+      rect:
+        serializedVersion: 2
+        x: 2892
+        y: 1060
+        width: 21
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 822076e03201f7eb0800000000000000
+      internalID: -4720036141709458904
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_44
+      rect:
+        serializedVersion: 2
+        x: 3181
+        y: 1073
+        width: 21
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 288d7b98b589791f0800000000000000
+      internalID: -1038193670165636990
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_45
+      rect:
+        serializedVersion: 2
+        x: 3358
+        y: 1055
+        width: 46
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 508c72ee3723196e0800000000000000
+      internalID: -1832628099864868859
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_46
+      rect:
+        serializedVersion: 2
+        x: 3396
+        y: 1075
+        width: 21
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f1fe6b7bdeb58af00800000000000000
+      internalID: 1128252783203905311
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_47
+      rect:
+        serializedVersion: 2
+        x: 3425
+        y: 1070
+        width: 35
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7d2942e97c4344e50800000000000000
+      internalID: 6792612169937883863
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_48
+      rect:
+        serializedVersion: 2
+        x: 709
+        y: 1028
+        width: 10
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 358b2493e47bbbde0800000000000000
+      internalID: -1316256919479732141
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_49
+      rect:
+        serializedVersion: 2
+        x: 792
+        y: 1010
+        width: 45
+        height: 53
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 423b3dc48273f1720800000000000000
+      internalID: 2819032537984381732
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_50
+      rect:
+        serializedVersion: 2
+        x: 1074
+        y: 1001
+        width: 60
+        height: 42
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: eca9ac00d912694d0800000000000000
+      internalID: -3128275932955370802
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_51
+      rect:
+        serializedVersion: 2
+        x: 1264
+        y: 1030
+        width: 26
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0c970eda2b5648d10800000000000000
+      internalID: 2126936742121470400
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_52
+      rect:
+        serializedVersion: 2
+        x: 1433
+        y: 996
+        width: 71
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6b0e54840c7092460800000000000000
+      internalID: 7217308400265584822
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_53
+      rect:
+        serializedVersion: 2
+        x: 2606
+        y: 1028
+        width: 10
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: da4bf780aa3ffa6b0800000000000000
+      internalID: -5282735926269725523
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_54
+      rect:
+        serializedVersion: 2
+        x: 2689
+        y: 1010
+        width: 45
+        height: 53
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d41d567c059d18c00800000000000000
+      internalID: 901240341416759629
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_55
+      rect:
+        serializedVersion: 2
+        x: 2971
+        y: 1001
+        width: 60
+        height: 42
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e3095193fd2610370800000000000000
+      internalID: 8287013500213366846
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_56
+      rect:
+        serializedVersion: 2
+        x: 3161
+        y: 1030
+        width: 26
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b25a80730da5455d0800000000000000
+      internalID: -3074732795264195285
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_57
+      rect:
+        serializedVersion: 2
+        x: 3330
+        y: 996
+        width: 71
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 72b93ffeb6ba4c0a0800000000000000
+      internalID: -6862171452130223321
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_58
+      rect:
+        serializedVersion: 2
+        x: 839
+        y: 984
+        width: 59
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4a5fe4844b44aa710800000000000000
+      internalID: 1705250950011090340
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_59
+      rect:
+        serializedVersion: 2
+        x: 1034
+        y: 990
+        width: 31
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5c3ff2c723a7463d0800000000000000
+      internalID: -3214309876785220667
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_60
+      rect:
+        serializedVersion: 2
+        x: 1226
+        y: 979
+        width: 108
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: aef3c0408070ae190800000000000000
+      internalID: -7932520062650662934
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_61
+      rect:
+        serializedVersion: 2
+        x: 1331
+        y: 997
+        width: 14
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3bd1ea0152be72e00800000000000000
+      internalID: 1020042385048870323
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_62
+      rect:
+        serializedVersion: 2
+        x: 1342
+        y: 988
+        width: 53
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8db83f5f849b58dc0800000000000000
+      internalID: -3637297401016644648
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_63
+      rect:
+        serializedVersion: 2
+        x: 1390
+        y: 1005
+        width: 45
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 76f13344428aaa520800000000000000
+      internalID: 2714166599160635239
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_64
+      rect:
+        serializedVersion: 2
+        x: 2736
+        y: 984
+        width: 59
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4377f0bece4caff90800000000000000
+      internalID: -6919001355666360524
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_65
+      rect:
+        serializedVersion: 2
+        x: 2931
+        y: 990
+        width: 31
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d58c4e83b93497e90800000000000000
+      internalID: -7027511409581438883
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_66
+      rect:
+        serializedVersion: 2
+        x: 3123
+        y: 979
+        width: 108
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ab96e6170594fc9b0800000000000000
+      internalID: -5057743246664504902
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_67
+      rect:
+        serializedVersion: 2
+        x: 3228
+        y: 997
+        width: 14
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c8b6b00b2c90005e0800000000000000
+      internalID: -1945544307242210420
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_68
+      rect:
+        serializedVersion: 2
+        x: 3239
+        y: 988
+        width: 53
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 034243fd94e67b720800000000000000
+      internalID: 2861877351773643824
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_69
+      rect:
+        serializedVersion: 2
+        x: 3287
+        y: 1005
+        width: 45
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ba28c825d50fe1b80800000000000000
+      internalID: -8422029969528683861
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_70
+      rect:
+        serializedVersion: 2
+        x: 529
+        y: 974
+        width: 22
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0629b474b7a4afa40800000000000000
+      internalID: 5402712596321899104
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_71
+      rect:
+        serializedVersion: 2
+        x: 888
+        y: 928
+        width: 91
+        height: 55
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8e5e599b0bcce93b0800000000000000
+      internalID: -5503736635200248344
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_72
+      rect:
+        serializedVersion: 2
+        x: 1170
+        y: 973
+        width: 21
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: af5a0b76cb3172300800000000000000
+      internalID: 227172006119908858
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_73
+      rect:
+        serializedVersion: 2
+        x: 1197
+        y: 981
+        width: 26
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f30ff3f40819c70b0800000000000000
+      internalID: -5729544645650681793
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_74
+      rect:
+        serializedVersion: 2
+        x: 1218
+        y: 971
+        width: 19
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d572e740e298cb0e0800000000000000
+      internalID: -2252774882855213219
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_75
+      rect:
+        serializedVersion: 2
+        x: 1243
+        y: 975
+        width: 20
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b6ff301de14486a90800000000000000
+      internalID: -7320526295144333461
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_76
+      rect:
+        serializedVersion: 2
+        x: 2426
+        y: 974
+        width: 22
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 97e543035ec2cb1c0800000000000000
+      internalID: -4486661765899985287
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_77
+      rect:
+        serializedVersion: 2
+        x: 2785
+        y: 928
+        width: 91
+        height: 55
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 93d0bb77190153a10800000000000000
+      internalID: 1888433835716840761
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_78
+      rect:
+        serializedVersion: 2
+        x: 3067
+        y: 973
+        width: 21
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1f37e52c73772f5e0800000000000000
+      internalID: -1877307013292198927
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_79
+      rect:
+        serializedVersion: 2
+        x: 3094
+        y: 981
+        width: 26
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 94008b336dec4fd80800000000000000
+      internalID: -8217716000658292663
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_80
+      rect:
+        serializedVersion: 2
+        x: 3115
+        y: 971
+        width: 19
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 34e9b85fc8af47ec0800000000000000
+      internalID: -3569953121276027325
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_81
+      rect:
+        serializedVersion: 2
+        x: 3140
+        y: 975
+        width: 20
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0e01c244dc4f1d3f0800000000000000
+      internalID: -877651289911324448
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_82
+      rect:
+        serializedVersion: 2
+        x: 690
+        y: 954
+        width: 26
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ad4e5accb0b5d0ab0800000000000000
+      internalID: -5040272301721525030
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_83
+      rect:
+        serializedVersion: 2
+        x: 724
+        y: 959
+        width: 13
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a61ca51ad6552d7d0800000000000000
+      internalID: -2895157681098931862
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_84
+      rect:
+        serializedVersion: 2
+        x: 752
+        y: 950
+        width: 22
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 431ebd9afeb3361c0800000000000000
+      internalID: -4511696501162122956
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_85
+      rect:
+        serializedVersion: 2
+        x: 812
+        y: 842
+        width: 491
+        height: 131
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 889d3e16a9c377ba0800000000000000
+      internalID: -6091333337230354040
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_86
+      rect:
+        serializedVersion: 2
+        x: 833
+        y: 948
+        width: 60
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8089556a02c84cde0800000000000000
+      internalID: -1313771119427872760
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_87
+      rect:
+        serializedVersion: 2
+        x: 1456
+        y: 953
+        width: 33
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dae073f4945bfb280800000000000000
+      internalID: -9025295801760936275
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_88
+      rect:
+        serializedVersion: 2
+        x: 2587
+        y: 954
+        width: 26
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c6fa6497adc9fb790800000000000000
+      internalID: -7512113191279218836
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_89
+      rect:
+        serializedVersion: 2
+        x: 2621
+        y: 959
+        width: 13
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2782b7e42128aa2a0800000000000000
+      internalID: -6725420078386698126
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_90
+      rect:
+        serializedVersion: 2
+        x: 2649
+        y: 950
+        width: 22
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3c0cceabc52e5bb80800000000000000
+      internalID: -8379542643751993149
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_91
+      rect:
+        serializedVersion: 2
+        x: 2709
+        y: 842
+        width: 491
+        height: 131
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 63fd8ea5c2b3683f0800000000000000
+      internalID: -898966013924024522
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_92
+      rect:
+        serializedVersion: 2
+        x: 2730
+        y: 948
+        width: 60
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cf487892c4a4c5280800000000000000
+      internalID: -9053279459946822404
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_93
+      rect:
+        serializedVersion: 2
+        x: 3353
+        y: 953
+        width: 33
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 13ff4a511cda51fe0800000000000000
+      internalID: -1218877079330422991
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_94
+      rect:
+        serializedVersion: 2
+        x: 582
+        y: 888
+        width: 90
+        height: 53
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c0d46a0bd8d16c1c0800000000000000
+      internalID: -4483863884609467124
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_95
+      rect:
+        serializedVersion: 2
+        x: 1436
+        y: 940
+        width: 24
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9d340becc6b215ab0800000000000000
+      internalID: -5021184363217271847
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_96
+      rect:
+        serializedVersion: 2
+        x: 1827
+        y: 928
+        width: 57
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 25beac3ad04c5c200800000000000000
+      internalID: 199781321349458770
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_97
+      rect:
+        serializedVersion: 2
+        x: 2479
+        y: 888
+        width: 90
+        height: 53
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7f405d5ea020bd330800000000000000
+      internalID: 3736582561662829815
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_98
+      rect:
+        serializedVersion: 2
+        x: 3333
+        y: 940
+        width: 24
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 01648d8ec9fe57ec0800000000000000
+      internalID: -3569683672420825584
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_99
+      rect:
+        serializedVersion: 2
+        x: 3724
+        y: 928
+        width: 57
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c00c0c60262718b90800000000000000
+      internalID: -7241380960489390068
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_100
+      rect:
+        serializedVersion: 2
+        x: 543
+        y: 915
+        width: 42
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ab9d11e22d76b0d00800000000000000
+      internalID: 939959099650595258
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_101
+      rect:
+        serializedVersion: 2
+        x: 2440
+        y: 915
+        width: 42
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 15bc2fdf54b433c90800000000000000
+      internalID: -7191321415995176111
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_102
+      rect:
+        serializedVersion: 2
+        x: 317
+        y: 861
+        width: 19
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: eb6865163895f2db0800000000000000
+      internalID: -4814531055827122498
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_103
+      rect:
+        serializedVersion: 2
+        x: 508
+        y: 866
+        width: 126
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7c819118b4ccfdd40800000000000000
+      internalID: 5611428285387446471
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_104
+      rect:
+        serializedVersion: 2
+        x: 2214
+        y: 861
+        width: 19
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 082a685bdd82e9fe0800000000000000
+      internalID: -1180461119626108288
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ruralparallaxclouds_105
+      rect:
+        serializedVersion: 2
+        x: 2405
+        y: 866
+        width: 126
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8905d759148f342f0800000000000000
+      internalID: -989674532526796648
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      ruralparallaxclouds_0: 8942991293557307055
+      ruralparallaxclouds_1: -5566492814865817119
+      ruralparallaxclouds_10: 4348279478976554743
+      ruralparallaxclouds_100: 939959099650595258
+      ruralparallaxclouds_101: -7191321415995176111
+      ruralparallaxclouds_102: -4814531055827122498
+      ruralparallaxclouds_103: 5611428285387446471
+      ruralparallaxclouds_104: -1180461119626108288
+      ruralparallaxclouds_105: -989674532526796648
+      ruralparallaxclouds_11: 5762319747737700714
+      ruralparallaxclouds_12: -8401713400019025617
+      ruralparallaxclouds_13: 4427922972771802374
+      ruralparallaxclouds_14: -1662507888896447845
+      ruralparallaxclouds_15: 4009171122943992652
+      ruralparallaxclouds_16: -7633497074526112613
+      ruralparallaxclouds_17: 6790534181857978317
+      ruralparallaxclouds_18: -8106755882088008750
+      ruralparallaxclouds_19: -1406857113816941262
+      ruralparallaxclouds_2: -5768893228824953137
+      ruralparallaxclouds_20: 6178278567618462963
+      ruralparallaxclouds_21: -4746478305027414192
+      ruralparallaxclouds_22: -2026712992190044370
+      ruralparallaxclouds_23: 2703466697996959880
+      ruralparallaxclouds_24: -4756068366744486352
+      ruralparallaxclouds_25: 1097600998355954316
+      ruralparallaxclouds_26: -7976573293760285904
+      ruralparallaxclouds_27: 1575098537023998287
+      ruralparallaxclouds_28: -6856690226847286028
+      ruralparallaxclouds_29: -573508178875086660
+      ruralparallaxclouds_3: -8690635777097468966
+      ruralparallaxclouds_30: -1706075143589786539
+      ruralparallaxclouds_31: 5826750835224889741
+      ruralparallaxclouds_32: 8232440858479672425
+      ruralparallaxclouds_33: -2093679228842265831
+      ruralparallaxclouds_34: 6264462034228625925
+      ruralparallaxclouds_35: -6440492515890479644
+      ruralparallaxclouds_36: 4609702398004881981
+      ruralparallaxclouds_37: 3237402958323753256
+      ruralparallaxclouds_38: -364069461280231100
+      ruralparallaxclouds_39: 2149557379599915923
+      ruralparallaxclouds_4: -9159468518021593504
+      ruralparallaxclouds_40: 4304600112583992521
+      ruralparallaxclouds_41: -7309484290799269575
+      ruralparallaxclouds_42: -7125462175743484355
+      ruralparallaxclouds_43: -4720036141709458904
+      ruralparallaxclouds_44: -1038193670165636990
+      ruralparallaxclouds_45: -1832628099864868859
+      ruralparallaxclouds_46: 1128252783203905311
+      ruralparallaxclouds_47: 6792612169937883863
+      ruralparallaxclouds_48: -1316256919479732141
+      ruralparallaxclouds_49: 2819032537984381732
+      ruralparallaxclouds_5: -6463606267518886325
+      ruralparallaxclouds_50: -3128275932955370802
+      ruralparallaxclouds_51: 2126936742121470400
+      ruralparallaxclouds_52: 7217308400265584822
+      ruralparallaxclouds_53: -5282735926269725523
+      ruralparallaxclouds_54: 901240341416759629
+      ruralparallaxclouds_55: 8287013500213366846
+      ruralparallaxclouds_56: -3074732795264195285
+      ruralparallaxclouds_57: -6862171452130223321
+      ruralparallaxclouds_58: 1705250950011090340
+      ruralparallaxclouds_59: -3214309876785220667
+      ruralparallaxclouds_6: -8614539490384112234
+      ruralparallaxclouds_60: -7932520062650662934
+      ruralparallaxclouds_61: 1020042385048870323
+      ruralparallaxclouds_62: -3637297401016644648
+      ruralparallaxclouds_63: 2714166599160635239
+      ruralparallaxclouds_64: -6919001355666360524
+      ruralparallaxclouds_65: -7027511409581438883
+      ruralparallaxclouds_66: -5057743246664504902
+      ruralparallaxclouds_67: -1945544307242210420
+      ruralparallaxclouds_68: 2861877351773643824
+      ruralparallaxclouds_69: -8422029969528683861
+      ruralparallaxclouds_7: -5404970785098542905
+      ruralparallaxclouds_70: 5402712596321899104
+      ruralparallaxclouds_71: -5503736635200248344
+      ruralparallaxclouds_72: 227172006119908858
+      ruralparallaxclouds_73: -5729544645650681793
+      ruralparallaxclouds_74: -2252774882855213219
+      ruralparallaxclouds_75: -7320526295144333461
+      ruralparallaxclouds_76: -4486661765899985287
+      ruralparallaxclouds_77: 1888433835716840761
+      ruralparallaxclouds_78: -1877307013292198927
+      ruralparallaxclouds_79: -8217716000658292663
+      ruralparallaxclouds_8: 4078516128848237550
+      ruralparallaxclouds_80: -3569953121276027325
+      ruralparallaxclouds_81: -877651289911324448
+      ruralparallaxclouds_82: -5040272301721525030
+      ruralparallaxclouds_83: -2895157681098931862
+      ruralparallaxclouds_84: -4511696501162122956
+      ruralparallaxclouds_85: -6091333337230354040
+      ruralparallaxclouds_86: -1313771119427872760
+      ruralparallaxclouds_87: -9025295801760936275
+      ruralparallaxclouds_88: -7512113191279218836
+      ruralparallaxclouds_89: -6725420078386698126
+      ruralparallaxclouds_9: 7834406264465698794
+      ruralparallaxclouds_90: -8379542643751993149
+      ruralparallaxclouds_91: -898966013924024522
+      ruralparallaxclouds_92: -9053279459946822404
+      ruralparallaxclouds_93: -1218877079330422991
+      ruralparallaxclouds_94: -4483863884609467124
+      ruralparallaxclouds_95: -5021184363217271847
+      ruralparallaxclouds_96: 199781321349458770
+      ruralparallaxclouds_97: 3736582561662829815
+      ruralparallaxclouds_98: -3569683672420825584
+      ruralparallaxclouds_99: -7241380960489390068
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
