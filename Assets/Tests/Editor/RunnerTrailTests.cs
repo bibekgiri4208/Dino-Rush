@@ -89,6 +89,7 @@ namespace DinoRush.Tests
                 foreach (var root in scene.GetRootGameObjects())
                     if (root.GetComponentInChildren<RunnerTrailShop>(true) != null) shop = root.GetComponentInChildren<RunnerTrailShop>(true);
                 Assert.That(shop, Is.Not.Null);
+                Assert.That(shop.transform.Find("Single adventure").gameObject.activeSelf, Is.False, "The retired Shop slogan must remain hidden.");
                 Assert.That(shop.GetComponentsInChildren<RunnerTrailPreview>(true).Length, Is.EqualTo(9));
                 Assert.That(shop.transform.Find("Trails section").gameObject.activeSelf, Is.False);
                 for (int i = 0; i < RunnerTrailProgress.Count; i++)
@@ -110,6 +111,8 @@ namespace DinoRush.Tests
                 Assert.That(shop.transform.Find("Trails category").GetComponent<Button>(), Is.Not.Null);
                 Assert.That(shop.PageCount, Is.EqualTo(2));
                 Assert.That(shop.transform.Find("Trails section/Next trails page").GetComponent<Button>(), Is.Not.Null);
+                Assert.That(shop.transform.Find("Trails section/Trail page indicator").GetComponent<Text>(), Is.Not.Null);
+                Assert.That(shop.transform.Find("Trails section/Equipped trail summary").GetComponent<Text>(), Is.Not.Null);
             }
             finally { EditorSceneManager.CloseScene(scene, true); }
         }

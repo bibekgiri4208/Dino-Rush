@@ -86,7 +86,7 @@ namespace DinoRush.Editor
             Label("Dino selection", customPage, "BLUE DINO", new Vector2(57, 57), new Vector2(260, 30), 16, Cream);
             Label("Map selection", customPage, "MAP: FOREST", new Vector2(57, 20), new Vector2(270, 28), 14, Sage);
             Label("Selected status", customPage, "SELECTED", new Vector2(57, -17), new Vector2(260, 26), 12, PixelMenuArt.Hex(0xd1df8e));
-            Label("Single adventure", customPage, "ONE DINO. ONE FOREST.\nENDLESS ADVENTURES.", new Vector2(0, -72), new Vector2(445, 42), 11, Sage);
+            Label("Single adventure", customPage, "ONE DINO. ONE FOREST.\nENDLESS ADVENTURES.", new Vector2(0, -72), new Vector2(445, 42), 11, Sage).gameObject.SetActive(false);
 
             RectTransform optionsPage = Rect("Options page", card.transform, Vector2.zero, new Vector2(480, 220));
             Button optionsSound = MenuButton("Toggle sound effects", optionsPage, new Vector2(0, 45), "SFX: ON", "Speaker", false, new Vector2(330, 64));

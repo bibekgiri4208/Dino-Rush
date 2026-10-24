@@ -18,7 +18,7 @@ namespace DinoRush
         public int ActiveCount => particles != null ? particles.ActiveCount : 0;
         public override Texture mainTexture => particles != null ? particles.Texture : Texture2D.whiteTexture;
         public static float WorldScale(Vector2 size) => Mathf.Min(size.x / 4.8f, size.y / 3.2f);
-        public static Vector2 FeetOffset(Vector2 size) => new Vector2(size.x * 0.23f, -size.y * 0.39f);
+        public static Vector2 FeetOffset(Vector2 size) => new Vector2(size.x * 0.23f, -size.y * 0.27f);
         public void SetDinoLayout(RectTransform image, Vector2 rest)
         {
             dino = image; dinoRest = rest;

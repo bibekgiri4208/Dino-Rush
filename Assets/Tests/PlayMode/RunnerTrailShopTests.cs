@@ -65,6 +65,7 @@ namespace DinoRush.Tests
             Click("Trails category");
             yield return null;
             Assert.That(menu.TrailShop.IsTrails, Is.True);
+            Assert.That(menu.TrailShop.transform.Find("Single adventure").gameObject.activeSelf, Is.False);
         }
         [UnityTest]
         public IEnumerator ShopPreviewsAreFreeBuyingEquipsOnceAndOwnedTrailsCanBeSwappedOrRemoved()
@@ -73,6 +74,9 @@ namespace DinoRush.Tests
             yield return Open();
             Assert.That(GameObject.Find("Buy mystery egg"), Is.Null);
             Assert.That(game.Shop.Balance, Is.EqualTo(6500));
+            Assert.That(GameObject.Find("Equipped trail summary").GetComponent<Text>().text, Is.EqualTo("USING: NONE"));
+            Assert.That(GameObject.Find("Trail page indicator").GetComponent<Text>().text, Is.EqualTo("PAGE 1 / 2"));
+            Assert.That(GameObject.Find("Trail card 1/Trail ownership").GetComponent<Text>().text, Is.EqualTo("2,000 EGGS"));
             yield return new WaitForSecondsRealtime(0.2f);
             foreach (RunnerTrailPreview preview in menu.TrailShop.GetComponentsInChildren<RunnerTrailPreview>())
             {
@@ -92,6 +96,7 @@ namespace DinoRush.Tests
                 Assert.That(game.Shop.Balance, Is.EqualTo(6500 - i * 2000));
                 Assert.That(RunnerTrailProgress.Equipped, Is.EqualTo((RunnerTrailKind)i));
                 Assert.That(RunnerTrailProgress.Owned((RunnerTrailKind)i), Is.True);
+                Assert.That(GameObject.Find("Trail card " + i + "/Trail ownership").GetComponent<Text>().text, Is.EqualTo("IN USE"));
                 var button = GameObject.Find("Buy or equip trail " + i).GetComponent<Button>();
                 button.onClick.Invoke(); // A duplicate event cannot charge the owned cosmetic again.
                 Assert.That(game.Shop.Balance, Is.EqualTo(6500 - i * 2000));
@@ -111,6 +116,7 @@ namespace DinoRush.Tests
             Assert.That(GameObject.Find("Buy mystery egg"), Is.Not.Null);
             Assert.That(GameObject.Find("Shop egg balance").GetComponent<Text>().text, Is.EqualTo("EGGS: 500"));
             Assert.That(GameObject.Find("Trails section"), Is.Null);
+            Assert.That(menu.TrailShop.transform.Find("Single adventure").gameObject.activeSelf, Is.False, "Switching back to Dinos must not revive background text.");
             yield return Reload();
             Assert.That(RunnerTrailProgress.Equipped, Is.EqualTo(RunnerTrailKind.Fire));
             Assert.That(game.Shop.Balance, Is.EqualTo(500));
@@ -125,6 +131,7 @@ namespace DinoRush.Tests
             Click("Next trails page");
             yield return new WaitForSecondsRealtime(0.2f);
             Assert.That(menu.TrailShop.Page, Is.EqualTo(1));
+            Assert.That(GameObject.Find("Trail page indicator").GetComponent<Text>().text, Is.EqualTo("PAGE 2 / 2"));
             Assert.That(GameObject.Find("Buy or equip trail 1"), Is.Null);
             yield return RunnerDisplayCapture.Capture("trail-shop-new-effects", 1280, 720);
             yield return RunnerDisplayCapture.Capture("trail-shop-new-effects-portrait", 360, 800);
@@ -141,6 +148,7 @@ namespace DinoRush.Tests
             Click("Previous trails page");
             Assert.That(menu.TrailShop.Page, Is.Zero);
             Assert.That(RunnerTrailProgress.Equipped, Is.EqualTo(RunnerTrailKind.Cosmic));
+            Assert.That(GameObject.Find("Equipped trail summary").GetComponent<Text>().text, Is.EqualTo("USING: COSMIC"), "Equipped status stays visible even on the other page.");
             Click("Next trails page");
             Click("Buy or equip trail 4");
             Assert.That(game.Shop.Balance, Is.EqualTo(500));
@@ -241,9 +249,46 @@ namespace DinoRush.Tests
                 {
                     Bounds bounds = RectTransformUtility.CalculateRelativeRectTransformBounds(panel, button.transform);
                     Assert.That(bounds.min.x, Is.GreaterThanOrEqualTo(panelRect.xMin), button.name);
+                    Assert.That(bounds.max.x, Is.LessThanOrEqualTo(panelRect.xMax), button.name);
+                    Assert.That(bounds.min.y, Is.GreaterThanOrEqualTo(panelRect.yMin), button.name);
                     Assert.That(bounds.max.y, Is.LessThanOrEqualTo(panelRect.yMax), button.name);
                 }
+                Transform section = menu.TrailShop.transform.Find("Trails section");
+                AssertSeparate(section, section.Find("Trail egg balance"), section.Find("Equipped trail summary"));
+                AssertSeparate(section, section.Find("Previous trails page"), section.Find("Trail page indicator"));
+                AssertSeparate(section, section.Find("Next trails page"), section.Find("Trail page indicator"));
+                foreach (Transform card in section)
+                {
+                    if (!card.name.StartsWith("Trail card ") || !card.gameObject.activeSelf) continue;
+                    AssertSeparate(section, card, section.Find("Next trails page"));
+                    AssertSeparate(section, card, section.Find("Previous trails page"));
+                    var blocks = new[] { card.Find("Trail name"), card.Find("Preview backdrop"), card.Find("Trail description"), card.Find("Trail ownership"), card.Find("Buy or equip trail " + card.name.Substring("Trail card ".Length)) };
+                    for (int a = 0; a < blocks.Length; a++)
+                    for (int b = a + 1; b < blocks.Length; b++) AssertSeparate(card, blocks[a], blocks[b]);
+                    Assert.That(((RectTransform)card.Find("Live trail preview")).rect.height, Is.GreaterThanOrEqualTo(size.y > size.x ? 210 : 180));
+                    if (size.y > size.x)
+                    {
+                        Assert.That(card.Find("Trail name").GetComponent<Text>().fontSize, Is.GreaterThanOrEqualTo(24));
+                        Assert.That(blocks[4].Find("Label").GetComponent<Text>().fontSize, Is.GreaterThanOrEqualTo(18));
+                    }
+                }
             }
+        }
+        private static void AssertSeparate(Transform space, Transform a, Transform b)
+        {
+            Assert.That(RectIn(space, a).Overlaps(RectIn(space, b)), Is.False, a.name + " overlaps " + b.name);
+        }
+        private static Rect RectIn(Transform space, Transform node)
+        {
+            var corners = new Vector3[4];
+            ((RectTransform)node).GetWorldCorners(corners);
+            Vector2 min = space.InverseTransformPoint(corners[0]), max = min;
+            for (int i = 1; i < corners.Length; i++)
+            {
+                Vector2 point = space.InverseTransformPoint(corners[i]);
+                min = Vector2.Min(min, point); max = Vector2.Max(max, point);
+            }
+            return Rect.MinMaxRect(min.x, min.y, max.x, max.y);
         }
         [UnityTest]
         public IEnumerator TrailsWorkWithEveryMapAndDinoAndNoTrailProducesNoMesh()

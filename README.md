@@ -77,7 +77,7 @@ The Shop has separate **DINOS** and **TRAILS** categories. Trails have animated,
 - **Blossom:** soft pink petals that flutter and rotate on a turbulent breeze.
 - **Cosmic:** bright stars that twinkle into violet stardust.
 
-The six effects are split into two pages of three cards. **PREV / NEXT** switches pages without spending eggs or changing the equipped effect; hidden-page previews do not keep simulating. Both pages retain stacked phone layouts and live hopping dino previews.
+The six effects are split into two pages of three cards. A balance/currently-equipped header sits above larger, color-accented preview cards. Each card shows its price once, or a clear **OWNED / IN USE** badge, with a separate **BUY TRAIL / EQUIP / EQUIPPED** action. **PREV / NEXT** and a persistent page counter have their own row below the cards; Back and Remove Trail are separate footer actions. Paging never spends eggs or changes equipment, and hidden-page previews stop simulating. Both pages have stacked phone cards with larger labels, buttons, and live hopping dino previews. Prices and saved ownership are unchanged.
 
 Buying permanently unlocks and immediately equips a trail. Owned trails can be equipped again for free; **No Trail** removes the effect without losing ownership. Only one trail is active at a time. Ownership and selection survive scene/app reloads; invalid/unowned selections safely show no trail. Insufficient funds and repeated purchase events cannot deduct eggs or grant an unowned cosmetic. Dino hatching and its existing prices/rewards are unchanged.
 
