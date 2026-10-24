@@ -32,6 +32,7 @@ namespace DinoRush.Editor
         {
             menu.EnsureShopUi();
             menu.EnsureRedeemUi();
+            menu.EnsureTrailUi();
             RunnerEggHatchCatalog catalog = Catalog();
             RunnerShopPresentation presentation = menu.ShopPresentation;
             presentation.SetCatalog(catalog);

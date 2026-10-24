@@ -160,7 +160,17 @@ namespace DinoRush.Tests
                 Click("Forest Main Menu/Main menu buttons/Options");
                 game.ApplyScreenLayout(layout);
                 yield return new WaitForSecondsRealtime(0.3f);
-                Assert.That(((RectTransform)dialog).sizeDelta, Is.EqualTo(portrait ? new Vector2(560, 440) : new Vector2(480, 352)));
+                Assert.That(((RectTransform)dialog).sizeDelta, Is.EqualTo(portrait ? new Vector2(560, 568) : new Vector2(480, 432)));
+                var sfx = (RectTransform)dialog.Find("Options page/Toggle sound effects");
+                var redeem = (RectTransform)dialog.Find("Options page/Redeem gift");
+                var optionsBack = (RectTransform)dialog.Find("Back to main menu");
+                Assert.That(redeem.sizeDelta, Is.EqualTo(sfx.sizeDelta), "Redeem belongs in the same full-width action list as SFX.");
+                Assert.That(redeem.anchoredPosition.x, Is.Zero);
+                Assert.That(optionsBack.anchoredPosition.x, Is.Zero);
+                Assert.That(redeem.anchoredPosition.y + redeem.rect.height / 2,
+                    Is.LessThan(sfx.anchoredPosition.y - sfx.rect.height / 2));
+                Assert.That(optionsBack.anchoredPosition.y, Is.LessThan(redeem.anchoredPosition.y));
+                Assert.That(redeem.Find("Icon").GetComponent<RunnerGiftGraphic>().raycastTarget, Is.False);
                 AssertCompactContents(dialog);
                 NativeLayout();
                 int soundBefore = PlayerPrefs.GetInt("DinoRush.Muted");
@@ -189,7 +199,7 @@ namespace DinoRush.Tests
                 Click("Forest Main Menu/Main menu buttons/Shop");
                 game.ApplyScreenLayout(layout);
                 yield return null;
-                Assert.That(((RectTransform)dialog).sizeDelta, Is.EqualTo(portrait ? new Vector2(640, 1240) : new Vector2(960, 644)));
+                Assert.That(((RectTransform)dialog).sizeDelta, Is.EqualTo(portrait ? new Vector2(640, 1360) : new Vector2(960, 744)));
                 Assert.That(back.GetComponentInChildren<Text>().text, Is.EqualTo("BACK"));
                 NativeLayout();
                 Click("Forest Main Menu/Menu dialog/Moss framed dialog/Back to main menu");

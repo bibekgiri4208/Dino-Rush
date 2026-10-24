@@ -54,6 +54,7 @@ namespace DinoRush
         [SerializeField] private RunnerShopCollection shopCollection;
         [SerializeField] private Button redeemGift;
         [SerializeField] private RunnerRedeemPresentation redeemPresentation;
+        [SerializeField] private RunnerTrailShop trailShop;
         private int pendingRewardIndex = -1;
         private RunnerShopProgress shop;
         private int selectedDino;
@@ -71,6 +72,7 @@ namespace DinoRush
         public RunnerShopPresentation ShopPresentation => shopPresentation;
         public RunnerShopCollection ShopCollection => shopCollection;
         public RunnerRedeemPresentation RedeemPresentation => redeemPresentation;
+        public RunnerTrailShop TrailShop => trailShop;
 
         public void ApplyDialogLayout(bool portrait, Vector2 available)
         {
@@ -83,6 +85,7 @@ namespace DinoRush
             RunnerCompactMenus.ApplyDialog(dialogTitle.transform.parent, kind, portrait, available);
             shopPresentation?.ApplyBatchLayout(portrait, available);
             redeemPresentation?.ApplyLayout(portrait, available);
+            trailShop?.ApplyLayout(portrait);
         }
 
         public void OpenModeSelector()
@@ -149,6 +152,7 @@ namespace DinoRush
                 RefreshShop();
                 shopCollection?.ShowIndex(selectedDino);
                 OpenDialog("SHOP", customizePage);
+                trailShop?.ShowTrails(false);
             });
             Bind(options, () => OpenDialog("OPTIONS", optionsPage));
             Bind(quit, () => OpenDialog("QUIT GAME?", quitPage));
@@ -169,6 +173,8 @@ namespace DinoRush
             shop = progress;
             EnsureShopUi();
             EnsureRedeemUi();
+            EnsureTrailUi();
+            trailShop?.Initialize(shop, shopPresentation, audio, RefreshShop);
             redeemPresentation?.Initialize(shop, audio, RefreshShop);
             shopCollection?.Initialize(shop);
             shopPresentation?.Initialize(audio, () =>
@@ -179,12 +185,27 @@ namespace DinoRush
             });
         }
 
+        public void EnsureTrailUi()
+        {
+            if (customizePage == null || selectedDinoLabel == null || back == null) return;
+            if (Application.isPlaying && trailShop != null) return;
+            trailShop = customizePage.GetComponent<RunnerTrailShop>();
+            if (trailShop == null) trailShop = customizePage.AddComponent<RunnerTrailShop>();
+            trailShop.EnsureUi(selectedDinoLabel.font, dialogTitle.transform.parent.GetComponent<Image>().sprite,
+                back.GetComponent<Image>().sprite, dinoPortraits[0].sprite);
+            ApplyDialogLayout(dialogPortrait, dialogAvailable);
+        }
+
         public void EnsureRedeemUi()
         {
             if (optionsPage == null || back == null || selectedDinoLabel == null) return;
-            if (Application.isPlaying && redeemGift != null && redeemPresentation != null) return;
+            if (Application.isPlaying && redeemGift != null && redeemPresentation != null && redeemGift.transform.Find("Icon") != null) return;
             redeemGift = PurchaseButton(optionsPage.transform, "Redeem gift");
             ShopLabel(redeemGift.transform, "Label", "REDEEM", selectedDinoLabel.font, 14, 0, 44, 132);
+            Transform icon = RunnerShopPresentation.Node("Icon", redeemGift.transform);
+            RunnerGiftGraphic giftIcon = icon.GetComponent<RunnerGiftGraphic>();
+            if (giftIcon == null) giftIcon = icon.gameObject.AddComponent<RunnerGiftGraphic>();
+            giftIcon.raycastTarget = false;
             redeemPresentation = GetComponent<RunnerRedeemPresentation>();
             if (redeemPresentation == null) redeemPresentation = gameObject.AddComponent<RunnerRedeemPresentation>();
             redeemPresentation.EnsureUi(transform, selectedDinoLabel.font, dialogTitle.transform.parent.GetComponent<Image>().sprite,
@@ -292,7 +313,7 @@ namespace DinoRush
 
         private void BuyMysteryEgg()
         {
-            if (shop == null || !customizePage.activeInHierarchy || (shopPresentation != null && shopPresentation.IsShowing)) return;
+            if (shop == null || !customizePage.activeInHierarchy || (trailShop != null && trailShop.IsTrails) || (shopPresentation != null && shopPresentation.IsShowing)) return;
             if (shop.TryBuy(out int index, out int fragments, out bool unlocked))
             {
                 shopResult.text = "+" + fragments + " " + dinoRoster[index].DisplayName.ToUpperInvariant() + " FRAGMENTS!\n" +
@@ -313,11 +334,12 @@ namespace DinoRush
             else if (shop.Balance < RunnerShopProgress.MysteryEggCost && !shopResult.text.StartsWith("+", StringComparison.Ordinal))
                 shopResult.text = "COLLECT EGGS ON YOUR RUNS TO HATCH";
             SetDinoSelection(selectedDino);
+            trailShop?.Refresh();
         }
 
         private void BuyTenMysteryEggs()
         {
-            if (shop == null || !customizePage.activeInHierarchy || shopPresentation == null || shopPresentation.IsShowing) return;
+            if (shop == null || !customizePage.activeInHierarchy || (trailShop != null && trailShop.IsTrails) || shopPresentation == null || shopPresentation.IsShowing) return;
             if (shop.TryBuyTen(out RunnerShopProgress.Reward[] rewards))
             {
                 int total = 0, unlocks = 0;

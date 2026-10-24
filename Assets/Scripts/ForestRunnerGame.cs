@@ -92,6 +92,7 @@ namespace DinoRush
         [SerializeField, Range(1, 6)] private int runningDirtCount = 3;
         [SerializeField, Range(8, 24)] private int landingDirtCount = 18;
         private RunnerPlayer player;
+        private RunnerPlayerTrail playerTrail;
         private readonly RunnerHealth health = new RunnerHealth();
         private RunnerAudio audioCues;
         private RunnerEggCollectibles eggs;
@@ -184,6 +185,10 @@ namespace DinoRush
                 SelectedMapIndex = mapCatalog.Find(PlayerPrefs.GetString(RunnerMapCatalog.SelectionKey, "forest"));
             ApplyPixelFiltering();
             player = new RunnerPlayer(dinoRenderer, dinoFrames, playerShadow);
+            var trailObject = new GameObject("Equipped dino trail");
+            trailObject.transform.SetParent(transform, false);
+            playerTrail = trailObject.AddComponent<RunnerPlayerTrail>();
+            playerTrail.Initialize(dinoRenderer);
             Shop = new RunnerShopProgress(dinoRoster);
             if (dinoRoster != null && dinoRoster.Count > 0)
             {
@@ -634,6 +639,7 @@ namespace DinoRush
             }
 
             player.Render(dt, State == RunState.Running, State == RunState.GameOver, RunnerRules.Speed(elapsed) / 6.8f);
+            playerTrail.Tick(dt, player.Feet, player.IsDucking, RunnerRules.Speed(elapsed), State == RunState.Running);
             SetSkyFraming(State == RunState.Ready);
             if (State == RunState.Ready) dinoRenderer.transform.localScale *= 0.9f;
             UpdateParticles(dt);
@@ -1029,6 +1035,7 @@ namespace DinoRush
                 particle.renderer.gameObject.SetActive(false);
             }
             player.Reset();
+            playerTrail?.Clear();
             health.Reset();
             hud.UpdateLives(Lives);
             hud.ClearDamage();

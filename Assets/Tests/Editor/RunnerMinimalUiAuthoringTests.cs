@@ -65,7 +65,7 @@ namespace DinoRush.Tests
                     Assert.That(hud.FindPropertyRelative(field).objectReferenceValue, Is.Not.Null, field);
                 Transform root = game.transform.Find("Forest runner UI/16 by 9 safe content");
                 Assert.That(((RectTransform)root.Find("Forest Pause Menu")).sizeDelta, Is.EqualTo(new Vector2(420, 336)));
-                Assert.That(((RectTransform)root.Find("Forest Main Menu/Menu dialog/Moss framed dialog")).sizeDelta, Is.EqualTo(new Vector2(480, 352)));
+                Assert.That(((RectTransform)root.Find("Forest Main Menu/Menu dialog/Moss framed dialog")).sizeDelta, Is.EqualTo(new Vector2(480, 432)));
                 ForestMainMenu menu = root.Find("Forest Main Menu").GetComponent<ForestMainMenu>();
                 Assert.That(menu.RedeemPresentation, Is.Not.Null);
                 Assert.That(menu.transform.Find("Redeem dialog").gameObject.activeSelf, Is.False);

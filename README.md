@@ -66,6 +66,22 @@ The Shop features a framed **animated egg showcase**, glowing pixel glints, and 
 
 The purchase is committed **once before the animation**, so interruption or scene exit cannot lose the reward or charge again. The modal blocks underlying Shop controls and repeated purchases. **Skip Reveal** (or Esc/P) finishes the single-pull count immediately; **Continue** returns to the Shop. Esc/P first skips, then dismisses the reward, and only then leaves the Shop. `RunnerShopPresentation.cs` owns presentation and cached-frame cleanup; `RunnerHatchGlowGraphic.cs` draws texture-free rays and pixel glints; `RunnerEggHatchCatalog.asset` stores original sheet bindings. **Dino Rush → Add Animated Mystery Egg Shop** authors both purchase buttons, the editable showcase, and both reward panels in place. Regular menu/dino/layout authoring also preserves these controls.
 
+### Trail effects Shop
+
+The Shop has separate **DINOS** and **TRAILS** categories. Trails have animated, free-to-view previews and cost **2,000 eggs each** from the same saved wallet as mystery eggs:
+
+- **Wind:** small pale wind blades that curl, rotate, and float behind the dino.
+- **Inferno:** warm fire embers that drift backward, rise, tumble, and fade.
+- **Voltage:** small blue-white current sparks that drift, rotate, and flicker out.
+
+Buying permanently unlocks and immediately equips a trail. Owned trails can be equipped again for free; **No Trail** removes the effect without losing ownership. Only one trail is active at a time. Ownership and selection survive scene/app reloads; invalid/unowned selections safely show no trail. Insufficient funds and repeated purchase events cannot deduct eggs or grant an unowned cosmetic. Dino hatching and its existing prices/rewards are unchanged.
+
+These are native Unity **world-space particles**, not baked trail sheets, a solid aura, or ghost-dino sprites. Only fresh particles spawn at the dino's current height; existing particles retain their own position, lifetime, velocity, and rotation. Jumps and landings therefore leave an airborne wake instead of carrying a flat picture around. Each particle uses a small generated 64×64 ember, spark, or wind-blade texture. Turbulence and independent velocities add drift; lifetime curves control size, color, and fading.
+
+The particles render behind the dino, work with every dino/map, spawn lower when ducking, freeze while paused, fade after game over, and clear on retry/menu transitions. Each system is capped at 80 particles and uses its own cosmetic random seed. Movement, collisions, pickups, and gameplay randomness are unchanged. Runtime systems, materials, and generated textures are cleaned up with the scene. Shop previews use the same particle simulation and periodically hop the preview dino to demonstrate the airborne wake; phone layouts stack the cards. Saved ownership, equipped IDs, and the **2,000-egg price** are unchanged; Wind retains the former Smoke save key so existing owners keep it.
+
+`RunnerTrailProgress.cs` owns prices, saved ownership, and equipment. `RunnerTrailShop.cs` owns category switching, purchases, previews, and responsive layouts. `RunnerTrailParticles.cs` manages the native simulation; `RunnerTrailParticleArt.cs` creates individual particle textures; `RunnerTrailPreview.cs` and `RunnerPlayerTrail.cs` integrate it into UI/gameplay. **Dino Rush → Add Trail Effects Shop** authors the editable categories/cards in place; normal Shop authoring also retains them. Tests cover prices, duplicate/invalid purchases, ownership persistence, equip/remove, independent particle motion across jumps/landings, hatch-modal guards, all-map/dino compatibility, pause/retry cleanup, lifetime fading, and layout. Optional captures: `trail-shop-landscape`, `trail-shop-portrait`, `trail-shop-owned`, `trail-world-<smoke/fire/electric>`, and `trail-air-<smoke/fire/electric>`.
+
 ### Redeemable production gift
 
 Open **Options → Redeem**, enter **`jestergift`**, then press **Redeem** or submit the input field with Enter/mobile Done. Every deliberate redemption grants **1,000 eggs** to the saved Shop wallet. The code is intentionally **unlimited-use**, including after restarting the game; uppercase/lowercase and surrounding whitespace are accepted. Invalid codes do not change the wallet. A full integer wallet is rejected rather than overflowing or partially crediting the gift.

@@ -15,17 +15,16 @@ namespace DinoRush
             Transform back = panel.Find("Back to main menu");
             if (kind == DialogKind.Options)
             {
-                Panel(panel, portrait ? new Vector2(560, 440) : new Vector2(480, 352), available);
-                Label(heading, 0, portrait ? 172 : 126, portrait ? 488 : 416, 40, portrait ? 24 : 22);
+                Panel(panel, portrait ? new Vector2(560, 568) : new Vector2(480, 432), available);
+                Label(heading, 0, portrait ? 236 : 164, portrait ? 488 : 416, 40, portrait ? 24 : 22);
                 Transform options = panel.Find("Options page");
-                Control(options.Find("Toggle sound effects"), 0, portrait ? 94 : 66, portrait ? 472 : 328,
+                Control(options.Find("Toggle sound effects"), 0, portrait ? 158 : 104, portrait ? 472 : 328,
                     portrait ? 100 : 52, portrait ? 22 : 18, null, true);
-                Label(options.Find("Controls help"), 0, portrait ? -20 : -22, portrait ? 488 : 420,
+                Control(options.Find("Redeem gift"), 0, portrait ? 46 : 40, portrait ? 472 : 328,
+                    portrait ? 100 : 52, portrait ? 22 : 18, "REDEEM", true);
+                Label(options.Find("Controls help"), 0, portrait ? -86 : -54, portrait ? 488 : 420,
                     portrait ? 112 : 100, portrait ? 12 : 10);
-                Control(options.Find("Redeem gift"), portrait ? -124 : -90, portrait ? -146 : -116,
-                    portrait ? 224 : 156, portrait ? 100 : 52, portrait ? 18 : 14, "REDEEM");
-                Control(back, portrait ? 124 : 90, portrait ? -146 : -116,
-                    portrait ? 224 : 156, portrait ? 100 : 52, 18, "BACK");
+                Control(back, 0, portrait ? -210 : -164, portrait ? 472 : 328, portrait ? 100 : 52, 18, "BACK");
             }
             else if (kind == DialogKind.Quit)
             {
@@ -50,8 +49,9 @@ namespace DinoRush
             else
             {
                 // The Shop keeps its roomy layout, even after visiting a compact dialog.
-                Panel(panel, portrait ? new Vector2(640, 1240) : new Vector2(960, 644), available);
-                Label(heading, 0, portrait ? 566 : 280, portrait ? 560 : 900, 48, 24);
+                bool trails = panel.Find("Customize page")?.GetComponent<RunnerTrailShop>() != null;
+                Panel(panel, portrait ? new Vector2(640, trails ? 1360 : 1240) : new Vector2(960, trails ? 744 : 644), available);
+                Label(heading, 0, portrait ? (trails ? 626 : 566) : (trails ? 330 : 280), portrait ? 560 : 900, 48, 24);
                 Control(back, portrait ? 0 : -272, portrait ? -560 : -272, portrait ? 560 : 340, portrait ? 100 : 52, 18, "BACK");
                 panel.Find("Customize page")?.GetComponent<RunnerShopCollection>()?.ApplyLayout(portrait);
             }
