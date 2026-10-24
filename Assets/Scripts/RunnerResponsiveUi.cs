@@ -108,6 +108,7 @@ namespace DinoRush
             Size("Forest Main Menu/Menu dialog/Dialog scrim", layout.UiSize);
             Size("Forest Main Menu/Map selector", layout.UiSize);
             Size("Forest Main Menu/Map selector/Map selector scrim", layout.UiSize);
+            Size("Forest Main Menu/Hatch reveal", layout.UiSize);
             if (layout.Portrait) Portrait(layout.UiSize);
             else
             {
@@ -117,6 +118,7 @@ namespace DinoRush
                 foreach (string path in new[] { "Jump", "Duck", "Trail stats frame", "Gameplay bottom fade", "Controls", "Keyboard controls" })
                     ShiftVertical(path, -extra);
             }
+            Fit("Forest Main Menu/Hatch reveal/Hatch reward panel", layout.UiSize);
 
             Rect world = layout.WorldPixels;
             Matte(0, Rect.MinMaxRect(0, 0, world.xMin, layout.ScreenSize.y), layout);
@@ -166,9 +168,9 @@ namespace DinoRush
                 Place("Forest Main Menu/Main menu buttons/" + menuButtons[i], 0, 84 - i * 120, 520, 104);
 
             const string dialog = "Forest Main Menu/Menu dialog/Moss framed dialog";
-            Place(dialog, 0, 0, 620, 1000);
-            Place(dialog + "/Dialog heading", 0, 444, 560, 48);
-            Place(dialog + "/Back to main menu", 0, -402, 520, 104);
+            Place(dialog, 0, 0, 620, 1080);
+            Place(dialog + "/Dialog heading", 0, 484, 560, 48);
+            Place(dialog + "/Back to main menu", 0, -476, 520, 104);
             Place(dialog + "/Options page/Toggle sound effects", 0, 70, 500, 104);
             Place(dialog + "/Options page/Controls help", 0, -90, 520, 144);
             FontSize(dialog + "/Options page/Controls help", 16);
@@ -178,26 +180,50 @@ namespace DinoRush
             Place(modes + "/Story availability", 0, 34, 500, 30);
             Place(modes + "/Endless mode", 0, -90, 500, 104);
             const string custom = dialog + "/Customize page";
-            Place(custom + "/Shop egg balance", 0, 388, 560, 30);
-            Place(custom + "/Mystery egg rules", 0, 340, 560, 48);
-            Place(custom + "/Buy mystery egg", 0, 270, 520, 88);
+            Place(custom + "/Shop egg balance", 0, 428, 560, 30);
+            const string product = custom + "/Mystery egg display";
+            Place(product, 0, 320, 560, 176);
+            Place(product + "/Egg display glow", -178, 0, 144, 144);
+            Place(product + "/Showcase egg", -178, 0, 120, 120);
+            Place(product + "/Companion egg left", -220, -10, 64, 64);
+            Place(product + "/Companion egg right", -136, -10, 64, 64);
+            Place(product + "/Egg product title", 80, 50, 320, 30);
+            FontSize(product + "/Egg product title", 16);
+            Place(product + "/Egg product description", 80, 0, 320, 44);
+            Place(product + "/Egg unlock requirement", 80, -52, 320, 24);
+            Place(custom + "/Buy mystery egg", 0, 172, 520, 88);
             Place(custom + "/Buy mystery egg/Label", 0, 0, 496, 64);
             FontSize(custom + "/Buy mystery egg/Label", 14);
-            Place(custom + "/Mystery egg result", 0, 198, 560, 52);
+            Place(custom + "/Mystery egg result", 0, 92, 560, 48);
             string[] dinos = { "Blue", "Red", "Yellow", "Green" };
             for (int i = 0; i < dinos.Length; i++)
             {
                 string card = custom + "/Dino choices/Select " + dinos[i] + " dino";
-                Place(card, i % 2 == 0 ? -142 : 142, i < 2 ? 76 : -114, 236, 176);
-                Place(card + "/Dino name", 0, -34, 200, 28);
-                Place(card + "/Fragments", 0, -64, 212, 36);
+                Place(card, i % 2 == 0 ? -142 : 142, i < 2 ? -44 : -240, 236, 176);
+                Place(card + "/Dino name", 0, -26, 200, 28);
+                Place(card + "/Fragments", 0, -60, 212, 36);
                 FontSize(card + "/Fragments", 12);
                 FontSize(card + "/Dino name", 18);
             }
-            Place(custom + "/Selected status", 0, -246, 560, 28);
-            Place(custom + "/Map selection", 0, -284, 560, 24);
+            Place(custom + "/Selected status", 0, -366, 560, 28);
+            Place(custom + "/Map selection", 0, -402, 560, 24);
             FontSize(custom + "/Selected status", 14);
             FontSize(custom + "/Map selection", 14);
+
+            const string hatch = "Forest Main Menu/Hatch reveal/Hatch reward panel";
+            Place(hatch, 0, 0, 620, 820);
+            Place(hatch + "/Hatch eyebrow", 0, 364);
+            Place(hatch + "/Hatch heading", 0, 308);
+            Place(hatch + "/Hatch light and sparkles", 0, 126);
+            Place(hatch + "/Hatching egg", 0, 132);
+            Place(hatch + "/Hatched dino", 0, 132);
+            const string reward = hatch + "/Hatch reward details";
+            Place(reward + "/Fragment reward amount", 0, -26);
+            Place(reward + "/Fragment reward species", 0, -82);
+            Place(reward + "/Fragment reward progress", 0, -130);
+            Place(reward + "/Fragment progress track", 0, -156);
+            Place(reward + "/Hatch unlock message", 0, -204);
+            Place(hatch + "/Hatch continue", 0, -316, 500, 88);
 
             const string maps = "Forest Main Menu/Map selector/Map selection panel";
             int rows = Mathf.CeilToInt(mapCards.Count / 2f);

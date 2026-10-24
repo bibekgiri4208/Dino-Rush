@@ -49,6 +49,7 @@ namespace DinoRush
         [SerializeField] private Text shopBalance;
         [SerializeField] private Text shopResult;
         [SerializeField] private Text[] dinoFragments = new Text[0];
+        [SerializeField] private RunnerShopPresentation shopPresentation;
         private RunnerShopProgress shop;
         private int selectedDino;
         private RunnerMapCatalog mapCatalog;
@@ -60,6 +61,7 @@ namespace DinoRush
         public bool DialogOpen => (dialog != null && dialog.activeInHierarchy) || (mapPage != null && mapPage.activeInHierarchy);
         public bool HasMapSelector => mapPage != null;
         public bool HasModeSelector => modePage != null;
+        public RunnerShopPresentation ShopPresentation => shopPresentation;
 
         public void OpenModeSelector()
         {
@@ -134,10 +136,11 @@ namespace DinoRush
             if (buyMysteryEgg != null) Bind(buyMysteryEgg, BuyMysteryEgg);
         }
 
-        public void InitializeShop(RunnerShopProgress progress)
+        public void InitializeShop(RunnerShopProgress progress, RunnerAudio audio = null)
         {
             shop = progress;
             EnsureShopUi();
+            shopPresentation?.Initialize(audio, RefreshShop);
         }
 
         // Shared by scene authoring and runtime fallback for older scenes. Existing bindings are retained.
@@ -145,13 +148,14 @@ namespace DinoRush
         {
             if (customize == null || customizePage == null || dinoChoices.Length == 0) return;
             if (Application.isPlaying && buyMysteryEgg != null && shopBalance != null && shopResult != null &&
-                dinoFragments.Length == dinoChoices.Length) return; // Preserve editable saved layouts.
+                dinoFragments.Length == dinoChoices.Length && shopPresentation != null) return; // Preserve editable saved layouts.
             customize.name = "Shop";
             customize.GetComponentInChildren<Text>(true).text = "SHOP";
             Font font = selectedDinoLabel.font;
             Transform page = customizePage.transform;
-            shopBalance = ShopLabel(page, "Shop egg balance", "EGGS: 0", font, 14, 210, 30);
-            ShopLabel(page, "Mystery egg rules", "MYSTERY EGG: 1-20 FRAGMENTS\nRANDOM LOCKED DINO / 100 TO UNLOCK", font, 12, 166, 44);
+            shopBalance = ShopLabel(page, "Shop egg balance", "EGGS: 0", font, 14, 238, 30);
+            // Retain the legacy text object for old scene references, but replace it with a visual product card.
+            if (page.Find("Mystery egg rules") != null) page.Find("Mystery egg rules").gameObject.SetActive(false);
             Transform purchase = page.Find("Buy mystery egg");
             if (purchase == null)
             {
@@ -167,24 +171,27 @@ namespace DinoRush
                 button.navigation = new Navigation { mode = Navigation.Mode.None };
             }
             buyMysteryEgg = purchase.GetComponent<Button>();
-            ShopPosition(purchase, 0, 106, 440, 64);
-            ShopLabel(purchase, "Label", "BUY MYSTERY EGG - " + RunnerShopProgress.MysteryEggCost + " EGGS", font, 12, 0, 44, 416);
-            shopResult = ShopLabel(page, "Mystery egg result", "COLLECT EGGS ON YOUR RUNS TO SHOP", font, 12, 42, 44);
+            ShopPosition(purchase, 0, 32, 440, 56);
+            ShopLabel(purchase, "Label", "HATCH EGG - " + RunnerShopProgress.MysteryEggCost + " EGGS", font, 16, 0, 40, 416);
+            shopResult = ShopLabel(page, "Mystery egg result", "COLLECT EGGS ON YOUR RUNS TO HATCH", font, 10, -20, 36);
             dinoFragments = new Text[dinoChoices.Length];
             ShopPosition(page.Find("Dino choices"), 0, 0, 620, 340);
             for (int i = 0; i < dinoChoices.Length; i++)
             {
                 Transform card = dinoChoices[i].transform;
-                ShopPosition(card, -234 + i * 156, -72, 140, 160);
-                ShopPosition(dinoPortraits[i].transform, 0, 18, 72, 80);
-                ShopPosition(dinoCaptions[i].transform, 0, -34, 130, 24);
-                dinoFragments[i] = ShopLabel(card, "Fragments", i == 0 ? "UNLOCKED" : "0 / 100", font, 10, -60, 28, 130);
+                ShopPosition(card, -234 + i * 156, -124, 140, 144);
+                ShopPosition(dinoPortraits[i].transform, 0, 20, 72, 72);
+                ShopPosition(dinoCaptions[i].transform, 0, -26, 130, 24);
+                dinoFragments[i] = ShopLabel(card, "Fragments", i == 0 ? "UNLOCKED" : "0 / 100", font, 10, -52, 28, 130);
             }
-            ShopPosition(selectedDinoLabel.transform, 0, -184, 620, 26);
-            if (customizeMapLabel != null) ShopPosition(customizeMapLabel.transform, 0, -210, 620, 24);
-            ShopPosition(dialogTitle.transform.parent, 0, 0, 680, 620);
-            ShopPosition(dialogTitle.transform, 0, 260, 620, 48);
-            ShopPosition(back.transform, 0, -254, 400, 64);
+            ShopPosition(selectedDinoLabel.transform, 0, -218, 620, 26);
+            if (customizeMapLabel != null) ShopPosition(customizeMapLabel.transform, 0, -242, 620, 24);
+            ShopPosition(dialogTitle.transform.parent, 0, 0, 680, 680);
+            ShopPosition(dialogTitle.transform, 0, 284, 620, 48);
+            ShopPosition(back.transform, 0, -288, 400, 64);
+            shopPresentation = page.GetComponent<RunnerShopPresentation>();
+            if (shopPresentation == null) shopPresentation = page.gameObject.AddComponent<RunnerShopPresentation>();
+            shopPresentation.EnsureUi(transform, font, dialogTitle.transform.parent.GetComponent<Image>().sprite, back.GetComponent<Image>().sprite);
         }
 
         private static Text ShopLabel(Transform parent, string name, string caption, Font font, int size,
@@ -222,10 +229,13 @@ namespace DinoRush
 
         private void BuyMysteryEgg()
         {
-            if (shop == null || !customizePage.activeInHierarchy) return;
+            if (shop == null || !customizePage.activeInHierarchy || (shopPresentation != null && shopPresentation.IsShowing)) return;
             if (shop.TryBuy(out int index, out int fragments, out bool unlocked))
+            {
                 shopResult.text = "+" + fragments + " " + dinoRoster[index].DisplayName.ToUpperInvariant() + " FRAGMENTS!\n" +
                     (unlocked ? "DINO UNLOCKED! TAP ITS CARD TO SELECT" : shop.Fragments(index) + " / 100 TO UNLOCK");
+                shopPresentation?.Play(dinoRoster[index], fragments, shop.Fragments(index), unlocked);
+            }
             RefreshShop();
         }
 
@@ -233,10 +243,10 @@ namespace DinoRush
         {
             if (shop == null || shopBalance == null) return;
             shopBalance.text = "EGGS: " + shop.Balance;
-            buyMysteryEgg.interactable = shop.CanBuy;
+            buyMysteryEgg.interactable = shop.CanBuy && (shopPresentation == null || !shopPresentation.IsShowing);
             if (shop.LockedCount == 0 && !shopResult.text.StartsWith("+", StringComparison.Ordinal)) shopResult.text = "ALL DINOS UNLOCKED!";
             else if (shop.Balance < RunnerShopProgress.MysteryEggCost && !shopResult.text.StartsWith("+", StringComparison.Ordinal))
-                shopResult.text = "COLLECT EGGS ON YOUR RUNS TO SHOP";
+                shopResult.text = "COLLECT EGGS ON YOUR RUNS TO HATCH";
             SetDinoSelection(selectedDino);
         }
 
@@ -285,6 +295,7 @@ namespace DinoRush
 
         public void Show()
         {
+            shopPresentation?.CancelReveal();
             gameObject.SetActive(true);
             foreach (GameObject item in gameplayChrome) if (item != null) item.SetActive(false);
             CloseDialog();
@@ -292,6 +303,7 @@ namespace DinoRush
 
         public void Hide()
         {
+            shopPresentation?.CancelReveal();
             gameObject.SetActive(false);
             foreach (GameObject item in gameplayChrome) if (item != null) item.SetActive(true);
         }
@@ -318,6 +330,7 @@ namespace DinoRush
 
         public void CloseDialog()
         {
+            if (shopPresentation != null && shopPresentation.HandleBack()) return;
             if (mapPage != null) mapPage.SetActive(false);
             dialog.SetActive(false);
             choices.SetActive(true);

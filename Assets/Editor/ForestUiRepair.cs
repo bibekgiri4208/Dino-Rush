@@ -126,7 +126,7 @@ namespace DinoRush.Editor
                 if (shadow != null) shadow.effectDistance = new Vector2(1, -1);
                 EditorUtility.SetDirty(text);
             }
-            menu.EnsureShopUi();
+            ForestShopPresentationBuilder.Apply(menu);
             EditorUtility.SetDirty(menu);
             Canvas.ForceUpdateCanvases();
         }

@@ -11,6 +11,8 @@ namespace DinoRush
         private readonly AudioClip crash;
         private readonly AudioClip milestone;
         private readonly AudioClip pickup;
+        private readonly AudioClip eggCrack;
+        private readonly AudioClip eggHatch;
         public bool Muted { get; private set; }
 
         public RunnerAudio(GameObject owner)
@@ -24,6 +26,8 @@ namespace DinoRush
             crash = Tone("Bump", 0.24f, 180f, 45f);
             milestone = Tone("New milestone", 0.3f, 660f, 1320f);
             pickup = Tone("Egg pickup", 0.09f, 1100f, 1760f);
+            eggCrack = Tone("Mystery shell crack", 0.12f, 250f, 90f);
+            eggHatch = Tone("Mystery hatch reveal", 0.55f, 520f, 1560f);
         }
 
         public void ToggleMute()
@@ -38,6 +42,8 @@ namespace DinoRush
         public void Crash() => source.PlayOneShot(crash);
         public void Milestone() => source.PlayOneShot(milestone, 0.5f);
         public void Pickup() => source.PlayOneShot(pickup, 0.45f);
+        public void EggCrack() => source.PlayOneShot(eggCrack, 0.45f);
+        public void EggHatch() => source.PlayOneShot(eggHatch, 0.65f);
 
         private static AudioClip Tone(string name, float duration, float start, float end)
         {
@@ -62,6 +68,8 @@ namespace DinoRush
             UnityEngine.Object.Destroy(crash);
             UnityEngine.Object.Destroy(milestone);
             UnityEngine.Object.Destroy(pickup);
+            UnityEngine.Object.Destroy(eggCrack);
+            UnityEngine.Object.Destroy(eggHatch);
         }
     }
 }

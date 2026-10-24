@@ -88,9 +88,9 @@ namespace DinoRush
 
         public void SetMainMenu(ForestMainMenu menu) => mainMenu = menu;
 
-        public void InitializeShop(RunnerShopProgress shop)
+        public void InitializeShop(RunnerShopProgress shop, RunnerAudio audio = null)
         {
-            if (mainMenu != null) mainMenu.InitializeShop(shop);
+            if (mainMenu != null) mainMenu.InitializeShop(shop, audio);
         }
 
         public void InitializeDinos(RunnerDinoRoster roster, int selected, Action<int> select)

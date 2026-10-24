@@ -213,7 +213,7 @@ namespace DinoRush
                 audioCues.Pickup();
                 hud.CollectEgg(eggs.Collected, position, gameCamera);
             });
-            hud.InitializeShop(Shop);
+            hud.InitializeShop(Shop, audioCues);
             hud.Initialize(PrimaryAction, TogglePause, Jump, ToggleMute, RestartRun, ReturnToMenu, SetDuckHeld, eggs.EggSprite);
             hud.UpdateLives(Lives);
             hud.InitializeDinos(dinoRoster, SelectedDinoIndex, SelectDino);
