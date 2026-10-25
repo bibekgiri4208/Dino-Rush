@@ -90,9 +90,9 @@ namespace DinoRush.Tests
             yield return ForestRunTests.Capture("slash-shattering-obstacles");
             Step(240); Assert.That(game.SlashAttack.DebrisCount, Is.Zero);
         }
-        [UnityTest] public IEnumerator ShopHasAnimatedStylesAndPaidMagazineOnPhoneAndDesktop()
+        [UnityTest] public IEnumerator ShopHasAnimatedStylesAndUncappedPaidStockOnPhoneAndDesktop()
         {
-            PlayerPrefs.SetInt(RunnerShopProgress.WalletKey, 18000);
+            PlayerPrefs.SetInt(RunnerShopProgress.WalletKey, 25000);
             var menu = game.GetComponentInChildren<ForestMainMenu>(true);
             GameObject.Find("Shop").GetComponent<Button>().onClick.Invoke();
             yield return new WaitForSecondsRealtime(0.35f);
@@ -108,9 +108,18 @@ namespace DinoRush.Tests
                 button.onClick.Invoke(); Assert.That(RunnerSlashProgress.Owned((RunnerSlashKind)i), Is.True);
             }
             var charge = menu.TrailShop.transform.Find("Slashes section/Buy slash charge").GetComponent<Button>();
-            for (int i = 0; i < 3; i++) charge.onClick.Invoke();
+            for (int i = 0; i < 10; i++)
+            {
+                Assert.That(charge.interactable, Is.True, "Buying must remain available beyond three stored charges.");
+                charge.onClick.Invoke();
+            }
             Assert.That(game.Shop.Balance, Is.Zero); Assert.That(charge.interactable, Is.False);
-            Assert.That(RunnerSlashProgress.Charges, Is.EqualTo(3));
+            Assert.That(RunnerSlashProgress.Charges, Is.EqualTo(10));
+            var status = menu.TrailShop.transform.Find("Slashes section/Slash loadout").GetComponent<Text>();
+            Assert.That(status.text, Does.Contain("STOCK 10").And.Not.Contain("/3"));
+            charge.onClick.Invoke(); Assert.That(RunnerSlashProgress.Charges, Is.EqualTo(10));
+            // Even the largest representable stock must fit; there is no three-charge display cap.
+            PlayerPrefs.SetInt(RunnerSlashProgress.ChargesKey, int.MaxValue); menu.TrailShop.Refresh();
             foreach (Vector2Int size in new[] { new Vector2Int(1280, 720), new Vector2Int(320, 568), new Vector2Int(360, 800), new Vector2Int(1024, 768) })
             {
                 game.ApplyScreenLayout(RunnerScreenLayout.Calculate(size.x, size.y, new Rect(0, 24, size.x, size.y - 48)));
@@ -121,11 +130,94 @@ namespace DinoRush.Tests
                     Assert.That(text.preferredHeight, Is.LessThanOrEqualTo(text.rectTransform.rect.height + 1), text.name);
                 }
             }
+            PlayerPrefs.SetInt(RunnerSlashProgress.ChargesKey, 10); menu.TrailShop.Refresh();
             game.ApplyScreenLayout(RunnerScreenLayout.Calculate(Screen.width, Screen.height, Screen.safeArea));
             yield return ForestRunTests.Capture("slash-shop-landscape");
             yield return ForestRunTests.Capture("slash-shop-portrait", 720, 1280);
+            yield return RunnerDisplayCapture.Capture("slash-stock-shop-desktop", 1280, 720);
+            yield return RunnerDisplayCapture.Capture("slash-stock-shop-phone", 360, 800);
             menu.TrailShop.ShowTrails(true); Assert.That(menu.TrailShop.transform.Find("Slashes section").gameObject.activeSelf, Is.False);
             menu.TrailShop.ShowTrails(false); Assert.That(menu.TrailShop.IsEffects, Is.False);
+        }
+        [UnityTest] public IEnumerator StockSurvivesRoundLimitRetryMenusAndSceneReloadWithoutRefills()
+        {
+            LoadCharges();
+            PlayerPrefs.SetInt(RunnerSlashProgress.ChargesKey, 12);
+            game.StartRun(); Set("spawnTimer", float.MaxValue);
+            for (int i = 0; i < RunnerSlashProgress.MaxUsesPerRound; i++) { Assert.That(game.Attack(), Is.True); Step(80); }
+            Assert.That(game.SlashesRemainingThisRound, Is.Zero);
+            Assert.That(game.Attack(), Is.False);
+            Assert.That(RunnerSlashProgress.Charges, Is.EqualTo(9));
+            yield return null;
+            var indicator = game.GetComponentInChildren<RunnerSlashHud>(true).transform.Find("Slash indicator");
+            Assert.That(indicator.Find("Slash charges").GetComponent<Text>().text, Does.Contain("ROUND 0/3"));
+            Assert.That(indicator.Find("Slash stock").GetComponent<Text>().text, Is.EqualTo("9 IN STOCK"));
+            Assert.That(indicator.Find("Slash hint").GetComponent<Text>().text, Is.EqualTo("ROUND LIMIT REACHED"));
+            Assert.That(indicator.GetComponent<Button>().interactable, Is.False);
+            yield return RunnerDisplayCapture.Capture("slash-stock-round-limit", 1280, 720);
+            game.RestartRun(); Set("spawnTimer", float.MaxValue);
+            Assert.That(game.SlashesRemainingThisRound, Is.EqualTo(3));
+            Assert.That(RunnerSlashProgress.Charges, Is.EqualTo(9));
+            Assert.That(game.Attack(), Is.True);
+            game.ReturnToMenu(); Assert.That(RunnerSlashProgress.Charges, Is.EqualTo(8));
+            yield return SceneManager.LoadSceneAsync("ForestRun");
+            game = Object.FindAnyObjectByType<ForestRunnerGame>(); game.enabled = false;
+            Assert.That(RunnerSlashProgress.Charges, Is.EqualTo(8));
+            game.StartRun(); Set("spawnTimer", float.MaxValue);
+            Assert.That(game.SlashesRemainingThisRound, Is.EqualTo(3));
+            Assert.That(game.Attack(), Is.True); Assert.That(RunnerSlashProgress.Charges, Is.EqualTo(7));
+        }
+
+        [UnityTest] public IEnumerator HudSeparatesRoundSlotsFromStockAndExplainsUnavailableAttacks()
+        {
+            LoadCharges(); PlayerPrefs.SetInt(RunnerSlashProgress.ChargesKey, 27);
+            game.StartRun(); Set("spawnTimer", float.MaxValue); yield return null;
+            var indicator = game.GetComponentInChildren<RunnerSlashHud>(true).transform.Find("Slash indicator");
+            var button = indicator.GetComponent<Button>();
+            var label = indicator.Find("Slash charges").GetComponent<Text>();
+            var stock = indicator.Find("Slash stock").GetComponent<Text>();
+            var hint = indicator.Find("Slash hint").GetComponent<Text>();
+            Assert.That(label.text, Does.Contain("FIRE / ROUND 3/3"));
+            Assert.That(stock.text, Is.EqualTo("27 IN STOCK"));
+            Assert.That(button.interactable, Is.True);
+            button.onClick.Invoke(); yield return null;
+            Assert.That(label.text, Does.Contain("ROUND 2/3"));
+            Assert.That(stock.text, Is.EqualTo("26 IN STOCK"));
+            Assert.That(hint.text, Is.EqualTo("SLASHING..."));
+            Assert.That(button.interactable, Is.False);
+            Assert.That(indicator.Find("Round use 1").GetComponent<Image>().color,
+                Is.Not.EqualTo(indicator.Find("Round use 3").GetComponent<Image>().color));
+            yield return RunnerDisplayCapture.Capture("slash-stock-hud-desktop", 1280, 720);
+            yield return RunnerDisplayCapture.Capture("slash-stock-hud-phone", 360, 800);
+            Step(80);
+            PlayerPrefs.SetInt(RunnerSlashProgress.ChargesKey, 1); yield return null;
+            Assert.That(label.text, Does.Contain("ROUND 2/3"), "Round allowance must not be confused with stock.");
+            Assert.That(stock.text, Is.EqualTo("1 IN STOCK"));
+            Assert.That(indicator.Find("Round use 1").GetComponent<Image>().color,
+                Is.Not.EqualTo(indicator.Find("Round use 2").GetComponent<Image>().color));
+            PlayerPrefs.SetInt(RunnerSlashProgress.ChargesKey, 0); yield return null;
+            Assert.That(hint.text, Is.EqualTo("BUY CHARGES IN SHOP")); Assert.That(button.interactable, Is.False);
+            PlayerPrefs.SetInt(RunnerSlashProgress.SelectionKey, 0); yield return null;
+            Assert.That(hint.text, Is.EqualTo("EQUIP A SLASH IN SHOP")); Assert.That(button.interactable, Is.False);
+            PlayerPrefs.SetInt(RunnerSlashProgress.ChargesKey, int.MaxValue); yield return null;
+            for (int kind = 1; kind <= 3; kind++)
+            {
+                PlayerPrefs.SetInt(RunnerSlashProgress.OwnershipKey((RunnerSlashKind)kind), 1);
+                RunnerSlashProgress.Equip((RunnerSlashKind)kind); yield return null;
+                foreach (var size in new[] { new Vector2Int(1280, 720), new Vector2Int(320, 568), new Vector2Int(360, 800) })
+                {
+                    game.ApplyScreenLayout(RunnerScreenLayout.Calculate(size.x, size.y, new Rect(0, 24, size.x, size.y - 48)));
+                    Canvas.ForceUpdateCanvases();
+                    foreach (var text in indicator.GetComponentsInChildren<Text>())
+                    {
+                        Assert.That(text.preferredWidth, Is.LessThanOrEqualTo(text.rectTransform.rect.width + 1), text.name);
+                        Assert.That(text.preferredHeight, Is.LessThanOrEqualTo(text.rectTransform.rect.height + 1), text.name);
+                    }
+                }
+            }
+            game.TogglePause(); yield return null; Assert.That(indicator.gameObject.activeSelf, Is.False);
+            game.TogglePause(); yield return null; Assert.That(indicator.gameObject.activeSelf, Is.True);
+            game.ReturnToMenu(); yield return null; Assert.That(indicator.gameObject.activeSelf, Is.False);
         }
         [UnityTest] public IEnumerator EnterAttacksWithoutJumpingAndHudShowsRemainingCharges()
         {
@@ -147,7 +239,10 @@ namespace DinoRush.Tests
                 InputSystem.QueueStateEvent(keyboard, new KeyboardState()); InputSystem.Update();
                 yield return null;
                 var label = game.GetComponentInChildren<RunnerSlashHud>().transform.Find("Slash indicator/Slash charges").GetComponent<Text>();
-                Assert.That(label.text, Does.Contain("2/3").And.Contain("ENTER"));
+                Assert.That(label.text, Does.Contain("ROUND 2/3"));
+                Assert.That(label.transform.parent.Find("Slash stock").GetComponent<Text>().text, Is.EqualTo("2 IN STOCK"));
+                Step(80); yield return null;
+                Assert.That(label.transform.parent.Find("Slash hint").GetComponent<Text>().text, Does.Contain("ENTER"));
                 yield return ForestRunTests.Capture("slash-game-indicator");
                 yield return ForestRunTests.Capture("slash-game-indicator-portrait", 720, 1280);
                 game.ApplyScreenLayout(RunnerScreenLayout.Calculate(320, 568, new Rect(0, 24, 320, 520)));

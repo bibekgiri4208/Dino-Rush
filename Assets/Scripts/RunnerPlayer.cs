@@ -21,6 +21,7 @@ namespace DinoRush
         private bool fastFalling;
 
         public bool Grounded => height <= 0f;
+        public float LandingSpeed { get; private set; }
         public int JumpsRemaining => RunnerRules.MaxJumps - jumpsUsed;
         public bool IsDucking => duckHeld || fastFalling;
         public Rect Hitbox => RunnerRules.PlayerHitbox(height, IsDucking);
@@ -37,6 +38,7 @@ namespace DinoRush
         public void Reset()
         {
             height = velocity = jumpBuffer = animationTime = squash = hurtTime = 0f;
+            LandingSpeed = 0f;
             jumpsUsed = 0;
             duckHeld = fastFalling = false;
             renderer.color = Color.white;
@@ -98,6 +100,7 @@ namespace DinoRush
                 velocity -= gravity * dt;
                 if (height <= 0f)
                 {
+                    LandingSpeed = Mathf.Max(0, -velocity);
                     height = velocity = 0f;
                     jumpsUsed = 0;
                     fastFalling = false;

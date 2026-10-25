@@ -62,6 +62,8 @@ namespace DinoRush
             public float spin;
             public float gravity;
             public bool puff;
+            public bool fine;
+            public bool skim;
         }
 
         private enum DirtEmission { Running, Takeoff, Landing, Crash }
@@ -90,9 +92,10 @@ namespace DinoRush
         [SerializeField] private RunnerHud hud;
         [Header("Pixel dirt effects")]
         [SerializeField] private Sprite[] dirtSprites;
-        [SerializeField, Range(0.04f, 0.25f)] private float runningDirtInterval = 0.10f;
-        [SerializeField, Range(1, 6)] private int runningDirtCount = 3;
-        [SerializeField, Range(8, 24)] private int landingDirtCount = 18;
+        public const int DirtPoolCapacity = 96;
+        [SerializeField, Range(0.04f, 0.25f)] private float runningDirtInterval = 0.065f;
+        [SerializeField, Range(1, 8)] private int runningDirtCount = 5;
+        [SerializeField, Range(8, 48)] private int landingDirtCount = 36;
         private RunnerPlayer player;
         private RunnerPlayerTrail playerTrail;
         private readonly RunnerHealth health = new RunnerHealth();
@@ -132,11 +135,13 @@ namespace DinoRush
         private bool touchGestureActive, touchGestureDucking;
         private Vector2 touchGestureStart;
         private int nextDirtParticle;
+        private readonly System.Random dirtRandom = new System.Random(7819);
         private float missionSaveTimer;
         private static readonly Color[] DirtColors =
         {
             new Color32(100, 76, 48, 255), new Color32(137, 105, 64, 255),
-            new Color32(173, 142, 91, 255), new Color32(192, 163, 111, 255)
+            new Color32(173, 142, 91, 255), new Color32(192, 163, 111, 255),
+            new Color32(211, 184, 139, 255)
         };
 
         public RunState State { get; private set; }
@@ -568,7 +573,7 @@ namespace DinoRush
                 if (asset is Sprite sprite) generatedSprites.Add(sprite);
                 else if (asset is Texture2D texture) generatedTextures.Add(texture);
             }
-            for (int i = 0; i < 36; i++)
+            for (int i = 0; i < DirtPoolCapacity; i++)
             {
                 SpriteRenderer particle = Renderer("Trail dust " + i, dirtSprites[i % dirtSprites.Length], 25, dustGroup);
                 particle.gameObject.SetActive(false);
@@ -707,11 +712,11 @@ namespace DinoRush
             if (jumped)
             {
                 audioCues.Jump();
-                if (wasGrounded) EmitDirt(player.Feet, 5, DirtEmission.Takeoff);
+                if (wasGrounded) EmitDirt(player.Feet, 8, DirtEmission.Takeoff);
             }
             if (landed)
             {
-                EmitDirt(player.Feet, landingDirtCount, DirtEmission.Landing);
+                EmitDirt(player.Feet, Mathf.RoundToInt(landingDirtCount * LandingDirtStrength), DirtEmission.Landing);
                 dustTimer = runningDirtInterval * 1.5f;
             }
             Scroll(travel);
@@ -837,11 +842,15 @@ namespace DinoRush
             }
         }
 
+        private float LandingDirtStrength => Mathf.Lerp(1f, 1.25f, Mathf.InverseLerp(12f, 32f, player.LandingSpeed));
+        private float DirtRange(float min, float max) => Mathf.Lerp(min, max, (float)dirtRandom.NextDouble());
+
         private void EmitDirt(Vector3 position, int count, DirtEmission emission)
         {
             if (dust.Count == 0) return;
             bool impact = emission == DirtEmission.Landing || emission == DirtEmission.Crash;
-            float drift = RunnerRules.Speed(elapsed) * (impact ? 0.22f : 0.4f);
+            float drift = RunnerRules.Speed(elapsed) * (impact ? 0.18f : 0.38f);
+            float strength = emission == DirtEmission.Landing ? LandingDirtStrength : 1f;
             for (int i = 0; i < count; i++)
             {
                 Dust particle = null;
@@ -860,21 +869,30 @@ namespace DinoRush
                     particle = dust[nextDirtParticle];
                     nextDirtParticle = (nextDirtParticle + 1) % dust.Count;
                 }
-                particle.puff = i % 3 == 0;
-                particle.duration = particle.life = impact ? Random.Range(0.42f, 0.65f) : Random.Range(0.30f, 0.48f);
-                particle.velocity = new Vector2((impact ? Random.Range(-3.8f, 3.8f) : Random.Range(-1.8f, -0.6f)) - drift,
-                    particle.puff ? Random.Range(0.5f, 1.1f) : Random.Range(impact ? 1.3f : 0.7f, impact ? 3.2f : 1.8f));
-                particle.gravity = particle.puff ? 2.2f : 10f;
-                particle.spin = particle.puff ? 0f : Random.Range(-180f, 180f);
-                particle.size = particle.puff ? Random.Range(impact ? 0.32f : 0.22f, impact ? 0.46f : 0.34f)
-                    : Random.Range(impact ? 0.12f : 0.085f, impact ? 0.20f : 0.15f);
-                particle.startColor = DirtColors[Random.Range(particle.puff ? 2 : 0, DirtColors.Length)];
+                // Alternate broad clouds, curl wisps, grit, and tiny grains rather than opaque dots.
+                int variant = impact ? (i % 6 == 0 ? 1 : i % 6 == 1 ? 3 : i % 6 == 2 ? 0 : i % 6 == 3 ? 5 : i % 6 == 4 ? 4 : 2)
+                    : (i % 5 == 0 ? 1 : i % 5 == 1 ? 2 : i % 5 == 2 ? 5 : i % 5 == 3 ? 3 : 0);
+                particle.skim = variant == 4;
+                particle.puff = variant == 1 || variant == 3 || particle.skim;
+                particle.fine = variant == 5;
+                particle.duration = particle.life = impact ? DirtRange(0.42f, 0.64f) : DirtRange(0.28f, 0.43f);
+                float side = (i % 2 == 0 ? -1f : 1f) * (i / 6 % 2 == 0 ? 1f : -1f);
+                float outward = particle.puff ? DirtRange(1.2f, 2.8f) : DirtRange(2.2f, 5f);
+                particle.velocity = new Vector2((impact ? side * outward * strength : DirtRange(-1.9f, -0.5f)) - drift,
+                    particle.skim ? 0.08f : particle.puff ? DirtRange(impact ? 0.8f : 0.55f, impact ? 1.55f : 1.15f) : DirtRange(impact ? 1.4f : 0.65f, impact ? 3.6f : 1.6f) * strength);
+                particle.gravity = particle.skim ? 1.5f : particle.puff ? 1.8f : particle.fine ? 5f : 12f;
+                particle.spin = particle.puff ? DirtRange(-22f, 22f) : DirtRange(-220f, 220f);
+                particle.size = (particle.skim ? DirtRange(0.65f, 0.95f) : particle.puff ? DirtRange(impact ? 0.42f : 0.30f, impact ? 0.66f : 0.44f)
+                    : particle.fine ? DirtRange(0.045f, 0.08f) : DirtRange(impact ? 0.10f : 0.065f, impact ? 0.18f : 0.12f)) * strength;
+                particle.startColor = DirtColors[dirtRandom.Next(particle.puff ? 2 : 0, DirtColors.Length)];
                 particle.startColor *= mapDustTint;
-                particle.startColor.a = particle.puff ? 0.65f : 1f;
+                particle.startColor.a = particle.skim ? 0.42f : particle.puff ? 0.7f : particle.fine ? 0.75f : 1f;
                 if (dirtSprites != null && dirtSprites.Length >= 3)
-                    particle.renderer.sprite = dirtSprites[particle.puff ? 1 : (i % 2 == 0 ? 0 : 2)];
-                particle.renderer.transform.position = position + new Vector3(impact ? Random.Range(-0.38f, 0.38f) : Random.Range(-0.48f, -0.16f), 0.05f, 0);
-                particle.renderer.transform.rotation = Quaternion.Euler(0, 0, particle.puff ? 0 : Random.Range(0, 4) * 90);
+                    particle.renderer.sprite = dirtSprites[variant < dirtSprites.Length ? variant : particle.puff ? 1 : 2];
+                particle.renderer.sortingOrder = particle.puff ? 18 : 21;
+                particle.renderer.transform.position = position + new Vector3(impact ? side * DirtRange(0.08f, 0.4f) : DirtRange(-0.5f, -0.17f),
+                    particle.skim ? 0.025f : particle.puff ? DirtRange(0.11f, 0.18f) : DirtRange(0.035f, 0.095f), 0);
+                particle.renderer.transform.rotation = Quaternion.Euler(0, 0, particle.puff ? DirtRange(-12f, 12f) : dirtRandom.Next(4) * 90);
                 particle.renderer.transform.localScale = Vector3.one * particle.size;
                 particle.renderer.color = particle.startColor;
                 particle.renderer.gameObject.SetActive(true);
@@ -894,6 +912,7 @@ namespace DinoRush
                     continue;
                 }
                 particle.velocity += Vector2.down * (dt * particle.gravity);
+                particle.velocity.x *= Mathf.Exp(-dt * (particle.puff ? 1.5f : 0.3f));
                 particle.renderer.transform.position += (Vector3)particle.velocity * dt;
                 Vector3 position = particle.renderer.transform.position;
                 if (position.y < RunnerRules.GroundY + 0.025f)
@@ -907,8 +926,10 @@ namespace DinoRush
                 Color color = particle.startColor;
                 color.a *= Mathf.SmoothStep(0f, 1f, remaining);
                 particle.renderer.color = color;
-                particle.renderer.transform.localScale = Vector3.one * particle.size *
-                    (particle.puff ? Mathf.Lerp(0.8f, 1.6f, age) : Mathf.Lerp(1f, 0.45f, age * age));
+                Vector3 shape = particle.skim ? new Vector3(Mathf.Lerp(1.1f, 2.1f, age), 0.4f, 1f) :
+                    particle.puff ? new Vector3(Mathf.Lerp(0.85f, 1.65f, age), Mathf.Lerp(0.7f, 1.25f, age), 1f) :
+                    Vector3.one * Mathf.Lerp(1f, 0.4f, age * age);
+                particle.renderer.transform.localScale = shape * particle.size;
                 particle.renderer.transform.Rotate(0, 0, particle.spin * dt);
             }
             for (int i = 0; i < motes.Count; i++)
@@ -1170,10 +1191,11 @@ namespace DinoRush
         }
         public RunnerSlashAttack SlashAttack { get; private set; }
         public int SlashesUsed { get; private set; }
+        public int SlashesRemainingThisRound => Mathf.Max(0, RunnerSlashProgress.MaxUsesPerRound - SlashesUsed);
         public bool Attack()
         {
             RunnerSlashKind style = RunnerSlashProgress.Equipped;
-            if (State != RunState.Running || SlashesUsed >= RunnerSlashProgress.MaxCharges ||
+            if (State != RunState.Running || SlashesRemainingThisRound == 0 ||
                 SlashAttack == null || SlashAttack.Active || RunnerSlashProgress.Charges <= 0 ||
                 style == RunnerSlashKind.None) return false;
             if (!SlashAttack.Launch(style, player.Feet)) return false;

@@ -115,7 +115,7 @@ namespace DinoRush.Tests
                 Assert.That(duck.activeSelf, Is.False, "The title preview must hide gameplay controls.");
                 Assert.That(duck.GetComponent<RunnerDuckControl>(), Is.Not.Null);
                 SerializedProperty dirtArt = serialized.FindProperty("dirtSprites");
-                Assert.That(dirtArt.arraySize, Is.EqualTo(3));
+                Assert.That(dirtArt.arraySize, Is.EqualTo(6));
                 for (int i = 0; i < dirtArt.arraySize; i++)
                 {
                     var sprite = dirtArt.GetArrayElementAtIndex(i).objectReferenceValue as Sprite;
@@ -124,7 +124,7 @@ namespace DinoRush.Tests
                     Assert.That(sprite.texture.filterMode, Is.EqualTo(FilterMode.Point));
                 }
                 SerializedProperty dirtPool = serialized.FindProperty("dust");
-                Assert.That(dirtPool.arraySize, Is.EqualTo(36));
+                Assert.That(dirtPool.arraySize, Is.EqualTo(ForestRunnerGame.DirtPoolCapacity));
                 for (int i = 0; i < dirtPool.arraySize; i++)
                 {
                     var renderer = (SpriteRenderer)dirtPool.GetArrayElementAtIndex(i).FindPropertyRelative("renderer").objectReferenceValue;
@@ -139,6 +139,28 @@ namespace DinoRush.Tests
                 if (openedForTest) EditorSceneManager.CloseScene(forest, true);
                 if (previous.IsValid() && previous.isLoaded) SceneManager.SetActiveScene(previous);
             }
+        }
+
+        [Test]
+        public void DetailedDirtArtAddsFeatheredCloudsWithoutReplacingTheOriginalAsset()
+        {
+            int shapes = 0, feathered = 0;
+            foreach (Object asset in AssetDatabase.LoadAllAssetsAtPath("Assets/Generated/ForestDirtDetailSprites.asset"))
+            {
+                if (!(asset is Sprite sprite)) continue;
+                shapes++;
+                Assert.That(sprite.texture.filterMode, Is.EqualTo(FilterMode.Point));
+                if (sprite.name != "Dirt puff" && sprite.name != "Dirt curl" && sprite.name != "Dirt ground haze") continue;
+                bool edge = false, core = false;
+                foreach (Color pixel in sprite.texture.GetPixels())
+                {
+                    edge |= pixel.a > 0 && pixel.a < 0.5f;
+                    core |= pixel.a > 0.9f;
+                }
+                if (edge && core) feathered++;
+            }
+            Assert.That(shapes, Is.EqualTo(6)); Assert.That(feathered, Is.EqualTo(3));
+            Assert.That(AssetDatabase.LoadMainAssetAtPath("Assets/Generated/ForestDirtSprites.asset"), Is.Not.Null);
         }
 
         [Test]

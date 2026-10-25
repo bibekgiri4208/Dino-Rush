@@ -8,6 +8,23 @@ namespace DinoRush.Editor
 {
     public static class ForestSlashShopBuilder
     {
+        [MenuItem("Dino Rush/Update Slash Counts UI")]
+        public static void UpdateCountsUi()
+        {
+            if (Application.isPlaying) return;
+            if (!Application.isBatchMode && !EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
+            var scene = EditorSceneManager.OpenScene("Assets/Scenes/ForestRun.unity");
+            var game = Object.FindAnyObjectByType<ForestRunnerGame>();
+            var hud = game.GetComponentInChildren<RunnerSlashHud>(true);
+            var button = hud.transform.Find("Slash indicator").GetComponent<Button>();
+            hud.EnsureUi(button.GetComponentInChildren<Text>(true).font, button.GetComponent<Image>().sprite);
+            EditorUtility.SetDirty(hud);
+            var shop = game.GetComponentInChildren<RunnerSlashShop>(true);
+            shop.RefreshCountLabels(); shop.ApplyLayout(false);
+            shop.transform.Find("Slashes section/Slash loadout").GetComponent<Text>().text = "STOCK 0\nNONE";
+            EditorSceneManager.MarkSceneDirty(scene); EditorSceneManager.SaveScene(scene);
+        }
+
         [MenuItem("Dino Rush/Add Slash Attacks and Shop")]
         public static void Build()
         {

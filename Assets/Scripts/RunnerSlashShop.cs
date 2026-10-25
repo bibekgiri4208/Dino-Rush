@@ -41,7 +41,8 @@ namespace DinoRush
             if (content == null) return;
             int balance = Mathf.Max(0, PlayerPrefs.GetInt(RunnerShopProgress.WalletKey));
             wallet.text = RunnerShopWallet.Caption(balance);
-            status.text = "LOADED " + RunnerSlashProgress.Charges + "/3 / " + RunnerSlashProgress.Equipped.ToString().ToUpperInvariant();
+            status.text = "STOCK " + RunnerSlashProgress.Charges.ToString("N0") + "\n" + RunnerSlashProgress.Equipped.ToString().ToUpperInvariant();
+            RefreshCountLabels();
             for (int i = 0; i < 3; i++)
             {
                 var kind = (RunnerSlashKind)(i + 1);
@@ -50,15 +51,20 @@ namespace DinoRush
                 styles[i].interactable = !selected && (owned || balance >= RunnerSlashProgress.UnlockCost);
                 styles[i].transform.parent.Find("Ownership").GetComponent<Text>().text = owned ? "PERMANENTLY OWNED" : "5,000 EGGS / FOREVER";
             }
-            charge.interactable = RunnerSlashProgress.Equipped != RunnerSlashKind.None && RunnerSlashProgress.Charges < 3 && balance >= RunnerSlashProgress.ChargeCost;
-            charge.GetComponentInChildren<Text>(true).text = RunnerSlashProgress.Charges == 3 ? "FULL / 3 CHARGES" : "+1 CHARGE / 1,000 EGGS";
+            charge.interactable = RunnerSlashProgress.Equipped != RunnerSlashKind.None && RunnerSlashProgress.Charges < int.MaxValue && balance >= RunnerSlashProgress.ChargeCost;
+        }
+        public void RefreshCountLabels()
+        {
+            content.transform.Find("Charge rules").GetComponent<Text>().text =
+                "STOCK UP / USE UP TO " + RunnerSlashProgress.MaxUsesPerRound + " PER ROUND\nUnused charges carry over / shared across styles";
+            charge.GetComponentInChildren<Text>(true).text = "+1 CHARGE / 1,000";
         }
         public void EnsureUi(Font font, Sprite panel, Sprite button, RunnerSlashCatalog catalog)
         {
             content = Node("Slashes section", transform).gameObject; Stretch(content.transform);
             wallet = content.transform.Find("Slash egg balance wallet/Slash egg balance")?.GetComponent<Text>() ??
                 Label("Slash egg balance", content.transform, "EGGS: 0", font, 16, -252, 226, 340, 32, Color.white);
-            status = Label("Slash loadout", content.transform, "LOADED 0/3", font, 12, 210, 226, 420, 32, Color.white);
+            status = Label("Slash loadout", content.transform, "STOCK 0\nNONE", font, 12, 210, 226, 420, 40, Color.white);
             string[] names = { "FIRE", "LIGHTNING", "WATER" };
             for (int i = 0; i < 3; i++)
             {
@@ -73,7 +79,7 @@ namespace DinoRush
                 Label("Ownership", card, "5,000 EGGS / FOREVER", font, 10, 0, -120, 248, 28, new Color32(255, 210, 117, 255));
                 styles[i] = Control("Unlock slash " + (i + 1), card, font, button);
             }
-            Label("Charge rules", content.transform, "ENTER TO SLASH / MAX 3 PER MATCH\nUnused charges carry over / shared across styles", font, 10, 0, -260, 840, 48, Color.white);
+            Label("Charge rules", content.transform, "STOCK UP / USE UP TO 3 PER ROUND\nUnused charges carry over / shared across styles", font, 10, 0, -260, 840, 48, Color.white);
             charge = Control("Buy slash charge", content.transform, font, button);
             Show(false); ApplyLayout(false);
         }
@@ -82,7 +88,7 @@ namespace DinoRush
         {
             if (content == null) return;
             RunnerShopWallet.Layout(wallet, portrait ? -146 : -252, portrait ? 492 : 226, portrait ? 280 : 340, portrait);
-            Position(status.transform, portrait ? 142 : 210, portrait ? 492 : 226, portrait ? 280 : 420, 32);
+            Position(status.transform, portrait ? 142 : 210, portrait ? 492 : 226, portrait ? 280 : 420, 40);
             for (int i = 0; i < 3; i++)
             {
                 Transform card = styles[i].transform.parent;

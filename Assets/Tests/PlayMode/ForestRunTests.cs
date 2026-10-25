@@ -86,12 +86,12 @@ namespace DinoRush.Tests
         {
             Transform pool = game.transform.Find("Forest effects/Trail dust pool");
             SpriteRenderer[] particles = pool.GetComponentsInChildren<SpriteRenderer>(true);
-            Assert.That(particles.Length, Is.EqualTo(36));
+            Assert.That(particles.Length, Is.EqualTo(ForestRunnerGame.DirtPoolCapacity));
             Assert.That(CountLiveDirt(particles), Is.Zero);
             yield return StartFromMapSelector();
             float deadline = Time.realtimeSinceStartup + 5f;
             while (game.Score < 2 && Time.realtimeSinceStartup < deadline) yield return null;
-            Assert.That(CountLiveDirt(particles), Is.GreaterThanOrEqualTo(3), "Running must kick up a visible dirt trail.");
+            Assert.That(CountLiveDirt(particles), Is.GreaterThanOrEqualTo(10), "Running must kick up a dense, layered dirt trail.");
             foreach (SpriteRenderer particle in particles)
             {
                 if (!particle.gameObject.activeSelf) continue;
@@ -111,7 +111,7 @@ namespace DinoRush.Tests
             Assert.That(CountLiveDirt(particles), Is.Zero, "Old dirt must fade away without emitting new dirt in midair.");
             while (dino.position.y > RunnerRules.GroundY + 0.0001f && Time.realtimeSinceStartup < deadline) yield return null;
             Assert.That(game.State, Is.EqualTo(ForestRunnerGame.RunState.Running));
-            Assert.That(CountLiveDirt(particles), Is.GreaterThanOrEqualTo(14), "Landing must create a stronger burst than a footstep.");
+            Assert.That(CountLiveDirt(particles), Is.GreaterThanOrEqualTo(36), "Landing must create a stronger burst than a footstep.");
             yield return new WaitForSeconds(0.08f);
             yield return Capture("forest-dirt-landing");
             game.TogglePause();
@@ -133,7 +133,7 @@ namespace DinoRush.Tests
             }
             game.RestartRun();
             Assert.That(CountLiveDirt(particles), Is.Zero);
-            Assert.That(pool.GetComponentsInChildren<SpriteRenderer>(true).Length, Is.EqualTo(36), "Bursts must reuse the pool.");
+            Assert.That(pool.GetComponentsInChildren<SpriteRenderer>(true).Length, Is.EqualTo(ForestRunnerGame.DirtPoolCapacity), "Bursts must reuse the pool.");
             game.ReturnToMenu();
             yield return new WaitForSeconds(0.2f);
             Assert.That(CountLiveDirt(particles), Is.Zero, "The title screen must not emit running dirt.");
