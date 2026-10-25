@@ -8,7 +8,7 @@ namespace DinoRush
     public sealed class ForestRunnerGame : MonoBehaviour
     {
         public enum RunState { Ready, Running, Paused, GameOver, AwaitingStart }
-        private const string HighScoreKey = "DinoRush.Forest.HighScore";
+        private const string HighScoreKey = RunnerAccountProgress.HighScoreKey;
         private const float MenuWalkSpeed = 1.4f;
         private const float MenuDinoScale = 0.9f;
 
@@ -1142,6 +1142,23 @@ namespace DinoRush
             hud.ShowReady(best);
             hud.UpdateLevel(0);
             hud.UpdateScore(0, best, 0, RunnerRules.Speed(0));
+        }
+
+        public bool ResetAccount()
+        {
+            if (!initialized || State != RunState.Ready) return false;
+            // Clear cached run state before deleting saves; no old score/mission data may be re-saved.
+            ResetRun();
+            best = bestAtRunStart = 0;
+            SlashesUsed = 0;
+            audioCues.StopEggSounds();
+            RunnerAccountProgress.Reset(dinoRoster);
+            DailyMissions.ResetProgress();
+            SelectDino(0);
+            SelectMap(mapCatalog != null ? mapCatalog.Find("forest") : 0);
+            GetComponentInChildren<ForestMainMenu>(true)?.RefreshAfterAccountReset();
+            ReturnToMenu();
+            return true;
         }
 
         public void Jump()

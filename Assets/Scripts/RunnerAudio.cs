@@ -11,8 +11,11 @@ namespace DinoRush
         private readonly AudioClip crash;
         private readonly AudioClip milestone;
         private readonly AudioClip pickup;
-        private readonly AudioClip eggCrack;
-        private readonly AudioClip eggHatch;
+        public enum EggCue { Pull, Crack, Charge, Reveal, Unlock, Fragments }
+        public event Action<EggCue> EggCuePlayed;
+        private readonly AudioSource shopSource;
+        private readonly AudioClip[] eggCues;
+        private readonly AudioClip[] revealNotes;
         public bool Muted { get; private set; }
 
         public RunnerAudio(GameObject owner)
@@ -26,14 +29,23 @@ namespace DinoRush
             crash = Tone("Bump", 0.24f, 180f, 45f);
             milestone = Tone("New milestone", 0.3f, 660f, 1320f);
             pickup = Tone("Egg pickup", 0.09f, 1100f, 1760f);
-            eggCrack = Tone("Mystery shell crack", 0.12f, 250f, 90f);
-            eggHatch = Tone("Mystery hatch reveal", 0.55f, 520f, 1560f);
+            shopSource = owner.AddComponent<AudioSource>();
+            shopSource.playOnAwake = false;
+            shopSource.spatialBlend = 0;
+            shopSource.volume = 0.55f;
+            shopSource.mute = Muted;
+            eggCues = new AudioClip[6];
+            for (int i = 0; i < eggCues.Length; i++) eggCues[i] = RunnerMysteryEggAudio.Create((EggCue)i);
+            revealNotes = new AudioClip[RunnerShopProgress.TenPullCount];
+            for (int i = 0; i < revealNotes.Length; i++) revealNotes[i] = RunnerMysteryEggAudio.Create(EggCue.Reveal, i);
         }
 
         public void ToggleMute()
         {
             Muted = !Muted;
             source.mute = Muted;
+            shopSource.mute = Muted;
+            if (Muted) { source.Stop(); shopSource.Stop(); }
             PlayerPrefs.SetInt("DinoRush.Muted", Muted ? 1 : 0);
             PlayerPrefs.Save();
         }
@@ -42,8 +54,20 @@ namespace DinoRush
         public void Crash() => source.PlayOneShot(crash);
         public void Milestone() => source.PlayOneShot(milestone, 0.5f);
         public void Pickup() => source.PlayOneShot(pickup, 0.45f);
-        public void EggCrack() => source.PlayOneShot(eggCrack, 0.45f);
-        public void EggHatch() => source.PlayOneShot(eggHatch, 0.65f);
+        public void EggPull() => PlayEgg(EggCue.Pull);
+        public void EggCrack() => PlayEgg(EggCue.Crack);
+        public void EggCharge() => PlayEgg(EggCue.Charge);
+        public void EggHatch(bool unlocked = false, int sequence = 0) => PlayEgg(unlocked ? EggCue.Unlock : EggCue.Reveal, sequence);
+        public void EggFragments() => PlayEgg(EggCue.Fragments);
+        public void StopEggSounds() { if (shopSource != null) shopSource.Stop(); }
+
+        private void PlayEgg(EggCue cue, int sequence = 0)
+        {
+            if (Muted || shopSource == null) return;
+            shopSource.PlayOneShot(cue == EggCue.Reveal ? revealNotes[Mathf.Clamp(sequence, 0, revealNotes.Length - 1)] : eggCues[(int)cue],
+                cue == EggCue.Fragments ? 0.3f : 1);
+            EggCuePlayed?.Invoke(cue);
+        }
 
         private static AudioClip Tone(string name, float duration, float start, float end)
         {
@@ -68,8 +92,13 @@ namespace DinoRush
             UnityEngine.Object.Destroy(crash);
             UnityEngine.Object.Destroy(milestone);
             UnityEngine.Object.Destroy(pickup);
-            UnityEngine.Object.Destroy(eggCrack);
-            UnityEngine.Object.Destroy(eggHatch);
+            if (source != null) source.Stop();
+            StopEggSounds();
+            foreach (AudioClip clip in eggCues) UnityEngine.Object.Destroy(clip);
+            foreach (AudioClip clip in revealNotes) UnityEngine.Object.Destroy(clip);
+            UnityEngine.Object.Destroy(source);
+            UnityEngine.Object.Destroy(shopSource);
+            EggCuePlayed = null;
         }
     }
 }

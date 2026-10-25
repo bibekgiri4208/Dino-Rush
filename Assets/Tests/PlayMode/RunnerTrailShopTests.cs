@@ -254,7 +254,7 @@ namespace DinoRush.Tests
                     Assert.That(bounds.max.y, Is.LessThanOrEqualTo(panelRect.yMax), button.name);
                 }
                 Transform section = menu.TrailShop.transform.Find("Trails section");
-                AssertSeparate(section, section.Find("Trail egg balance"), section.Find("Equipped trail summary"));
+                AssertSeparate(section, section.Find("Trail egg balance wallet"), section.Find("Equipped trail summary"));
                 AssertSeparate(section, section.Find("Previous trails page"), section.Find("Trail page indicator"));
                 AssertSeparate(section, section.Find("Next trails page"), section.Find("Trail page indicator"));
                 foreach (Transform card in section)

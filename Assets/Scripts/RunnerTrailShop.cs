@@ -115,9 +115,10 @@ namespace DinoRush
             content.SetActive(IsTrails);
             slashShop?.Show(IsSlashes);
             foreach (GameObject node in dinoContent)
-                if (node != null) node.SetActive(!IsEffects && node.name != "Mystery egg rules" && node.name != "Single adventure" &&
+                if (node != null) node.SetActive(!IsEffects && node.name != "Mystery egg rules" && node.name != "Single adventure" && node.name != "Dino selection" &&
                     (!portrait || node.name != "Selected status" && node.name != "Map selection"));
-            wallet.text = "EGGS: " + (shop != null ? shop.Balance : Mathf.Max(0, PlayerPrefs.GetInt(RunnerShopProgress.WalletKey))).ToString("N0");
+            transform.Find("Shop egg balance wallet")?.gameObject.SetActive(!IsEffects);
+            wallet.text = RunnerShopWallet.Caption(shop != null ? shop.Balance : PlayerPrefs.GetInt(RunnerShopProgress.WalletKey));
             RunnerTrailKind equipped = RunnerTrailProgress.Equipped;
             equippedLabel.text = "USING: " + (RunnerTrailProgress.Valid(equipped) ? Names[(int)equipped - 1] : "NONE");
             pageLabel.text = "PAGE " + (page + 1) + " / " + PageCount;
@@ -153,7 +154,8 @@ namespace DinoRush
             trailsTab = Control("Trails category", transform, "TRAILS", font, buttonSprite);
             content = Node("Trails section", transform).gameObject;
             Stretch(content.transform);
-            wallet = Label("Trail egg balance", content.transform, "EGGS: 0", font, 16, 0, 226, 840, 32, Gold);
+            wallet = content.transform.Find("Trail egg balance wallet/Trail egg balance")?.GetComponent<Text>() ??
+                Label("Trail egg balance", content.transform, "EGGS: 0", font, 16, 0, 226, 840, 32, Gold);
             hint = Label("Trail shop hint", content.transform, "PERMANENT UNLOCKS / FREE SWAPS", font, 11, 0, -278, 840, 28, Cream);
             equippedLabel = Label("Equipped trail summary", content.transform, "USING: NONE", font, 12, 220, 226, 400, 32, Cream);
             pageLabel = Label("Trail page indicator", content.transform, "PAGE 1 / 2", font, 14, 0, -236, 280, 32, Cream);
@@ -201,6 +203,11 @@ namespace DinoRush
             slashesTab = Control("Slashes category", transform, "SLASHES", font, button);
             ApplyLayout(portrait);
         }
+        public void EnsureWalletUi(Sprite eggSprite = null)
+        {
+            RunnerShopWallet.Ensure(wallet, eggSprite);
+            slashShop?.EnsureWalletUi(eggSprite);
+        }
         public void ApplyLayout(bool isPortrait)
         {
             portrait = isPortrait;
@@ -218,7 +225,7 @@ namespace DinoRush
                 TextSize(trailsTab.transform.Find("Label"), portrait ? 16 : 18);
                 TextSize(slashesTab.transform.Find("Label"), portrait ? 16 : 18);
             }
-            Position(wallet.transform, portrait ? -142 : -254, portrait ? 492 : 226, portrait ? 280 : 340, 32);
+            RunnerShopWallet.Layout(wallet, portrait ? -146 : -254, portrait ? 492 : 226, portrait ? 280 : 340, portrait);
             Position(equippedLabel.transform, portrait ? 142 : 216, portrait ? 492 : 226, portrait ? 280 : 408, 32);
             equippedLabel.fontSize = portrait ? 14 : 12;
             Place(previousPage.transform, portrait ? -205 : -304, portrait ? -482 : -244, portrait ? 146 : 184, portrait ? 60 : 48);

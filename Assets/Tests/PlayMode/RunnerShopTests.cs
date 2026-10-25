@@ -17,6 +17,8 @@ namespace DinoRush.Tests
         private readonly HashSet<string> existing = new HashSet<string>();
         private string previousDino;
         private bool hadDino;
+        private bool hadMute;
+        private int previousMute;
 
         [UnitySetUp]
         public IEnumerator FreshProfile()
@@ -32,6 +34,9 @@ namespace DinoRush.Tests
             hadDino = PlayerPrefs.HasKey(RunnerDinoRoster.SelectionKey);
             previousDino = PlayerPrefs.GetString(RunnerDinoRoster.SelectionKey);
             PlayerPrefs.SetString(RunnerDinoRoster.SelectionKey, "blue");
+            hadMute = PlayerPrefs.HasKey("DinoRush.Muted");
+            previousMute = PlayerPrefs.GetInt("DinoRush.Muted");
+            PlayerPrefs.SetInt("DinoRush.Muted", 0);
             yield return Reload();
         }
 
@@ -54,6 +59,8 @@ namespace DinoRush.Tests
                 else PlayerPrefs.DeleteKey(pair.Key);
             if (hadDino) PlayerPrefs.SetString(RunnerDinoRoster.SelectionKey, previousDino);
             else PlayerPrefs.DeleteKey(RunnerDinoRoster.SelectionKey);
+            if (hadMute) PlayerPrefs.SetInt("DinoRush.Muted", previousMute);
+            else PlayerPrefs.DeleteKey("DinoRush.Muted");
             PlayerPrefs.Save();
         }
 
@@ -471,6 +478,162 @@ namespace DinoRush.Tests
             yield return new WaitForSecondsRealtime(0.3f);
             Assert.That(GameObject.Find("Buy mystery egg").GetComponent<Button>().interactable, Is.False);
             Assert.That(GameObject.Find("Buy ten mystery eggs").GetComponent<Button>().interactable, Is.False);
+        }
+
+        [UnityTest]
+        public IEnumerator EggWalletsStayReadableAccurateAndNonBlockingInEveryCategoryAndOrientation()
+        {
+            Click("Shop");
+            yield return new WaitForSecondsRealtime(0.3f);
+            var menu = game.GetComponentInChildren<ForestMainMenu>();
+            foreach (int balance in new[] { 0, 49, 50, 499, 500, 2000, 5000, int.MaxValue })
+            {
+                PlayerPrefs.SetInt(RunnerShopProgress.WalletKey, balance);
+                typeof(ForestMainMenu).GetMethod("RefreshShop", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(menu, null);
+                foreach (bool portrait in new[] { false, true })
+                {
+                    Vector2Int size = portrait ? new Vector2Int(320, 568) : new Vector2Int(1280, 720);
+                    game.ApplyScreenLayout(RunnerScreenLayout.Calculate(size.x, size.y, new Rect(0, 24, size.x, size.y - 48)));
+                    for (int category = 0; category < 3; category++)
+                    {
+                        if (category == 0) menu.TrailShop.ShowTrails(false);
+                        else if (category == 1) menu.TrailShop.ShowTrails(true);
+                        else menu.TrailShop.ShowSlashes();
+                        Canvas.ForceUpdateCanvases();
+                        Assert.That(menu.ShopCollection.transform.Find("Dino selection").gameObject.activeSelf, Is.False,
+                            "The retired selection caption must not overlap the phone collection heading.");
+                        var wallets = menu.GetComponentsInChildren<RunnerShopWallet>();
+                        Assert.That(wallets.Length, Is.EqualTo(1), "Only the selected category's wallet should be visible.");
+                        Text label = wallets[0].GetComponentInChildren<Text>();
+                        Assert.That(label.text, Is.EqualTo(RunnerShopWallet.Caption(balance)));
+                        Assert.That(label.fontSize, Is.InRange(16, 18));
+                        Assert.That(((RectTransform)wallets[0].transform).rect.height, Is.LessThanOrEqualTo(44));
+                        Assert.That(((RectTransform)wallets[0].transform).rect.width, Is.LessThanOrEqualTo(360));
+                        Assert.That(label.cachedTextGenerator.characterCountVisible, Is.EqualTo(label.text.Length), "The full balance must fit, including the maximum saved wallet.");
+                        Assert.That(wallets[0].GetComponentInChildren<Image>().raycastTarget, Is.False);
+                        Assert.That(wallets[0].transform.Find("Wallet egg icon").GetComponent<Image>().sprite, Is.Not.Null);
+                        foreach (Graphic art in wallets[0].GetComponentsInChildren<Graphic>()) Assert.That(art.raycastTarget, Is.False);
+                    }
+                }
+                Assert.That(game.Shop.Balance, Is.EqualTo(balance), "Switching categories and resizing must never spend eggs.");
+            }
+            PlayerPrefs.SetInt(RunnerShopProgress.WalletKey, 12345);
+            typeof(ForestMainMenu).GetMethod("RefreshShop", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(menu, null);
+            for (int category = 0; category < 3; category++)
+            {
+                if (category == 0) menu.TrailShop.ShowTrails(false);
+                else if (category == 1) menu.TrailShop.ShowTrails(true);
+                else menu.TrailShop.ShowSlashes();
+                yield return RunnerDisplayCapture.Capture("shop-wallet-" + category, 1280, 720);
+                yield return RunnerDisplayCapture.Capture("shop-wallet-portrait-" + category, 360, 800);
+            }
+        }
+
+        private RunnerAudio Audio => (RunnerAudio)typeof(ForestRunnerGame).GetField("audioCues", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(game);
+
+        [UnityTest]
+        public IEnumerator SinglePullPlaysStageSoundsOnceUnlocksCelebrateAndSkipDoesNotStackShellSounds()
+        {
+            Click("Shop");
+            yield return new WaitForSecondsRealtime(0.3f);
+            var reveal = game.GetComponentInChildren<ForestMainMenu>().ShopPresentation;
+            reveal.enabled = false;
+            var cues = new List<RunnerAudio.EggCue>();
+            Audio.EggCuePlayed += cues.Add;
+            reveal.Play(game.DinoRoster[1], 5, 100, true);
+            Assert.That(cues, Is.EqualTo(new[] { RunnerAudio.EggCue.Pull }));
+            Advance(reveal, RunnerShopPresentation.CrackTime + 0.01f);
+            Advance(reveal, RunnerShopPresentation.HatchTime - RunnerShopPresentation.CrackTime);
+            Advance(reveal, RunnerShopPresentation.RewardTime - RunnerShopPresentation.HatchTime);
+            Assert.That(cues.GetRange(0, 4), Is.EqualTo(new[] { RunnerAudio.EggCue.Pull, RunnerAudio.EggCue.Crack, RunnerAudio.EggCue.Charge, RunnerAudio.EggCue.Unlock }));
+            Advance(reveal, 1);
+            int count = cues.Count;
+            reveal.RefreshLayout(); Advance(reveal, 1);
+            Assert.That(cues.Count, Is.EqualTo(count));
+            reveal.HandleBack();
+            cues.Clear();
+            reveal.Play(game.DinoRoster[1], 5, 15, false);
+            reveal.HandleBack();
+            Assert.That(cues, Is.EqualTo(new[] { RunnerAudio.EggCue.Pull, RunnerAudio.EggCue.Reveal }));
+            Assert.That(reveal.DisplayedFragments, Is.EqualTo(5));
+            reveal.HandleBack();
+            Audio.EggCuePlayed -= cues.Add;
+            yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator TenPullChimesEachCardMuteSuppressesCuesAndSlowFramesOnlyPlayOneReveal()
+        {
+            Click("Shop");
+            yield return new WaitForSecondsRealtime(0.3f);
+            var reveal = game.GetComponentInChildren<ForestMainMenu>().ShopPresentation;
+            var batch = reveal.Batch;
+            batch.enabled = false;
+            var rewards = new RunnerShopProgress.Reward[10];
+            for (int i = 0; i < rewards.Length; i++) rewards[i] = new RunnerShopProgress.Reward(1, 5, 50 + i * 5, i == 9);
+            var cues = new List<RunnerAudio.EggCue>();
+            Audio.EggCuePlayed += cues.Add;
+            batch.Play(game.DinoRoster, rewards);
+            AdvanceBatch(batch, RunnerShopBatchPresentation.GatherTime + 0.01f);
+            AdvanceBatch(batch, RunnerShopBatchPresentation.RevealTime - RunnerShopBatchPresentation.GatherTime);
+            for (int i = 1; i < 10; i++) AdvanceBatch(batch, RunnerShopBatchPresentation.RevealSpacing);
+            Assert.That(cues.FindAll(c => c == RunnerAudio.EggCue.Reveal).Count, Is.EqualTo(9));
+            Assert.That(cues.FindAll(c => c == RunnerAudio.EggCue.Unlock).Count, Is.EqualTo(1));
+            Assert.That(cues[0], Is.EqualTo(RunnerAudio.EggCue.Pull));
+            Assert.That(cues[1], Is.EqualTo(RunnerAudio.EggCue.Crack));
+            batch.Cancel(); cues.Clear();
+            batch.Play(game.DinoRoster, rewards);
+            AdvanceBatch(batch, RunnerShopBatchPresentation.Duration + 1);
+            Assert.That(cues, Is.EqualTo(new[] { RunnerAudio.EggCue.Pull, RunnerAudio.EggCue.Unlock }));
+            batch.Cancel(); cues.Clear();
+            Audio.ToggleMute();
+            batch.Play(game.DinoRoster, rewards);
+            AdvanceBatch(batch, RunnerShopBatchPresentation.Duration + 1);
+            Assert.That(cues, Is.Empty);
+            foreach (AudioSource source in game.GetComponents<AudioSource>()) Assert.That(source.mute, Is.True);
+            batch.Cancel();
+            Audio.ToggleMute();
+            batch.Play(game.DinoRoster, rewards); batch.HandleBack();
+            Assert.That(cues, Is.EqualTo(new[] { RunnerAudio.EggCue.Pull, RunnerAudio.EggCue.Unlock }));
+            batch.Cancel();
+            Audio.EggCuePlayed -= cues.Add;
+            Assert.That(game.Shop.Balance, Is.Zero, "Audio and presentation do not write wallet progress.");
+            yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator GeneratedShopCuesHaveAudibleBoundedSamplesAndAreDisposedWithTheirSources()
+        {
+            var owner = new GameObject("Shop audio lifecycle test");
+            Random.State state = Random.state;
+            float expected = Random.value;
+            Random.state = state;
+            var audio = new RunnerAudio(owner);
+            Assert.That(Random.value, Is.EqualTo(expected), "Sound synthesis must not consume gameplay randomness.");
+            Random.state = state;
+            const BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic;
+            var clips = new List<AudioClip>((AudioClip[])typeof(RunnerAudio).GetField("eggCues", flags).GetValue(audio));
+            clips.AddRange((AudioClip[])typeof(RunnerAudio).GetField("revealNotes", flags).GetValue(audio));
+            foreach (AudioClip clip in clips)
+            {
+                var samples = new float[clip.samples];
+                Assert.That(clip.GetData(samples, 0), Is.True);
+                float peak = 0;
+                foreach (float sample in samples)
+                {
+                    Assert.That(float.IsNaN(sample) || float.IsInfinity(sample), Is.False);
+                    peak = Mathf.Max(peak, Mathf.Abs(sample));
+                }
+                Assert.That(peak, Is.InRange(0.1f, 0.91f), clip.name);
+                Assert.That(Mathf.Abs(samples[0]), Is.LessThan(0.01f));
+                Assert.That(Mathf.Abs(samples[samples.Length - 1]), Is.LessThan(0.01f));
+            }
+            AudioSource[] sources = owner.GetComponents<AudioSource>();
+            audio.Dispose();
+            yield return null;
+            foreach (AudioClip clip in clips) Assert.That(clip == null, Is.True);
+            foreach (AudioSource source in sources) Assert.That(source == null, Is.True);
+            Object.Destroy(owner);
         }
 
         private static void Click(string name)

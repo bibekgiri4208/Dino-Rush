@@ -36,7 +36,7 @@ namespace DinoRush
         {
             if (content == null) return;
             int balance = Mathf.Max(0, PlayerPrefs.GetInt(RunnerShopProgress.WalletKey));
-            wallet.text = "EGGS: " + balance.ToString("N0");
+            wallet.text = RunnerShopWallet.Caption(balance);
             status.text = "LOADED " + RunnerSlashProgress.Charges + "/3 / " + RunnerSlashProgress.Equipped.ToString().ToUpperInvariant();
             for (int i = 0; i < 3; i++)
             {
@@ -52,7 +52,8 @@ namespace DinoRush
         public void EnsureUi(Font font, Sprite panel, Sprite button, RunnerSlashCatalog catalog)
         {
             content = Node("Slashes section", transform).gameObject; Stretch(content.transform);
-            wallet = Label("Slash egg balance", content.transform, "EGGS: 0", font, 16, -252, 226, 340, 32, Color.white);
+            wallet = content.transform.Find("Slash egg balance wallet/Slash egg balance")?.GetComponent<Text>() ??
+                Label("Slash egg balance", content.transform, "EGGS: 0", font, 16, -252, 226, 340, 32, Color.white);
             status = Label("Slash loadout", content.transform, "LOADED 0/3", font, 12, 210, 226, 420, 32, Color.white);
             string[] names = { "FIRE", "LIGHTNING", "WATER" };
             for (int i = 0; i < 3; i++)
@@ -72,10 +73,11 @@ namespace DinoRush
             charge = Control("Buy slash charge", content.transform, font, button);
             Show(false); ApplyLayout(false);
         }
+        public void EnsureWalletUi(Sprite eggSprite = null) => RunnerShopWallet.Ensure(wallet, eggSprite);
         public void ApplyLayout(bool portrait)
         {
             if (content == null) return;
-            Position(wallet.transform, portrait ? -142 : -252, portrait ? 492 : 226, portrait ? 280 : 340, 32);
+            RunnerShopWallet.Layout(wallet, portrait ? -146 : -252, portrait ? 492 : 226, portrait ? 280 : 340, portrait);
             Position(status.transform, portrait ? 142 : 210, portrait ? 492 : 226, portrait ? 280 : 420, 32);
             for (int i = 0; i < 3; i++)
             {

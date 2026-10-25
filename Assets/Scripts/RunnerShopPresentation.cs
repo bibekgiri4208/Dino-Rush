@@ -42,7 +42,7 @@ namespace DinoRush
         private RunnerAudio audioCues;
         private Action closed;
         private int reward, total;
-        private bool unlocked, bound, crackPlayed, hatchPlayed;
+        private bool unlocked, bound, crackPlayed, chargePlayed, hatchPlayed;
         private float elapsed, idleTime, lastTick;
 
         public RunnerEggHatchCatalog Catalog => catalog;
@@ -98,7 +98,8 @@ namespace DinoRush
             elapsed = 0;
             lastTick = -1;
             DisplayedFragments = 0;
-            crackPlayed = hatchPlayed = false;
+            crackPlayed = chargePlayed = hatchPlayed = false;
+            audioCues?.EggPull();
             revealRoot.SetActive(true);
             revealRoot.transform.SetAsLastSibling();
             revealPortrait.sprite = dino.Portrait;
@@ -110,7 +111,15 @@ namespace DinoRush
         {
             if (batch != null && batch.IsShowing) return batch.HandleBack();
             if (!SingleShowing) return false;
-            if (elapsed < Duration) { elapsed = Duration; Advance(0); return true; }
+            if (elapsed < Duration)
+            {
+                audioCues?.StopEggSounds();
+                if (!hatchPlayed) audioCues?.EggHatch(unlocked);
+                crackPlayed = chargePlayed = hatchPlayed = true;
+                elapsed = Duration;
+                RenderReveal();
+                return true;
+            }
             CancelReveal();
             closed?.Invoke();
             return true;
@@ -118,6 +127,7 @@ namespace DinoRush
 
         public void CancelReveal()
         {
+            audioCues?.StopEggSounds();
             if (revealRoot != null) revealRoot.SetActive(false);
             batch?.Cancel();
             if (revealFade != null) revealFade.alpha = 1;
@@ -151,8 +161,13 @@ namespace DinoRush
         {
             if (!SingleShowing) return;
             elapsed += Mathf.Max(0, dt);
-            if (elapsed >= CrackTime && !crackPlayed) { crackPlayed = true; audioCues?.EggCrack(); }
-            if (elapsed >= RewardTime && !hatchPlayed) { hatchPlayed = true; audioCues?.EggHatch(); }
+            // A slow frame plays only the latest stage, not several overlapping transition sounds.
+            if (elapsed >= RewardTime && !hatchPlayed) audioCues?.EggHatch(unlocked);
+            else if (elapsed >= HatchTime && !chargePlayed) audioCues?.EggCharge();
+            else if (elapsed >= CrackTime && !crackPlayed) audioCues?.EggCrack();
+            crackPlayed |= elapsed >= CrackTime;
+            chargePlayed |= elapsed >= HatchTime;
+            hatchPlayed |= elapsed >= RewardTime;
             RenderReveal();
         }
 
@@ -192,7 +207,7 @@ namespace DinoRush
             if (count != DisplayedFragments && elapsed - lastTick > 0.065f && elapsed < Duration)
             {
                 lastTick = elapsed;
-                audioCues?.Pickup();
+                audioCues?.EggFragments();
             }
             DisplayedFragments = count;
             amount.text = "+" + count;

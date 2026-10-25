@@ -23,6 +23,8 @@ namespace DinoRush
                     portrait ? 100 : 52, portrait ? 22 : 18, null, true);
                 Control(options.Find("Redeem gift"), 0, portrait ? 46 : 40, portrait ? 472 : 328,
                     portrait ? 100 : 52, portrait ? 22 : 18, "REDEEM", true);
+                Control(options.Find("Reset account"), 0, portrait ? -66 : -32, portrait ? 472 : 328,
+                    portrait ? 100 : 52, portrait ? 18 : 14, "RESET ACCOUNT");
                 Control(back, 0, portrait ? -210 : -164, portrait ? 472 : 328, portrait ? 100 : 52, 18, "BACK");
             }
             else if (kind == DialogKind.Quit)

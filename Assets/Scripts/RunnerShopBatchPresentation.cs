@@ -74,6 +74,7 @@ namespace DinoRush
             elapsed = 0;
             lastRevealed = 0;
             charged = false;
+            audioCues?.EggPull();
             for (int i = 0; i < cards.Length; i++)
             {
                 var reward = rewards[i];
@@ -96,10 +97,11 @@ namespace DinoRush
             if (!IsShowing) return false;
             if (!Complete)
             {
+                audioCues?.StopEggSounds();
+                PlayRevealSound(cards.Length);
                 elapsed = Duration;
                 charged = true;
                 lastRevealed = cards.Length;
-                audioCues?.EggHatch();
                 Render();
                 return true;
             }
@@ -110,6 +112,7 @@ namespace DinoRush
 
         public void Cancel()
         {
+            audioCues?.StopEggSounds();
             if (overlay != null) overlay.SetActive(false);
             rewards = null;
             elapsed = 0;
@@ -122,16 +125,24 @@ namespace DinoRush
         {
             if (!IsShowing) return;
             elapsed += Mathf.Max(0, dt);
-            if (!charged && elapsed >= GatherTime) { charged = true; audioCues?.EggCrack(); }
             int count = RevealedCount;
+            if (!charged && elapsed >= GatherTime && count == 0) audioCues?.EggCrack();
+            charged |= elapsed >= GatherTime;
             if (count > lastRevealed)
             {
                 // At most one cue per frame, including when a slow frame crosses several reveals.
-                if (lastRevealed == 0) audioCues?.EggHatch();
-                else audioCues?.Pickup();
+                PlayRevealSound(count);
                 lastRevealed = count;
             }
             Render();
+        }
+
+        private void PlayRevealSound(int count)
+        {
+            if (count <= lastRevealed || rewards == null) return;
+            bool unlocked = false;
+            for (int i = lastRevealed; i < count; i++) unlocked |= rewards[i].NewlyUnlocked;
+            audioCues?.EggHatch(unlocked, count - 1);
         }
 
         public void RefreshLayout() { if (IsShowing) Render(); }

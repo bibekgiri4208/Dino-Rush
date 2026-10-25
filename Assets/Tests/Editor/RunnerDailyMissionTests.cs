@@ -88,6 +88,21 @@ namespace DinoRush.Tests
             Assert.That(progress.Claim(0), Is.EqualTo(RunnerDailyMissions.ClaimResult.AlreadyClaimed));
             Assert.That(PlayerPrefs.GetInt(RunnerShopProgress.WalletKey), Is.EqualTo(100));
         }
+        [Test] public void ExplicitAccountResetReplacesTheLiveSnapshotAndPersistsFreshMissions()
+        {
+            CompleteAll(); progress.Claim(0); progress.Claim(1);
+            progress.ResetProgress(); progress.Flush(); progress.Refresh();
+            var reloaded = New();
+            for (int i = 0; i < RunnerDailyMissions.Count; i++)
+            {
+                Assert.That(progress.Progress(i), Is.Zero);
+                Assert.That(progress.Claimed(i), Is.False);
+                Assert.That(reloaded.Progress(i), Is.Zero);
+                Assert.That(reloaded.Claimed(i), Is.False);
+            }
+            Assert.That(progress.Claim(0), Is.EqualTo(RunnerDailyMissions.ClaimResult.Incomplete));
+            Assert.That(PlayerPrefs.GetInt(RunnerShopProgress.WalletKey), Is.EqualTo(300), "The account service, not mission reset, owns the wallet.");
+        }
         [Test] public void MissedDaysResetOnceWithoutBankingRewards()
         {
             CompleteAll(); progress.Flush(); now = now.AddDays(7);

@@ -57,6 +57,7 @@ namespace DinoRush
         [SerializeField] private RunnerTrailShop trailShop;
         [SerializeField] private Button missions;
         [SerializeField] private RunnerDailyMissionsPanel missionsPage;
+        [SerializeField] private RunnerAccountReset accountReset;
         private int pendingRewardIndex = -1;
         private RunnerShopProgress shop;
         private int selectedDino;
@@ -76,6 +77,9 @@ namespace DinoRush
         public RunnerRedeemPresentation RedeemPresentation => redeemPresentation;
         public RunnerTrailShop TrailShop => trailShop;
         public RunnerDailyMissionsPanel MissionsPage => missionsPage;
+        public RunnerAccountReset AccountReset => accountReset;
+        public bool CanResetAccount => dialog != null && dialog.activeInHierarchy && optionsPage.activeInHierarchy &&
+            (redeemPresentation == null || !redeemPresentation.IsShowing) && (shopPresentation == null || !shopPresentation.IsShowing);
 
         public void ApplyDialogLayout(bool portrait, Vector2 available)
         {
@@ -89,6 +93,7 @@ namespace DinoRush
             RunnerCompactMenus.ApplyDialog(dialogTitle.transform.parent, kind, portrait, available);
             shopPresentation?.ApplyBatchLayout(portrait, available);
             redeemPresentation?.ApplyLayout(portrait, available);
+            accountReset?.ApplyLayout(portrait, available);
             trailShop?.ApplyLayout(portrait);
             missionsPage?.ApplyLayout(portrait);
             if (mapPage != null) RunnerMapSelectionUi.Apply(mapPage.transform.Find("Map selection panel"), portrait, available);
@@ -185,6 +190,9 @@ namespace DinoRush
             EnsureShopUi();
             EnsureRedeemUi();
             EnsureTrailUi();
+            EnsureWalletUi();
+            EnsureAccountResetUi();
+            accountReset.Initialize(this, GetComponentInParent<ForestRunnerGame>());
             trailShop?.Initialize(shop, shopPresentation, audio, RefreshShop);
             redeemPresentation?.Initialize(shop, audio, RefreshShop);
             shopCollection?.Initialize(shop);
@@ -205,6 +213,32 @@ namespace DinoRush
             trailShop.EnsureUi(selectedDinoLabel.font, dialogTitle.transform.parent.GetComponent<Image>().sprite,
                 back.GetComponent<Image>().sprite, dinoPortraits[0].sprite);
             ApplyDialogLayout(dialogPortrait, dialogAvailable);
+        }
+
+        public void EnsureWalletUi(Sprite eggSprite = null)
+        {
+            if (shopBalance == null) return;
+            RunnerShopWallet.Ensure(shopBalance, eggSprite);
+            trailShop?.EnsureWalletUi(eggSprite);
+            ApplyDialogLayout(dialogPortrait, dialogAvailable);
+        }
+        public void EnsureAccountResetUi()
+        {
+            if (accountReset == null) accountReset = GetComponent<RunnerAccountReset>();
+            if (Application.isPlaying && accountReset != null) return;
+            if (accountReset == null) accountReset = gameObject.AddComponent<RunnerAccountReset>();
+            accountReset.EnsureUi(optionsPage.transform, selectedDinoLabel.font,
+                dialogTitle.transform.parent.GetComponent<Image>().sprite, back.GetComponent<Image>().sprite);
+            ApplyDialogLayout(dialogPortrait, dialogAvailable);
+        }
+
+        public void RefreshAfterAccountReset()
+        {
+            pendingRewardIndex = -1;
+            shopResult.text = "COLLECT EGGS ON YOUR RUNS TO HATCH";
+            shopCollection?.ShowIndex(0);
+            trailShop?.ShowTrails(false);
+            RefreshShop();
         }
         public void InitializeDailyMissions(RunnerDailyMissions progress) => missionsPage?.Initialize(progress, RefreshShop);
         public void OpenDailyMissions()
@@ -297,7 +331,8 @@ namespace DinoRush
             customize.GetComponentInChildren<Text>(true).text = "SHOP";
             Font font = selectedDinoLabel.font;
             Transform page = customizePage.transform;
-            shopBalance = ShopLabel(page, "Shop egg balance", "EGGS: 0", font, 14, 238, 30);
+            shopBalance = page.Find("Shop egg balance wallet/Shop egg balance")?.GetComponent<Text>() ??
+                ShopLabel(page, "Shop egg balance", "EGGS: 0", font, 14, 238, 30);
             // Retain the legacy text object for old scene references, but replace it with a visual product card.
             if (page.Find("Mystery egg rules") != null) page.Find("Mystery egg rules").gameObject.SetActive(false);
             buyMysteryEgg = PurchaseButton(page, "Buy mystery egg");
@@ -400,7 +435,7 @@ namespace DinoRush
         private void RefreshShop()
         {
             if (shop == null || shopBalance == null) return;
-            shopBalance.text = "EGGS: " + shop.Balance;
+            shopBalance.text = RunnerShopWallet.Caption(shop.Balance);
             buyMysteryEgg.interactable = shop.CanBuy && (shopPresentation == null || !shopPresentation.IsShowing);
             if (buyTenMysteryEggs != null) buyTenMysteryEggs.interactable = shop.CanBuyTen && (shopPresentation == null || !shopPresentation.IsShowing);
             if (shop.LockedCount == 0 && !shopResult.text.StartsWith("+", StringComparison.Ordinal)) shopResult.text = "ALL DINOS UNLOCKED!";
@@ -474,6 +509,7 @@ namespace DinoRush
 
         public void Show()
         {
+            accountReset?.Cancel();
             shopPresentation?.CancelReveal();
             redeemPresentation?.Cancel();
             gameObject.SetActive(true);
@@ -483,6 +519,7 @@ namespace DinoRush
 
         public void Hide()
         {
+            accountReset?.Cancel();
             shopPresentation?.CancelReveal();
             redeemPresentation?.Cancel();
             gameObject.SetActive(false);
@@ -498,6 +535,7 @@ namespace DinoRush
 
         private void OpenDialog(string heading, GameObject page)
         {
+            accountReset?.Cancel();
             if (mapPage != null) mapPage.SetActive(false);
             choices.SetActive(false);
             logo.SetActive(false);
@@ -513,6 +551,7 @@ namespace DinoRush
 
         public void CloseDialog()
         {
+            if (accountReset != null && accountReset.HandleBack()) return;
             if (redeemPresentation != null && redeemPresentation.HandleBack()) return;
             if (shopPresentation != null && shopPresentation.HandleBack()) return;
             if (mapPage != null) mapPage.SetActive(false);

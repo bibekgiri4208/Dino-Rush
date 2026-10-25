@@ -91,6 +91,12 @@ namespace DinoRush
             EnsureDay();
             if (dirty) Flush();
         }
+        public void ResetProgress()
+        {
+            // Replace the live snapshot too, so later Flush/focus/quit cannot restore old claims.
+            state = new Snapshot { day = clock().Date.Ticks };
+            Write();
+        }
         public void Flush()
         {
             EnsureDay();

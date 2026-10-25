@@ -45,6 +45,15 @@ namespace DinoRush.Tests
                 foreach (GameObject root in scene.GetRootGameObjects())
                     if ((menu = root.GetComponentInChildren<ForestMainMenu>(true)) != null) break;
                 Assert.That(menu.ShopPresentation, Is.Not.Null);
+                var wallets = menu.GetComponentsInChildren<RunnerShopWallet>(true);
+                Assert.That(wallets.Length, Is.EqualTo(3), "Every category has an editable currency badge.");
+                foreach (RunnerShopWallet wallet in wallets)
+                {
+                    var icon = wallet.transform.Find("Wallet egg icon").GetComponent<UnityEngine.UI.Image>();
+                    Assert.That(AssetDatabase.GetAssetPath(icon.sprite), Is.EqualTo("Assets/Generated/ShopEggIcon.asset"));
+                    Assert.That(wallet.GetComponentInChildren<UnityEngine.UI.Text>(true).fontSize, Is.EqualTo(16));
+                    Assert.That(((RectTransform)wallet.transform).rect.height, Is.EqualTo(36));
+                }
                 Assert.That(menu.ShopPresentation.Catalog.Count, Is.EqualTo(9));
                 Assert.That(menu.ShopPresentation.transform.Find("Mystery egg display/Showcase egg").GetComponent<UnityEngine.UI.Image>().sprite, Is.Not.Null);
                 Assert.That(menu.transform.Find("Hatch reveal").gameObject.activeSelf, Is.False);

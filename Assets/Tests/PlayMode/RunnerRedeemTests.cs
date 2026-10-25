@@ -123,7 +123,7 @@ namespace DinoRush.Tests
             menu.CloseDialog();
             yield return null;
             Click("Shop");
-            Assert.That(GameObject.Find("Shop egg balance").GetComponent<Text>().text, Is.EqualTo("EGGS: 3000"));
+            Assert.That(GameObject.Find("Shop egg balance").GetComponent<Text>().text, Is.EqualTo("EGGS: 3,000"));
             Assert.That(GameObject.Find("Buy ten mystery eggs").GetComponent<Button>().interactable, Is.True);
         }
 

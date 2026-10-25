@@ -92,8 +92,9 @@ namespace DinoRush
 
         public void ApplyLayout(bool portrait)
         {
+            transform.Find("Dino selection")?.gameObject.SetActive(false); // Retired caption overlaps the paged collection on phones.
             float productX = portrait ? 0 : -272;
-            Rect("Mystery egg display", productX, portrait ? 370 : 70, portrait ? 560 : 340, portrait ? 220 : 280);
+            Rect("Mystery egg display", productX, portrait ? 338 : 54, portrait ? 560 : 340, portrait ? 220 : 264);
             const string product = "Mystery egg display/";
             Rect(product + "Egg display glow", portrait ? -184 : 0, portrait ? 0 : 64, 184, 184);
             Rect(product + "Showcase egg", portrait ? -184 : 0, portrait ? 0 : 64, 144, 144);
@@ -102,7 +103,9 @@ namespace DinoRush
             TextLayout(product + "Egg product title", portrait ? 86 : 0, portrait ? 54 : -28, portrait ? 336 : 312, 30, portrait ? 20 : 18);
             TextLayout(product + "Egg product description", portrait ? 86 : 0, portrait ? 0 : -70, portrait ? 336 : 312, 48, portrait ? 14 : 11);
             TextLayout(product + "Egg unlock requirement", portrait ? 86 : 0, portrait ? -60 : -112, portrait ? 336 : 312, 24, portrait ? 12 : 10);
-            TextLayout("Shop egg balance", productX, portrait ? 516 : 226, portrait ? 560 : 340, 30, 16);
+            Text wallet = transform.Find("Shop egg balance")?.GetComponent<Text>() ??
+                transform.Find("Shop egg balance wallet/Shop egg balance")?.GetComponent<Text>();
+            if (wallet != null) RunnerShopWallet.Layout(wallet, productX, portrait ? 490 : 226, portrait ? 560 : 340, portrait);
             Rect("Buy mystery egg", portrait ? -146 : productX, portrait ? 196 : -104, portrait ? 268 : 340, portrait ? 100 : 52);
             TextLayout("Buy mystery egg/Label", 0, 0, portrait ? 236 : 316, portrait ? 76 : 40, portrait ? 18 : 14);
             transform.Find("Buy mystery egg/Label").GetComponent<Text>().text = portrait ? "HATCH 1\n50 EGGS" : "HATCH 1 - 50 EGGS";
