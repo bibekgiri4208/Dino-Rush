@@ -72,6 +72,14 @@ namespace DinoRush.Tests
                 InputField code = menu.RedeemPresentation.CodeInput;
                 Assert.That(code, Is.Not.Null);
                 Assert.That(code.textComponent.supportRichText, Is.False);
+                Assert.That(code.textComponent.alignment, Is.EqualTo(TextAnchor.MiddleLeft));
+                Assert.That(code.textComponent.alignByGeometry, Is.False);
+                Assert.That(code.textComponent.lineSpacing, Is.EqualTo(1f));
+                var placeholder = (Text)code.placeholder;
+                Assert.That(placeholder.alignment, Is.EqualTo(code.textComponent.alignment));
+                Assert.That(placeholder.alignByGeometry, Is.False);
+                Assert.That(placeholder.fontSize, Is.EqualTo(code.textComponent.fontSize));
+                Assert.That(code.caretWidth, Is.EqualTo(2));
                 Assert.That(code.placeholder.raycastTarget, Is.False);
                 Assert.That(code.characterLimit, Is.EqualTo(64));
                 Assert.That(menu.transform.Find("Menu dialog/Moss framed dialog/Options page/Redeem gift").GetComponent<Button>(), Is.Not.Null);

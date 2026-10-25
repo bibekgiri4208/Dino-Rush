@@ -145,7 +145,15 @@ namespace DinoRush
             Place(hint, 0, portrait ? 160 : 88, size.x - 64, 32, portrait ? 16 : 12);
             Position(input.transform, 0, portrait ? 74 : 28, portrait ? 512 : 432, portrait ? 100 : 64);
             Place(input.textComponent, 0, 0, portrait ? 468 : 396, portrait ? 72 : 44, portrait ? 20 : 18);
-            Place((Text)input.placeholder, 0, 0, portrait ? 468 : 396, portrait ? 72 : 44, portrait ? 18 : 16);
+            var placeholder = (Text)input.placeholder;
+            Place(placeholder, 0, 0, portrait ? 468 : 396, portrait ? 72 : 44, portrait ? 20 : 18);
+            // Labels are geometry-centered elsewhere, but editable text must use the same
+            // left-aligned font metrics as Unity's caret and selection calculations.
+            input.textComponent.alignment = placeholder.alignment = TextAnchor.MiddleLeft;
+            input.textComponent.alignByGeometry = placeholder.alignByGeometry = false;
+            input.textComponent.lineSpacing = placeholder.lineSpacing = 1f;
+            input.caretWidth = 2;
+            input.ForceLabelUpdate();
             Place(status, 0, -36, size.x - 64, portrait ? 64 : 44, portrait ? 12 : 10);
             Control(redeem, portrait ? -136 : -112, portrait ? -204 : -124, portrait ? 248 : 208, portrait ? 100 : 56);
             Control(cancel, portrait ? 136 : 112, portrait ? -204 : -124, portrait ? 248 : 208, portrait ? 100 : 56);

@@ -89,17 +89,18 @@ namespace DinoRush.Tests
             Assert.That(GameObject.Find("Code status").GetComponent<Text>().text, Does.Contain("NOT RECOGNIZED"));
             gift.CodeInput.text = "jestergift";
             Click("Submit gift code");
-            Assert.That(game.Shop.Balance, Is.EqualTo(1000), "Save the gift before starting its animation.");
+            Assert.That(game.Shop.Balance, Is.EqualTo(10000), "Save the gift before starting its animation.");
             Assert.That(gift.ShowingGift, Is.True);
             Assert.That(GameObject.Find("Gift from production").GetComponent<Text>().text, Is.EqualTo("Gift from\nBibek Giri Productions"));
             // A duplicate submit event from the same click/Enter cannot pay twice during one celebration.
             gift.CodeInput.onSubmit.Invoke("jestergift");
-            Assert.That(game.Shop.Balance, Is.EqualTo(1000));
+            Assert.That(game.Shop.Balance, Is.EqualTo(10000));
             Advance(0.6f);
-            Assert.That(gift.DisplayedEggs, Is.InRange(1, 999));
+            Assert.That(gift.DisplayedEggs, Is.InRange(1, 9999));
             yield return RunnerDisplayCapture.Capture("redeem-gift-opening", 1280, 720);
             Advance(2);
-            Assert.That(gift.DisplayedEggs, Is.EqualTo(1000));
+            Assert.That(gift.DisplayedEggs, Is.EqualTo(10000));
+            Assert.That(GameObject.Find("Gift egg amount").GetComponent<Text>().text, Is.EqualTo("+10,000 EGGS"));
             yield return RunnerDisplayCapture.Capture("redeem-gift-reward", 1280, 720);
             yield return RunnerDisplayCapture.Capture("redeem-gift-reward-portrait", 360, 800);
             Canvas.ForceUpdateCanvases();
@@ -108,13 +109,13 @@ namespace DinoRush.Tests
             yield return null;
             Assert.That(gift.CodeInput.text, Is.EqualTo("jestergift"));
             Click("Submit gift code");
-            Assert.That(game.Shop.Balance, Is.EqualTo(2000));
+            Assert.That(game.Shop.Balance, Is.EqualTo(20000));
             menu.CloseDialog(); // Skip.
-            Assert.That(gift.DisplayedEggs, Is.EqualTo(1000));
+            Assert.That(gift.DisplayedEggs, Is.EqualTo(10000));
             menu.CloseDialog(); // Return to entry, allowing another deliberate redemption.
             Assert.That(gift.ShowingGift, Is.False);
             gift.CodeInput.onSubmit.Invoke(gift.CodeInput.text);
-            Assert.That(game.Shop.Balance, Is.EqualTo(3000));
+            Assert.That(game.Shop.Balance, Is.EqualTo(30000));
             menu.CloseDialog();
             menu.CloseDialog();
             menu.CloseDialog(); // Dismiss entry, leaving Options open.
@@ -123,7 +124,7 @@ namespace DinoRush.Tests
             menu.CloseDialog();
             yield return null;
             Click("Shop");
-            Assert.That(GameObject.Find("Shop egg balance").GetComponent<Text>().text, Is.EqualTo("EGGS: 3,000"));
+            Assert.That(GameObject.Find("Shop egg balance").GetComponent<Text>().text, Is.EqualTo("EGGS: 30,000"));
             Assert.That(GameObject.Find("Buy ten mystery eggs").GetComponent<Button>().interactable, Is.True);
         }
 
@@ -136,18 +137,18 @@ namespace DinoRush.Tests
             menu.Hide();
             Assert.That(gift.IsShowing, Is.False);
             yield return Reload();
-            Assert.That(game.Shop.Balance, Is.EqualTo(1000));
+            Assert.That(game.Shop.Balance, Is.EqualTo(10000));
             yield return Open();
             Assert.That(gift.CodeInput.text, Is.Empty);
             gift.CodeInput.text = "JESTERGIFT";
             Click("Submit gift code");
-            Assert.That(game.Shop.Balance, Is.EqualTo(2000));
+            Assert.That(game.Shop.Balance, Is.EqualTo(20000));
             Advance(4);
             Advance(4);
-            Assert.That(game.Shop.Balance, Is.EqualTo(2000), "Presentation cannot credit again.");
+            Assert.That(game.Shop.Balance, Is.EqualTo(20000), "Presentation cannot credit again.");
             menu.Hide();
             yield return Reload();
-            Assert.That(game.Shop.Balance, Is.EqualTo(2000));
+            Assert.That(game.Shop.Balance, Is.EqualTo(20000));
         }
 
         [UnityTest]
@@ -167,6 +168,8 @@ namespace DinoRush.Tests
                 Time.timeScale = 0;
                 yield return new WaitForSecondsRealtime(0.7f);
                 Assert.That(gift.DisplayedEggs, Is.GreaterThan(0));
+                Advance(2);
+                Assert.That(gift.DisplayedEggs, Is.EqualTo(10000));
                 foreach (Vector2Int size in new[] { new Vector2Int(1280, 720), new Vector2Int(320, 568), new Vector2Int(1024, 768) })
                 {
                     game.ApplyScreenLayout(RunnerScreenLayout.Calculate(size.x, size.y, new Rect(0, 24, size.x, size.y - 48)));
@@ -181,7 +184,7 @@ namespace DinoRush.Tests
                     Bounds button = RectTransformUtility.CalculateRelativeRectTransformBounds(panel, GameObject.Find("Gift continue").transform);
                     Assert.That(button.min.y, Is.GreaterThan(rect.yMin));
                     Assert.That(button.max.x, Is.LessThan(rect.xMax));
-                    Assert.That(game.Shop.Balance, Is.EqualTo(1000));
+                    Assert.That(game.Shop.Balance, Is.EqualTo(10000));
                 }
             }
             finally { Time.timeScale = scale; }
@@ -189,6 +192,57 @@ namespace DinoRush.Tests
             menu.CloseDialog();
             menu.CloseDialog();
             Assert.That(gift.IsShowing, Is.False);
+        }
+
+        [UnityTest]
+        public IEnumerator CodeCaretTracksLeftAlignedTextThroughEditingScrollingAndReflow()
+        {
+            yield return Open();
+            InputField input = gift.CodeInput;
+            input.caretBlinkRate = 0;
+            foreach (var size in new[] { new Vector2Int(1280, 720), new Vector2Int(320, 568), new Vector2Int(360, 800), new Vector2Int(1280, 720) })
+            {
+                game.ApplyScreenLayout(RunnerScreenLayout.Calculate(size.x, size.y, new Rect(0, 24, size.x, size.y - 48)));
+                input.Select(); input.ActivateInputField(); yield return null;
+                Assert.That(input.isFocused, Is.True);
+                Text text = input.textComponent;
+                var placeholder = (Text)input.placeholder;
+                Assert.That(text.alignment, Is.EqualTo(TextAnchor.MiddleLeft));
+                Assert.That(text.alignByGeometry, Is.False);
+                Assert.That(text.lineSpacing, Is.EqualTo(1f));
+                Assert.That(placeholder.alignment, Is.EqualTo(text.alignment));
+                Assert.That(placeholder.fontSize, Is.EqualTo(text.fontSize));
+                foreach (string value in new[] { "", "jestergift", new string('w', 64) })
+                {
+                    input.text = value;
+                    foreach (int position in new[] { 0, value.Length / 2, value.Length })
+                    {
+                        input.caretPosition = position; input.ForceLabelUpdate();
+                        yield return null;
+                        Canvas.ForceUpdateCanvases(); input.Rebuild(CanvasUpdate.LatePreRender);
+                        var renderer = (CanvasRenderer)typeof(InputField).GetField("m_CachedInputRenderer", Private).GetValue(input);
+                        Assert.That(renderer, Is.Not.Null);
+                        Mesh mesh = renderer.GetMesh();
+                        Assert.That(mesh.vertexCount, Is.EqualTo(4), "Editing must display one visible caret, not a selection.");
+                        var caretRect = (RectTransform)renderer.transform;
+                        Assert.That(caretRect.anchoredPosition, Is.EqualTo(text.rectTransform.anchoredPosition));
+                        Assert.That(caretRect.sizeDelta, Is.EqualTo(text.rectTransform.sizeDelta));
+                        Assert.That(caretRect.localScale, Is.EqualTo(text.rectTransform.localScale));
+                        int drawStart = (int)typeof(InputField).GetField("m_DrawStart", Private).GetValue(input);
+                        int visiblePosition = position - drawStart;
+                        float expectedX = value.Length == 0 ? text.rectTransform.rect.xMin :
+                            text.cachedTextGenerator.characters[visiblePosition].cursorPos.x / text.pixelsPerUnit;
+                        Assert.That(mesh.bounds.min.x, Is.EqualTo(expectedX).Within(2f / text.pixelsPerUnit), "Caret must follow the insertion point, including scrolled text.");
+                        Assert.That(mesh.bounds.size.y, Is.LessThanOrEqualTo(text.fontSize * 1.5f), "Label line spacing must not make the caret oversized.");
+                        Assert.That(mesh.bounds.min.x, Is.GreaterThanOrEqualTo(text.rectTransform.rect.xMin - 2));
+                        Assert.That(mesh.bounds.max.x, Is.LessThanOrEqualTo(text.rectTransform.rect.xMax + 3));
+                    }
+                }
+            }
+            input.text = "jestergift"; input.caretPosition = 5; input.ForceLabelUpdate(); yield return null;
+            yield return RunnerDisplayCapture.Capture("redeem-code-caret", 1280, 720);
+            yield return RunnerDisplayCapture.Capture("redeem-code-caret-portrait", 360, 800);
+            Assert.That(game.Shop.Balance, Is.Zero, "Editing alone must never redeem a gift.");
         }
 
         [UnityTest]
@@ -210,7 +264,7 @@ namespace DinoRush.Tests
                     gift.CodeInput.ProcessEvent(new Event { type = EventType.KeyDown, character = letter });
                 Assert.That(gift.CodeInput.text, Is.EqualTo("jestergift"));
                 gift.CodeInput.onSubmit.Invoke(gift.CodeInput.text);
-                Assert.That(game.Shop.Balance, Is.EqualTo(1000));
+                Assert.That(game.Shop.Balance, Is.EqualTo(10000));
             }
             finally
             {

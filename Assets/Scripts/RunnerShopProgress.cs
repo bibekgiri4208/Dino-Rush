@@ -13,7 +13,7 @@ namespace DinoRush
         public const int MinFragments = 1;
         public const int MaxFragments = 20;
         public const string GiftCode = "jestergift";
-        public const int GiftEggs = 1000;
+        public const int GiftEggs = 10000;
         public enum RedeemResult { Success, InvalidCode, WalletFull }
 
         private readonly RunnerDinoRoster roster;
