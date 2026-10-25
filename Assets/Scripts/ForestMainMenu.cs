@@ -91,6 +91,7 @@ namespace DinoRush
             redeemPresentation?.ApplyLayout(portrait, available);
             trailShop?.ApplyLayout(portrait);
             missionsPage?.ApplyLayout(portrait);
+            if (mapPage != null) RunnerMapSelectionUi.Apply(mapPage.transform.Find("Map selection panel"), portrait, available);
         }
 
         public void OpenModeSelector()
@@ -106,12 +107,14 @@ namespace DinoRush
             logo.SetActive(false);
             dialog.SetActive(false);
             mapPage.SetActive(true);
+            ApplyDialogLayout(dialogPortrait, dialogAvailable);
         }
 
         public void InitializeMaps(RunnerMapCatalog catalog, int selected, Action<int> select, Action start)
         {
             mapCatalog = catalog;
             if (catalog == null || catalog.Count == 0 || mapChoices.Length != catalog.Count) return;
+            RunnerMapSelectionUi.EnsureUi(mapPage.transform.Find("Map selection panel"));
             Text startLabel = startMap != null ? startMap.GetComponentInChildren<Text>(true) : null;
             if (startLabel != null) startLabel.text = "CONTINUE";
             if (!mapsBound)
@@ -130,6 +133,7 @@ namespace DinoRush
                 });
             }
             SetMapSelection(selected);
+            ApplyDialogLayout(dialogPortrait, dialogAvailable);
         }
 
         public void SetMapSelection(int selected)
@@ -140,9 +144,10 @@ namespace DinoRush
                 mapPreviews[i].sprite = mapCatalog[i].preview;
                 mapCaptions[i].text = mapCatalog[i].displayName.ToUpperInvariant();
                 mapChoices[i].GetComponent<Image>().sprite = i == selected ? selectedDinoFrame : unselectedDinoFrame;
+                RunnerMapSelectionUi.SetSelected(mapChoices[i].transform, i == selected);
             }
             string name = mapCatalog[selected].displayName.ToUpperInvariant();
-            mapStatus.text = name + " SELECTED / READY TO RUN";
+            mapStatus.text = name;
             if (customizeMapLabel != null) customizeMapLabel.text = "MAP: " + name;
         }
 

@@ -93,7 +93,9 @@ namespace DinoRush
             }
             Position(content.transform.Find("Charge rules"), 0, portrait ? -484 : -260, portrait ? 576 : 840, portrait ? 60 : 48);
             Place(charge.transform, portrait ? 146 : 240, portrait ? -614 : -330, portrait ? 276 : 360, portrait ? 88 : 52);
-            if (content.activeSelf)
+            // A selected category stays activeSelf when its Shop page is hidden.
+            // Only the visible Shop page may reposition the shared dialog Back button.
+            if (gameObject.activeSelf && content.activeSelf)
             {
                 Transform back = transform.parent.Find("Back to main menu");
                 Place(back, portrait ? -146 : -240, portrait ? -614 : -330, portrait ? 276 : 360, portrait ? 88 : 52);

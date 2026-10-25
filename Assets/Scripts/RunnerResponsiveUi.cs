@@ -38,7 +38,6 @@ namespace DinoRush
         private readonly CanvasScaler scaler;
         private readonly Dictionary<string, Placement> placements = new Dictionary<string, Placement>();
         private readonly RectTransform[] mattes = new RectTransform[4];
-        private readonly List<string> mapCards = new List<string>();
 
         public RunnerResponsiveUi(RectTransform root)
         {
@@ -46,10 +45,6 @@ namespace DinoRush
             canvas = root.GetComponentInParent<Canvas>();
             canvas.gameObject.layer = 5;
             scaler = canvas.GetComponent<CanvasScaler>();
-            Transform maps = root.Find("Forest Main Menu/Map selector/Map selection panel");
-            if (maps != null)
-                foreach (Transform child in maps)
-                    if (child.name.StartsWith("Choose ", System.StringComparison.Ordinal)) mapCards.Add(child.name);
             foreach (RectTransform rect in root.GetComponentsInChildren<RectTransform>(true))
             {
                 rect.gameObject.layer = 5; // Also supports rendering the UI independently for resolution tests.
@@ -197,30 +192,11 @@ namespace DinoRush
             Place(reward + "/Hatch unlock message", 0, -204);
             Place(hatch + "/Hatch continue", 0, -316, 500, 88);
 
-            const string maps = "Forest Main Menu/Map selector/Map selection panel";
-            int rows = Mathf.CeilToInt(mapCards.Count / 2f);
-            float extra = Mathf.Max(0, rows - 2) * 228f;
-            Place(maps, 0, 0, 620, 720 + extra);
-            Place(maps + "/Map heading", 0, 306 + extra * 0.5f, 560, 48);
-            Place(maps + "/Map hint", 0, 262 + extra * 0.5f, 560, 30);
-            for (int i = 0; i < mapCards.Count; i++)
-            {
-                bool lastSingle = i == mapCards.Count - 1 && mapCards.Count % 2 == 1;
-                Place(maps + "/" + mapCards[i], lastSingle ? 0 : (i % 2 == 0 ? -142 : 142),
-                    124 + extra * 0.5f - i / 2 * 228, 248, 208);
-            }
-            Place(maps + "/Selected map status", 0, -238 - extra * 0.5f, 560, 30);
-            Place(maps + "/Map selector back", -146, -306 - extra * 0.5f, 244, 72);
-            Place(maps + "/Map selector back/Label", 0, 0, 220, 40);
-            Place(maps + "/Start selected map", 126, -306 - extra * 0.5f, 268, 72);
-            Place(maps + "/Start selected map/Label", 0, 0, 244, 40);
-
             Place("Menu card", 0, 0, 600, 560);
             Place("Menu card/Eyebrow", 0, 220);
             Place("Menu card/Title", 0, 168);
             Place("Menu card/Primary action", 0, -100, 504, 88);
             Place("Menu card/Results main menu", 0, -204, 504, 80);
-            Fit(maps, size);
             Fit("Menu card", size);
         }
 

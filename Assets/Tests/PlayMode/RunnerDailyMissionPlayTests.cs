@@ -132,6 +132,43 @@ namespace DinoRush.Tests
             Assert.That(GameObject.Find("Daily reset countdown").GetComponent<Text>().text, Is.EqualTo("RESETS IN 23:59:59"));
             Assert.That(GameObject.Find("Claim daily mission 1").GetComponent<Button>().interactable, Is.False);
         }
+        [UnityTest] public IEnumerator MissionsBackStaysCenteredAfterLeavingSlashesAndRotating()
+        {
+            Click("Shop"); yield return null;
+            Click("Slashes category");
+            Transform panel = menu.MissionsPage.transform.parent;
+            var back = (RectTransform)panel.Find("Back to main menu");
+            var label = (RectTransform)back.Find("Label");
+            var slashes = panel.Find("Customize page/Slashes section");
+            Assert.That(slashes.gameObject.activeInHierarchy, Is.True);
+            menu.CloseDialog(); yield return null;
+
+            // Slashes retains its category selection under the inactive Shop page.
+            // Reflowing it must not overwrite another dialog's shared footer.
+            foreach (Vector2Int size in new[] { new Vector2Int(1280, 720), new Vector2Int(320, 568),
+                new Vector2Int(360, 800), new Vector2Int(1024, 768), new Vector2Int(1280, 720) })
+            {
+                Click("Missions");
+                var layout = RunnerScreenLayout.Calculate(size.x, size.y, new Rect(0, 24, size.x, size.y - 48));
+                game.ApplyScreenLayout(layout); Canvas.ForceUpdateCanvases();
+                Assert.That(slashes.gameObject.activeSelf, Is.True);
+                Assert.That(slashes.gameObject.activeInHierarchy, Is.False);
+                Vector2 expectedPosition = new Vector2(0, layout.Portrait ? -490 : -280);
+                Vector2 expectedSize = new Vector2(layout.Portrait ? 560 : 360, layout.Portrait ? 100 : 52);
+                Assert.That(back.anchoredPosition, Is.EqualTo(expectedPosition));
+                Assert.That(back.sizeDelta, Is.EqualTo(expectedSize));
+                Assert.That(label.anchoredPosition, Is.EqualTo(Vector2.zero));
+                Assert.That(label.sizeDelta, Is.EqualTo(expectedSize - new Vector2(24, 8)));
+                yield return new WaitForSecondsRealtime(0.3f);
+                Assert.That(back.anchoredPosition, Is.EqualTo(expectedPosition), "The entrance must not move the footer.");
+                Assert.That(label.anchoredPosition, Is.EqualTo(Vector2.zero), "Button feedback must retain the centered label.");
+                // Synthetic layouts don't resize the physical batch-mode window used for raycasts.
+                game.ApplyScreenLayout(RunnerScreenLayout.Calculate(Screen.width, Screen.height, Screen.safeArea));
+                Click("Back to main menu");
+                Assert.That(menu.DialogOpen, Is.False);
+                yield return null;
+            }
+        }
         [UnityTest] public IEnumerator MissionsFitPhonesAndDesktopAndDoNotLeakIntoOtherDialogs()
         {
             game.DailyMissions.RecordDistance(250);

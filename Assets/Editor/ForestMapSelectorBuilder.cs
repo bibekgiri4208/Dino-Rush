@@ -13,6 +13,35 @@ namespace DinoRush.Editor
         private static readonly Color Cream = PixelMenuArt.Hex(0xf0f2cf);
         private static readonly Color Sage = PixelMenuArt.Hex(0xaecb98);
 
+        [MenuItem("Dino Rush/Refine Map Selection Menu")]
+        public static void RefineMenu()
+        {
+            if (Application.isPlaying) return;
+            if (!Application.isBatchMode && !EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
+            var scene = EditorSceneManager.OpenScene("Assets/Scenes/ForestRun.unity");
+            ForestMainMenu menu = Object.FindAnyObjectByType<ForestMainMenu>();
+            Transform panel = menu.transform.Find("Map selector/Map selection panel");
+            ApplyMenuDesign(panel);
+            ForestUiMotionBuilder.Apply(Object.FindAnyObjectByType<ForestRunnerGame>());
+            EditorSceneManager.MarkSceneDirty(scene);
+            EditorSceneManager.SaveScene(scene);
+        }
+
+        private static void ApplyMenuDesign(Transform panel)
+        {
+            RunnerMapSelectionUi.EnsureUi(panel);
+            bool first = true;
+            foreach (Transform child in panel)
+            {
+                if (!child.name.StartsWith("Choose ", System.StringComparison.Ordinal)) continue;
+                RunnerMapSelectionUi.SetSelected(child, first);
+                child.GetComponent<Image>().sprite = ForestHudArt.Load(first ? "HudJump" : "HudPanel");
+                first = false;
+            }
+            panel.Find("Selected map status").GetComponent<Text>().text = "FOREST";
+            RunnerMapSelectionUi.Apply(panel, false, new Vector2(1280, 720));
+        }
+
         [MenuItem("Dino Rush/Refine New Map Layer Placement")]
         public static void RefineLayerPlacement()
         {
@@ -124,6 +153,7 @@ namespace DinoRush.Editor
             Button startControl = Button(start, PixelMenuArt.Load("ButtonPlay"));
             Label(Node("Label", back, 0, 0, 276, 40), "BACK", font, 24, Cream);
             Label(Node("Label", start, 0, 0, 316, 40), "CONTINUE", font, 24, Cream);
+            ApplyMenuDesign(panel);
             page.gameObject.SetActive(false);
 
             var gameData = new SerializedObject(game);

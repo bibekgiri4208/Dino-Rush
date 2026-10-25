@@ -118,6 +118,82 @@ namespace DinoRush.Tests
         }
 
         [UnityTest]
+        public IEnumerator MapGalleryKeepsPreviewsSelectionAndFooterReadableAcrossScreenSizes()
+        {
+            Click("Play"); yield return null;
+            Click("Endless mode"); yield return new WaitForSecondsRealtime(0.3f);
+            var menu = game.GetComponentInChildren<ForestMainMenu>();
+            var panel = (RectTransform)menu.transform.Find("Map selector/Map selection panel");
+            int childCount = panel.childCount;
+            foreach (Vector2Int size in new[] { new Vector2Int(1280, 720), new Vector2Int(320, 568),
+                new Vector2Int(360, 800), new Vector2Int(1024, 768), new Vector2Int(1920, 820), new Vector2Int(1280, 720) })
+            {
+                var layout = RunnerScreenLayout.Calculate(size.x, size.y, new Rect(0, 24, size.x, size.y - 48));
+                game.ApplyScreenLayout(layout);
+                yield return new WaitForSecondsRealtime(0.3f);
+                Canvas.ForceUpdateCanvases();
+                Assert.That(panel.childCount, Is.EqualTo(childCount), "Reflow must reuse the gallery.");
+                var rectangles = new List<Rect>();
+                for (int i = 0; i < game.MapCatalog.Count; i++)
+                {
+                    Transform card = panel.Find("Choose " + game.MapCatalog[i].displayName + " map");
+                    var preview = card.Find("Map preview").GetComponent<Image>();
+                    Assert.That(preview.preserveAspect, Is.True);
+                    Assert.That(preview.rectTransform.rect.width / preview.rectTransform.rect.height, Is.EqualTo(16f / 9f).Within(0.001f));
+                    Assert.That(card.Find("Trail number").GetComponent<Text>().text, Is.EqualTo((i + 1).ToString("00")));
+                    foreach (Graphic graphic in card.GetComponentsInChildren<Graphic>())
+                    {
+                        if (graphic.transform == card) continue;
+                        Assert.That(graphic.raycastTarget, Is.False, graphic.name);
+                        Bounds bounds = RectTransformUtility.CalculateRelativeRectTransformBounds(card, graphic.transform);
+                        Rect cardRect = ((RectTransform)card).rect;
+                        Assert.That(bounds.min.x, Is.GreaterThanOrEqualTo(cardRect.xMin - 1), graphic.name);
+                        Assert.That(bounds.max.x, Is.LessThanOrEqualTo(cardRect.xMax + 1), graphic.name);
+                        Assert.That(bounds.min.y, Is.GreaterThanOrEqualTo(cardRect.yMin - 1), graphic.name);
+                        Assert.That(bounds.max.y, Is.LessThanOrEqualTo(cardRect.yMax + 1), graphic.name);
+                    }
+                }
+                foreach (Button button in panel.GetComponentsInChildren<Button>())
+                {
+                    var rect = (RectTransform)button.transform;
+                    Vector2 center = panel.InverseTransformPoint(rect.position);
+                    var bounds = new Rect(center - rect.sizeDelta * 0.5f, rect.sizeDelta);
+                    Assert.That(panel.rect.Contains(bounds.min) && panel.rect.Contains(bounds.max), Is.True, button.name);
+                    foreach (Rect other in rectangles) Assert.That(bounds.Overlaps(other), Is.False, button.name + " overlaps another action");
+                    rectangles.Add(bounds);
+                    if (layout.Portrait) Assert.That(rect.rect.height * panel.localScale.y * layout.UiScale, Is.GreaterThanOrEqualTo(44), button.name);
+                }
+                for (int selected = 0; selected < game.MapCatalog.Count; selected++)
+                {
+                    game.SelectMap(selected);
+                    Assert.That(panel.Find("Selected map status").GetComponent<Text>().text, Is.EqualTo(game.MapCatalog[selected].displayName.ToUpperInvariant()));
+                    for (int i = 0; i < game.MapCatalog.Count; i++)
+                    {
+                        Transform card = panel.Find("Choose " + game.MapCatalog[i].displayName + " map");
+                        Assert.That(card.Find("Selected tag").gameObject.activeSelf, Is.EqualTo(i == selected));
+                        Assert.That(card.Find("Selected edge").gameObject.activeSelf, Is.EqualTo(i == selected));
+                    }
+                }
+                foreach (Text text in panel.GetComponentsInChildren<Text>())
+                {
+                    Assert.That(text.preferredWidth, Is.LessThanOrEqualTo(text.rectTransform.rect.width + 1), text.name);
+                    Assert.That(text.preferredHeight, Is.LessThanOrEqualTo(text.rectTransform.rect.height + 1), text.name);
+                }
+            }
+            game.ApplyScreenLayout(RunnerScreenLayout.Calculate(Screen.width, Screen.height, Screen.safeArea));
+            yield return ForestRunTests.Capture("map-gallery-landscape");
+            yield return ForestRunTests.Capture("map-gallery-tablet", 1024, 768);
+            yield return RunnerDisplayCapture.Capture("map-gallery-portrait", 360, 800, new Rect(0, 24, 360, 752));
+            Click("Map selector back");
+            Assert.That(GameObject.Find("Endless mode"), Is.Not.Null);
+            yield return null;
+            Click("Endless mode"); yield return null;
+            Assert.That(game.SelectedMapName, Is.EqualTo("Snow Mountain"));
+            Click("Start selected map");
+            Assert.That(game.State, Is.EqualTo(ForestRunnerGame.RunState.AwaitingStart));
+        }
+
+        [UnityTest]
         public IEnumerator EveryMapRunsWithTheChosenDinoAndRetainsItsThemeThroughPauseAndRetry()
         {
             game.SelectDino(2);
