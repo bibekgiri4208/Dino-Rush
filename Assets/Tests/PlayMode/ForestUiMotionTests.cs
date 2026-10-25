@@ -230,6 +230,56 @@ namespace DinoRush.Tests
 
         private Button Control(string path) => root.Find(path).GetComponent<Button>();
 
+        [UnityTest]
+        public IEnumerator AcceptedButtonActivationsPlayOnceIncludingHiddenDialogControlsButNotHoverOrRejectedClicks()
+        {
+            var audio = (RunnerAudio)typeof(ForestRunnerGame).GetField("audioCues", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(game);
+            if (audio.Muted) audio.ToggleMute();
+            int clicks = 0;
+            audio.ButtonClickPlayed += () => clicks++;
+            RunnerUiEffects.Install((RectTransform)root, audio);
+            RunnerUiEffects.Install((RectTransform)root, audio);
+            foreach (var feedback in root.GetComponentsInChildren<RunnerUiButtonFeedback>(true))
+                Assert.That(typeof(RunnerUiButtonFeedback).GetField("audioCues", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(feedback), Is.SameAs(audio), feedback.name);
+
+            Button options = Control("Forest Main Menu/Main menu buttons/Options");
+            var pointer = Pointer(-1);
+            ExecuteEvents.Execute(options.gameObject, pointer, ExecuteEvents.pointerEnterHandler);
+            ExecuteEvents.Execute(options.gameObject, pointer, ExecuteEvents.pointerDownHandler);
+            ExecuteEvents.Execute(options.gameObject, pointer, ExecuteEvents.pointerExitHandler);
+            ExecuteEvents.Execute(options.gameObject, pointer, ExecuteEvents.pointerUpHandler);
+            Assert.That(clicks, Is.Zero, "Hovering or releasing a cancelled press is silent.");
+            options.interactable = false;
+            ExecuteEvents.Execute(options.gameObject, pointer, ExecuteEvents.pointerClickHandler);
+            Assert.That(clicks, Is.Zero);
+            options.interactable = true;
+            pointer.button = PointerEventData.InputButton.Right;
+            ExecuteEvents.Execute(options.gameObject, pointer, ExecuteEvents.pointerClickHandler);
+            Assert.That(clicks, Is.Zero);
+            pointer.button = PointerEventData.InputButton.Left;
+            ExecuteEvents.Execute(options.gameObject, pointer, ExecuteEvents.pointerClickHandler);
+            Assert.That(clicks, Is.EqualTo(1));
+            yield return null;
+
+            Button back = Control("Forest Main Menu/Menu dialog/Moss framed dialog/Back to main menu");
+            ExecuteEvents.Execute(back.gameObject, pointer, ExecuteEvents.pointerClickHandler);
+            Assert.That(back.gameObject.activeInHierarchy, Is.False);
+            Assert.That(clicks, Is.EqualTo(2), "Closing a dialog must not swallow or duplicate its click.");
+            ExecuteEvents.Execute(back.gameObject, pointer, ExecuteEvents.pointerClickHandler);
+            Assert.That(clicks, Is.EqualTo(2));
+            audio.ToggleMute();
+            ExecuteEvents.Execute(options.gameObject, pointer, ExecuteEvents.pointerClickHandler);
+            Assert.That(clicks, Is.EqualTo(2));
+            audio.ToggleMute();
+            yield return null;
+            ExecuteEvents.Execute(back.gameObject, pointer, ExecuteEvents.pointerClickHandler);
+            Assert.That(clicks, Is.EqualTo(3));
+
+            Time.timeScale = 0;
+            ExecuteEvents.Execute(options.gameObject, pointer, ExecuteEvents.pointerClickHandler);
+            Assert.That(clicks, Is.EqualTo(4), "UI sounds remain available while time is frozen.");
+        }
+
         private static PointerEventData Pointer(int id) => new PointerEventData(EventSystem.current)
         {
             pointerId = id,

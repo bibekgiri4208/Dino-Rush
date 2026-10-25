@@ -46,6 +46,10 @@ Duck uses the dino's crouched running frames and a shorter collision box. In mid
 
 Your best score, sound preference, chosen dino, and last map are saved locally with PlayerPrefs. Restarting a run does not erase your best or change your dino/map.
 
+UI buttons play a short, soft **click** on accepted activation, including Shop, map selection, Options, confirmations, and pause/results controls. Hover, cancelled presses, disabled buttons, and right-clicks are silent. The shared `RunnerUiButtonFeedback` binding avoids duplicate audio when UI effects are installed again, and its game-owned audio source lets closing-button clicks finish after the panel hides.
+
+Slashes use dedicated, sample-based **Fire** (weighty flame ignition), **Lightning** (a sharp 0.75-second electric zap that carries through the slash, with a natural decay and no spell buildup), and **Water** (liquid splash/tail) effects instead of the earlier pitched-tone approximations. The short mono PCM files are in `Assets/Resources/Audio/Slashes`, where they can be auditioned in the Inspector; `SOURCES.txt` documents the CC0 sources, credits, and edits. `RunnerActionAudio.cs` loads them once per audio owner through Unity's shared asset cache; only UI clicks are synthesized there. A successful attack plays its equipped element once; blocked attacks never play a slash sound or spend an extra charge. Unlocking/equipping a different Shop style previews its sound once, while looping artwork stays silent. Slash sounds pause/resume with gameplay and stop on restart, results, or returning to the title. All sounds respect SFX mute and use separate UI/element sources so they do not interrupt egg pulls. Generated clips and sources are cleaned up with `RunnerAudio`; imported slash assets are retained for scene reloads and other owners. Neither loading nor playback consumes gameplay randomness.
+
 ### Collectible dinosaur eggs
 
 Every map now offers optional **speckled egg trails**. Four safe starter eggs introduce collecting before the first obstacle. Low trails sit in clear recovery gaps (up to four eggs), riskier single-jump arcs offer six eggs around obstacles, and high arcs offer eight eggs along a double-jump route. High arcs only appear where there is room to land before the next encounter; rapid obstacle sequences keep their existing single-jump rhythm. Eggs never overlap obstacle hitboxes, and skipping a trail has no penalty. Collecting eggs does not alter obstacle scheduling, distance scoring, or health.
@@ -195,7 +199,7 @@ The flat fill below the grass is replaced with layered pixel-art earth: subtle s
 - `RunnerMapCatalog.cs`: five maps, source/loop sprites, previews, parallax framing, and environment colors.
 - `RunnerUiButtonFeedback.cs`, `RunnerUiReveal.cs`, `RunnerUiEffects.cs`: shared button feedback, panel entrances, and motion styling.
 - `RunnerHud.cs`: start/retry/pause cards and gameplay HUD.
-- `RunnerAudio.cs`: short generated jump/crash/milestone cues (no external audio required).
+- `RunnerAudio.cs`: generated gameplay/egg-pull/UI-click cues, imported elemental-slash samples, SFX mute, and audio cleanup.
 
 The ForestRun scene contains its **saved camera, forest layers, player, obstacle pool, effects, and complete UI**. They are visible and editable in the Hierarchy, Scene view, and Game view without pressing Play. Expand `Dino Rush - Forest` to find the grouped objects. Select the camera to see its frame, or use the Game tab for the start-screen preview. UI layout, colors, and fonts can be edited normally. Menu/score text still updates according to the game state.
 

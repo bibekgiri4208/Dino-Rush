@@ -67,6 +67,7 @@ namespace DinoRush
         private float damageTime;
         private const float DamagePopupDuration = 0.95f;
         private RunnerResponsiveUi responsiveUi;
+        private RunnerAudio audioCues;
         private GameObject stageDisplay;
         private Text stageTitle, stageCountdown;
         private RectTransform stageFill;
@@ -92,6 +93,7 @@ namespace DinoRush
 
         public void InitializeShop(RunnerShopProgress shop, RunnerAudio audio = null)
         {
+            audioCues = audio;
             if (mainMenu != null) mainMenu.InitializeShop(shop, audio);
         }
 
@@ -219,7 +221,7 @@ namespace DinoRush
             CreateStageDisplay();
             CreateStartPrompt();
             CreateEggDisplay(eggSprite);
-            RunnerUiEffects.Install(root);
+            RunnerUiEffects.Install(root, audioCues);
             responsiveUi = new RunnerResponsiveUi(root);
             levelLabel = root.Find("Top left badge/Map")?.GetComponent<Text>();
             Bind(primaryControl, primary);

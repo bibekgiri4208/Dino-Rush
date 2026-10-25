@@ -165,6 +165,9 @@ namespace DinoRush.Tests
             yield return null;
             Click("Shop");
             AssertVisibleMenuLayout();
+            Assert.That(menu.ShopCollection.Page, Is.EqualTo(game.SelectedDinoIndex / RunnerShopCollection.PageSize),
+                "The Shop opens on the equipped dino's page, which may not be the first page.");
+            menu.ShopCollection.ShowIndex(0);
             Assert.That(GameObject.Find("Select Blue dino"), Is.Not.Null);
             Assert.That(GameObject.Find("Select Red dino"), Is.Not.Null);
             Assert.That(GameObject.Find("Select Yellow dino"), Is.Not.Null);

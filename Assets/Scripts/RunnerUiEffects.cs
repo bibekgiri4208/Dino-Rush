@@ -3,16 +3,19 @@ using UnityEngine.UI;
 
 namespace DinoRush
 {
-    /// <summary>Shared, dependency-free motion styling for authored and fallback UI.</summary>
+    /// <summary>Shared motion styling and optional click audio for authored and fallback UI.</summary>
     public static class RunnerUiEffects
     {
-        public static void Install(RectTransform root)
+        public static void Install(RectTransform root, RunnerAudio audio = null)
         {
             foreach (Button button in root.GetComponentsInChildren<Button>(true))
             {
-                if (button.GetComponent<RunnerUiButtonFeedback>() != null) continue;
+                var feedback = button.GetComponent<RunnerUiButtonFeedback>();
+                bool installed = feedback != null;
                 // Add the mesh animation before its outline so the glow follows the art.
-                button.gameObject.AddComponent<RunnerUiButtonFeedback>();
+                if (!installed) feedback = button.gameObject.AddComponent<RunnerUiButtonFeedback>();
+                if (audio != null) feedback.SetAudio(audio);
+                if (installed) continue;
                 Outline glow = button.GetComponent<Outline>();
                 if (glow == null) glow = button.gameObject.AddComponent<Outline>();
                 glow.effectDistance = new Vector2(2, -2);

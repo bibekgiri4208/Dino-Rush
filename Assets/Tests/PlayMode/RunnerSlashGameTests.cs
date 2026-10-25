@@ -210,5 +210,67 @@ namespace DinoRush.Tests
             Invoke("EndRun"); Assert.That(game.SlashAttack.Active, Is.False);
             Assert.That(game.Attack(), Is.False); Assert.That(RunnerSlashProgress.Charges, Is.EqualTo(2));
         }
+
+        [UnityTest] public IEnumerator EachSuccessfulAttackPlaysItsElementOnceAndRejectedOrMutedAttacksStaySilent()
+        {
+            var audio = (RunnerAudio)typeof(ForestRunnerGame).GetField("audioCues", Private).GetValue(game);
+            var sounds = new List<RunnerSlashKind>(); audio.SlashPlayed += sounds.Add;
+            for (int i = 1; i <= 3; i++) PlayerPrefs.SetInt(RunnerSlashProgress.OwnershipKey((RunnerSlashKind)i), 1);
+            RunnerSlashProgress.Equip(RunnerSlashKind.Fire);
+            PlayerPrefs.SetInt(RunnerSlashProgress.ChargesKey, 3);
+            Assert.That(game.Attack(), Is.False); Assert.That(sounds, Is.Empty);
+            game.StartRun(); Set("spawnTimer", float.MaxValue);
+            for (int i = 1; i <= 3; i++)
+            {
+                RunnerSlashKind style = (RunnerSlashKind)i;
+                RunnerSlashProgress.Equip(style);
+                Assert.That(game.Attack(), Is.True);
+                Assert.That(sounds.Count, Is.EqualTo(i)); Assert.That(sounds[i - 1], Is.EqualTo(style));
+                Assert.That(game.Attack(), Is.False);
+                game.TogglePause(); Assert.That(game.Attack(), Is.False);
+                Assert.That(sounds.Count, Is.EqualTo(i));
+                game.TogglePause(); Step(80);
+            }
+            Assert.That(game.Attack(), Is.False); Assert.That(sounds.Count, Is.EqualTo(3));
+            game.ReturnToMenu(); PlayerPrefs.SetInt(RunnerSlashProgress.ChargesKey, 1);
+            game.StartRun(); Set("spawnTimer", float.MaxValue); audio.ToggleMute();
+            Assert.That(game.Attack(), Is.True, "Muting must never block the attack or change charge costs.");
+            Assert.That(RunnerSlashProgress.Charges, Is.Zero); Assert.That(sounds.Count, Is.EqualTo(3));
+            foreach (AudioSource source in game.GetComponents<AudioSource>()) Assert.That(source.mute, Is.True);
+            game.ReturnToMenu();
+            audio.ToggleMute();
+            yield return null;
+            Assert.That(((AudioSource)typeof(RunnerAudio).GetField("slashSource", Private).GetValue(audio)).isPlaying, Is.False);
+        }
+
+        [UnityTest] public IEnumerator ShopStyleChangesPlayOnePreviewWhileLoopingArtFailedPurchasesAndRepeatedSelectionsAreSilent()
+        {
+            var audio = (RunnerAudio)typeof(ForestRunnerGame).GetField("audioCues", Private).GetValue(game);
+            var sounds = new List<RunnerSlashKind>(); audio.SlashPlayed += sounds.Add;
+            var menu = game.GetComponentInChildren<ForestMainMenu>(true);
+            GameObject.Find("Shop").GetComponent<Button>().onClick.Invoke();
+            menu.TrailShop.ShowSlashes();
+            yield return new WaitForSecondsRealtime(0.4f);
+            Assert.That(sounds, Is.Empty, "Animated Shop previews do not trigger audio on every loop.");
+            Button fire = menu.TrailShop.transform.Find("Slashes section/Slash card 1/Unlock slash 1").GetComponent<Button>();
+            fire.onClick.Invoke(); Assert.That(sounds, Is.Empty);
+            PlayerPrefs.SetInt(RunnerShopProgress.WalletKey, 15000);
+            menu.TrailShop.Refresh();
+            for (int i = 1; i <= 3; i++)
+            {
+                var button = menu.TrailShop.transform.Find("Slashes section/Slash card " + i + "/Unlock slash " + i).GetComponent<Button>();
+                button.onClick.Invoke(); Assert.That(sounds[sounds.Count - 1], Is.EqualTo((RunnerSlashKind)i));
+                int count = sounds.Count; button.onClick.Invoke(); Assert.That(sounds.Count, Is.EqualTo(count));
+            }
+            Assert.That(sounds.Count, Is.EqualTo(3));
+            fire.onClick.Invoke(); Assert.That(sounds.Count, Is.EqualTo(4));
+            Assert.That(sounds[3], Is.EqualTo(RunnerSlashKind.Fire));
+            audio.ToggleMute();
+            menu.TrailShop.transform.Find("Slashes section/Slash card 2/Unlock slash 2").GetComponent<Button>().onClick.Invoke();
+            Assert.That(sounds.Count, Is.EqualTo(4));
+            Assert.That(RunnerSlashProgress.Equipped, Is.EqualTo(RunnerSlashKind.Lightning));
+            yield return new WaitForSecondsRealtime(0.6f);
+            Assert.That(sounds.Count, Is.EqualTo(4));
+        }
     }
 }

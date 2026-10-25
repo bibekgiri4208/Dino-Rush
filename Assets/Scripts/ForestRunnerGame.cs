@@ -1083,6 +1083,7 @@ namespace DinoRush
 
         private void ResetRun()
         {
+            audioCues?.StopSlashSounds();
             DailyMissions?.Flush();
             missionSaveTimer = 0;
             touchGestureActive = touchGestureDucking = false;
@@ -1171,12 +1172,14 @@ namespace DinoRush
         public int SlashesUsed { get; private set; }
         public bool Attack()
         {
+            RunnerSlashKind style = RunnerSlashProgress.Equipped;
             if (State != RunState.Running || SlashesUsed >= RunnerSlashProgress.MaxCharges ||
                 SlashAttack == null || SlashAttack.Active || RunnerSlashProgress.Charges <= 0 ||
-                RunnerSlashProgress.Equipped == RunnerSlashKind.None) return false;
-            if (!SlashAttack.Launch(RunnerSlashProgress.Equipped, player.Feet)) return false;
+                style == RunnerSlashKind.None) return false;
+            if (!SlashAttack.Launch(style, player.Feet)) return false;
             if (!RunnerSlashProgress.Consume()) { SlashAttack.Clear(); return false; }
             SlashesUsed++;
+            audioCues.Slash(style);
             return true;
         }
 
@@ -1206,6 +1209,7 @@ namespace DinoRush
             if (State == RunState.Running)
             {
                 State = RunState.Paused;
+                audioCues.PauseSlashSounds(true);
                 ReleaseDuckInput();
                 SaveBest();
                 hud.ShowPaused();
@@ -1213,6 +1217,7 @@ namespace DinoRush
             else if (State == RunState.Paused)
             {
                 State = RunState.Running;
+                audioCues.PauseSlashSounds(false);
                 hud.ShowRunning();
             }
         }
@@ -1237,6 +1242,7 @@ namespace DinoRush
 
         private void EndRun()
         {
+            audioCues.StopSlashSounds();
             SlashAttack?.Clear();
             bool record = Score > bestAtRunStart;
             State = RunState.GameOver;

@@ -13,9 +13,11 @@ namespace DinoRush
         [SerializeField] private Button charge;
         private Action changed;
         private bool bound;
-        public void Initialize(Action refresh)
+        private RunnerAudio audioCues;
+        public void Initialize(Action refresh, RunnerAudio audio = null)
         {
             changed = refresh;
+            audioCues = audio;
             if (bound) return;
             bound = true;
             for (int i = 0; i < styles.Length; i++)
@@ -24,7 +26,9 @@ namespace DinoRush
                 styles[i].onClick.AddListener(() =>
                 {
                     if (!content.activeInHierarchy) return;
-                    if (RunnerSlashProgress.Owned(kind)) RunnerSlashProgress.Equip(kind); else RunnerSlashProgress.Buy(kind);
+                    if (RunnerSlashProgress.Equipped == kind) return;
+                    bool success = RunnerSlashProgress.Owned(kind) ? RunnerSlashProgress.Equip(kind) : RunnerSlashProgress.Buy(kind);
+                    if (success) audioCues?.Slash(kind);
                     UnityEngine.EventSystems.EventSystem.current?.SetSelectedGameObject(null);
                     changed?.Invoke(); Refresh();
                 });

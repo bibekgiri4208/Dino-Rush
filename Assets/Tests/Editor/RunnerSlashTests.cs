@@ -76,5 +76,24 @@ namespace DinoRush.Tests
                 }
             }
         }
+
+        [TestCase(RunnerSlashKind.Fire)] [TestCase(RunnerSlashKind.Lightning)] [TestCase(RunnerSlashKind.Water)]
+        public void ElementalSoundsShipAsPreloadedMonoSamplesWithSourceCredits(RunnerSlashKind kind)
+        {
+            string path = "Assets/Resources/Audio/Slashes/" + kind + " slash.wav";
+            var clip = AssetDatabase.LoadAssetAtPath<AudioClip>(path);
+            Assert.That(clip, Is.Not.Null);
+            Assert.That(Resources.Load<AudioClip>("Audio/Slashes/" + kind + " slash"), Is.SameAs(clip));
+            Assert.That(clip.channels, Is.EqualTo(1));
+            Assert.That(clip.frequency, Is.EqualTo(44100));
+            Assert.That(clip.length, kind == RunnerSlashKind.Lightning ? Is.InRange(0.7f, 0.85f) : Is.InRange(0.25f, 0.8f));
+            var importer = (AudioImporter)AssetImporter.GetAtPath(path);
+            Assert.That(importer.defaultSampleSettings.preloadAudioData, Is.True);
+            Assert.That(importer.loadInBackground, Is.False);
+            Assert.That(importer.defaultSampleSettings.loadType, Is.EqualTo(AudioClipLoadType.DecompressOnLoad));
+            Assert.That(importer.defaultSampleSettings.compressionFormat, Is.EqualTo(AudioCompressionFormat.PCM));
+            var credits = AssetDatabase.LoadAssetAtPath<TextAsset>("Assets/Resources/Audio/Slashes/SOURCES.txt");
+            Assert.That(credits.text, Does.Contain(kind + " slash.wav").And.Contain("CC0"));
+        }
     }
 }

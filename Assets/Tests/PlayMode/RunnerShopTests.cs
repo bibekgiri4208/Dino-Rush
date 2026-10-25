@@ -602,7 +602,7 @@ namespace DinoRush.Tests
         }
 
         [UnityTest]
-        public IEnumerator GeneratedShopCuesHaveAudibleBoundedSamplesAndAreDisposedWithTheirSources()
+        public IEnumerator GeneratedCuesAreDisposedAndSharedElementSamplesRemainAudibleAcrossAudioInstances()
         {
             var owner = new GameObject("Shop audio lifecycle test");
             Random.State state = Random.state;
@@ -614,7 +614,44 @@ namespace DinoRush.Tests
             const BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic;
             var clips = new List<AudioClip>((AudioClip[])typeof(RunnerAudio).GetField("eggCues", flags).GetValue(audio));
             clips.AddRange((AudioClip[])typeof(RunnerAudio).GetField("revealNotes", flags).GetValue(audio));
-            foreach (AudioClip clip in clips)
+            var click = (AudioClip)typeof(RunnerAudio).GetField("buttonClick", flags).GetValue(audio);
+            var slashes = (AudioClip[])typeof(RunnerAudio).GetField("slashClips", flags).GetValue(audio);
+            clips.Add(click);
+            Assert.That(click.length, Is.InRange(0.04f, 0.09f));
+            Assert.That(slashes.Length, Is.EqualTo(3));
+            for (int i = 0; i < slashes.Length; i++)
+            {
+                Assert.That(slashes[i].name, Does.Contain(((RunnerSlashKind)(i + 1)).ToString()));
+                Assert.That(slashes[i], Is.SameAs(Resources.Load<AudioClip>("Audio/Slashes/" + (RunnerSlashKind)(i + 1) + " slash")),
+                    "Use the authored elemental samples, not a regenerated approximation.");
+                Assert.That(slashes[i].channels, Is.EqualTo(1));
+                Assert.That(slashes[i].length, i == (int)RunnerSlashKind.Lightning - 1 ? Is.InRange(0.7f, 0.85f) : Is.InRange(0.25f, 0.8f));
+                for (int j = 0; j < i; j++) Assert.That(slashes[i].samples, Is.Not.EqualTo(slashes[j].samples), "Each element has a different envelope.");
+                var body = new float[slashes[i].samples]; slashes[i].GetData(body, 0);
+                double energy = 0;
+                foreach (float sample in body) energy += sample * sample;
+                Assert.That(System.Math.Sqrt(energy / body.Length), Is.InRange(0.08, 0.3),
+                    "The body of every element must remain audible, not just a single normalized spike.");
+                if (i == (int)RunnerSlashKind.Lightning - 1)
+                {
+                    double attack = 0, tail = 0;
+                    int window = Mathf.RoundToInt(slashes[i].frequency * 0.04f);
+                    for (int n = 0; n < window; n++)
+                    {
+                        attack += body[n] * body[n];
+                        tail += body[body.Length - 1 - n] * body[body.Length - 1 - n];
+                    }
+                    Assert.That(attack, Is.GreaterThan(tail * 8), "Lightning should snap immediately and decay, not swell like a spell.");
+                    int sustainStart = Mathf.RoundToInt(slashes[i].frequency * 0.2f);
+                    int sustainEnd = Mathf.RoundToInt(slashes[i].frequency * 0.55f);
+                    double sustain = 0;
+                    for (int n = sustainStart; n < sustainEnd; n++) sustain += body[n] * body[n];
+                    Assert.That(System.Math.Sqrt(sustain / (sustainEnd - sustainStart)), Is.GreaterThan(0.06),
+                        "The longer zap must contain audible electricity through the slash, not added silence.");
+                }
+            }
+            var allClips = new List<AudioClip>(clips); allClips.AddRange(slashes);
+            foreach (AudioClip clip in allClips)
             {
                 var samples = new float[clip.samples];
                 Assert.That(clip.GetData(samples, 0), Is.True);
@@ -633,7 +670,16 @@ namespace DinoRush.Tests
             yield return null;
             foreach (AudioClip clip in clips) Assert.That(clip == null, Is.True);
             foreach (AudioSource source in sources) Assert.That(source == null, Is.True);
+            var nextAudio = new RunnerAudio(owner);
+            var nextSlashes = (AudioClip[])typeof(RunnerAudio).GetField("slashClips", flags).GetValue(nextAudio);
+            for (int i = 0; i < slashes.Length; i++)
+            {
+                Assert.That(slashes[i] != null, Is.True, "Disposing an audio owner must not destroy imported assets.");
+                Assert.That(nextSlashes[i], Is.SameAs(slashes[i]));
+            }
+            nextAudio.Dispose();
             Object.Destroy(owner);
+            yield return null;
         }
 
         private static void Click(string name)

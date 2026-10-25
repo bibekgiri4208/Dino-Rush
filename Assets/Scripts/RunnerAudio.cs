@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace DinoRush
 {
-    /// <summary>Small synthesized cues, since the supplied art pack has no audio.</summary>
+    /// <summary>Generated gameplay/UI cues and sampled elemental slashes, with shared SFX controls.</summary>
     public sealed class RunnerAudio : IDisposable
     {
         private readonly AudioSource source;
@@ -16,6 +16,11 @@ namespace DinoRush
         private readonly AudioSource shopSource;
         private readonly AudioClip[] eggCues;
         private readonly AudioClip[] revealNotes;
+        private readonly AudioSource uiSource, slashSource;
+        private readonly AudioClip buttonClick;
+        private readonly AudioClip[] slashClips;
+        public event Action ButtonClickPlayed;
+        public event Action<RunnerSlashKind> SlashPlayed;
         public bool Muted { get; private set; }
 
         public RunnerAudio(GameObject owner)
@@ -38,6 +43,19 @@ namespace DinoRush
             for (int i = 0; i < eggCues.Length; i++) eggCues[i] = RunnerMysteryEggAudio.Create((EggCue)i);
             revealNotes = new AudioClip[RunnerShopProgress.TenPullCount];
             for (int i = 0; i < revealNotes.Length; i++) revealNotes[i] = RunnerMysteryEggAudio.Create(EggCue.Reveal, i);
+            uiSource = owner.AddComponent<AudioSource>();
+            uiSource.playOnAwake = false;
+            uiSource.spatialBlend = 0;
+            uiSource.volume = 0.32f;
+            uiSource.mute = Muted;
+            slashSource = owner.AddComponent<AudioSource>();
+            slashSource.playOnAwake = false;
+            slashSource.spatialBlend = 0;
+            slashSource.volume = 0.5f;
+            slashSource.mute = Muted;
+            buttonClick = RunnerActionAudio.CreateButtonClick();
+            slashClips = new AudioClip[(int)RunnerSlashKind.Water];
+            for (int i = 0; i < slashClips.Length; i++) slashClips[i] = RunnerActionAudio.LoadSlash((RunnerSlashKind)(i + 1));
         }
 
         public void ToggleMute()
@@ -45,7 +63,8 @@ namespace DinoRush
             Muted = !Muted;
             source.mute = Muted;
             shopSource.mute = Muted;
-            if (Muted) { source.Stop(); shopSource.Stop(); }
+            uiSource.mute = slashSource.mute = Muted;
+            if (Muted) { source.Stop(); shopSource.Stop(); uiSource.Stop(); slashSource.Stop(); }
             PlayerPrefs.SetInt("DinoRush.Muted", Muted ? 1 : 0);
             PlayerPrefs.Save();
         }
@@ -60,6 +79,29 @@ namespace DinoRush
         public void EggHatch(bool unlocked = false, int sequence = 0) => PlayEgg(unlocked ? EggCue.Unlock : EggCue.Reveal, sequence);
         public void EggFragments() => PlayEgg(EggCue.Fragments);
         public void StopEggSounds() { if (shopSource != null) shopSource.Stop(); }
+
+        public void ButtonClick()
+        {
+            if (Muted || uiSource == null) return;
+            uiSource.PlayOneShot(buttonClick);
+            ButtonClickPlayed?.Invoke();
+        }
+
+        public void Slash(RunnerSlashKind kind)
+        {
+            if (Muted || slashSource == null || !RunnerSlashProgress.Valid(kind)) return;
+            AudioClip clip = slashClips[(int)kind - 1];
+            if (clip == null) return;
+            slashSource.Stop(); // Rapid deliberate style previews never pile up into a loud chorus.
+            slashSource.PlayOneShot(clip);
+            SlashPlayed?.Invoke(kind);
+        }
+        public void StopSlashSounds() { if (slashSource != null) slashSource.Stop(); }
+        public void PauseSlashSounds(bool paused)
+        {
+            if (slashSource == null) return;
+            if (paused) slashSource.Pause(); else slashSource.UnPause();
+        }
 
         private void PlayEgg(EggCue cue, int sequence = 0)
         {
@@ -94,11 +136,19 @@ namespace DinoRush
             UnityEngine.Object.Destroy(pickup);
             if (source != null) source.Stop();
             StopEggSounds();
+            StopSlashSounds();
+            if (uiSource != null) uiSource.Stop();
             foreach (AudioClip clip in eggCues) UnityEngine.Object.Destroy(clip);
             foreach (AudioClip clip in revealNotes) UnityEngine.Object.Destroy(clip);
+            UnityEngine.Object.Destroy(buttonClick);
+            // Slash clips are shared imported assets, not runtime-generated objects to destroy.
             UnityEngine.Object.Destroy(source);
             UnityEngine.Object.Destroy(shopSource);
+            UnityEngine.Object.Destroy(uiSource);
+            UnityEngine.Object.Destroy(slashSource);
             EggCuePlayed = null;
+            ButtonClickPlayed = null;
+            SlashPlayed = null;
         }
     }
 }

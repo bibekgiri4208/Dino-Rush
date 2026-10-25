@@ -43,7 +43,7 @@ namespace DinoRush
         public void Initialize(RunnerShopProgress progress, RunnerShopPresentation presentation, RunnerAudio audio, Action refresh)
         {
             shop = progress; hatch = presentation; audioCues = audio; changed = refresh;
-            slashShop?.Initialize(refresh);
+            slashShop?.Initialize(refresh, audio);
             if (!bound)
             {
                 bound = true;

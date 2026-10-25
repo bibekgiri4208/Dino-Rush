@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 namespace DinoRush
 {
-    /// <summary>Animates button artwork, never its RectTransform or pointer hit area.</summary>
+    /// <summary>Animates button artwork without moving its hit area, and sounds accepted activations.</summary>
     [DisallowMultipleComponent, RequireComponent(typeof(Button))]
     public sealed class RunnerUiButtonFeedback : BaseMeshEffect, IPointerEnterHandler, IPointerExitHandler,
         IPointerDownHandler, IPointerUpHandler
@@ -25,6 +25,9 @@ namespace DinoRush
         private float lift, hover, clickTime;
         private bool initialized;
         private bool held;
+        private RunnerAudio audioCues;
+
+        public void SetAudio(RunnerAudio audio) => audioCues = audio;
 
         public bool IsPressed => held || pressing.Count > 0;
         public bool IsHovered => hovering.Count > 0;
@@ -43,7 +46,7 @@ namespace DinoRush
             initialized = true;
             button = GetComponent<Button>();
             glow = GetComponent<Outline>();
-            button.onClick.AddListener(Pulse);
+            button.onClick.AddListener(OnClicked);
             var children = new List<RectTransform>();
             foreach (Transform child in transform)
                 if (child is RectTransform rect) children.Add(rect);
@@ -82,6 +85,14 @@ namespace DinoRush
         public void Pulse()
         {
             if (CanInteract) clickTime = 0.24f;
+        }
+
+        private void OnClicked()
+        {
+            // Button.onClick means an accepted activation. Its action may already have hidden
+            // or disabled the widget; the sound must still finish on the game-owned source.
+            audioCues?.ButtonClick();
+            Pulse();
         }
 
         public void SetHeld(bool value) => held = value && CanInteract;
@@ -193,7 +204,8 @@ namespace DinoRush
 
         protected override void OnDestroy()
         {
-            if (button != null) button.onClick.RemoveListener(Pulse);
+            if (button != null) button.onClick.RemoveListener(OnClicked);
+            audioCues = null;
             base.OnDestroy();
         }
     }

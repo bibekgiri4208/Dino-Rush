@@ -1,0 +1,40 @@
+ELEMENTAL SLASH SOUND SOURCES
+============================
+
+These three edited samples replace the original oscillator-generated slashes.
+All source sounds used here are offered under CC0 1.0 Universal (public domain).
+License: https://creativecommons.org/publicdomain/zero/1.0/
+CC0 permits commercial use and modification without attribution requirements.
+The following voluntary credits and edit details preserve their provenance.
+
+Fire slash.wav
+  "Catching fire" by themightyglider, derived from a sound by qubodup.
+  Page: https://opengameart.org/content/catching-fire
+  Download: https://opengameart.org/sites/default/files/flame_0.ogg
+  Upstream: https://freesound.org/people/qubodup/sounds/159725/
+  Edits: use 0.02s to end, resample to 0.58s for a weightier flame ignition.
+
+Lightning slash.wav
+  "ELECTRIC_ZAP_001.wav" by JoelAudio (CC0).
+  Page: https://freesound.org/people/JoelAudio/sounds/136542/
+  Public high-quality preview used as the editing source:
+  https://cdn.freesound.org/previews/136/136542_1206321-hq.mp3
+  Edits: retain the full 0.00s-0.75s discharge, including the electric body
+  and natural decay, so it carries through the 0.6s slash animation.
+  Original pitch retained: no stretching, looping, or spell buildup.
+  Mild transient soft-limiting: tanh(1.5 * signal / peak).
+  0.75s total, 1ms entry / 12ms exit fades, mono, DC offset removed,
+  peak-normalized to 0.78, 44.1 kHz PCM16 WAV.
+
+Water slash.wav
+  "40 CC0 water / splash / slime SFX" by rubberduck, splash_08.ogg.
+  Page: https://opengameart.org/content/40-cc0-water-splash-slime-sfx
+  Download: https://opengameart.org/sites/default/files/water-splash-slime-sfx.zip
+  Edits: use first 0.64s, retaining the splash and natural liquid tail.
+  Soft-limit isolated transients with tanh(2.5 * signal / peak) before fades
+  and normalization, keeping the liquid body audible beside other elements.
+
+Fire/Water processing: stereo averaged to mono, DC offset removed, resampled to
+44.1 kHz, 2ms entry / 45ms exit fades, peak-normalized to 0.78, PCM16 WAV.
+No new pitched oscillators, synthetic droplets, or synthesized noise are mixed in.
+The final WAVs can be auditioned individually in the Unity Inspector.
