@@ -128,6 +128,56 @@ namespace DinoRush.Tests
         }
 
         [UnityTest]
+        public IEnumerator AllTenDinosWalkWithTheMenuGroundWithoutAdvancingGameplay()
+        {
+            var player = (RunnerPlayer)typeof(ForestRunnerGame).GetField("player", Private).GetValue(game);
+            var renderer = game.transform.Find("Player/Blue dino player").GetComponent<SpriteRenderer>();
+            FieldInfo phase = typeof(RunnerPlayer).GetField("animationTime", Private);
+            FieldInfo soilOffset = typeof(ForestRunnerGame).GetField("soilOffset", Private);
+            var soil = (Transform)typeof(ForestRunnerGame).GetField("trailSoil", Private).GetValue(game);
+            float soilWidth = soil.GetComponent<SpriteRenderer>().sprite.bounds.size.x;
+            MethodInfo update = typeof(ForestRunnerGame).GetMethod("Update", Private);
+            Rect hitbox = player.Hitbox;
+            int[] missionProgress = { game.DailyMissions.Progress(0), game.DailyMissions.Progress(1), game.DailyMissions.Progress(2) };
+            int balance = game.Shop.Balance;
+            for (int dino = 0; dino < game.DinoRoster.Count; dino++)
+            {
+                game.SelectDino(dino);
+                player.Reset();
+                yield return null;
+                for (int frame = 0; frame < 6; frame++)
+                {
+                    // Sample each part of the walk cycle through the actual menu Update.
+                    float before = frame + 0.1f;
+                    phase.SetValue(player, before);
+                    float travelBefore = (float)soilOffset.GetValue(game);
+                    float dt = Mathf.Min(Time.deltaTime, 0.1f);
+                    Assert.That(dt, Is.GreaterThan(0));
+                    update.Invoke(game, null);
+                    Assert.That(renderer.sprite.name, Is.EqualTo(game.DinoRoster[dino].DisplayName + " dino frame " + (4 + frame)));
+                    Assert.That((float)phase.GetValue(player) - before,
+                        Is.EqualTo(dt * 12 * 1.4f / (RunnerRules.Speed(0) * 0.9f)).Within(0.00001f), "Cadence must match the smaller dino's scrolling ground.");
+                    Assert.That((float)soilOffset.GetValue(game), Is.EqualTo(Mathf.Repeat(travelBefore + dt * 1.4f, soilWidth)).Within(0.00001f));
+                    Assert.That(renderer.transform.localScale.x, Is.EqualTo(1.8f).Within(0.00001f));
+                    Assert.That(renderer.transform.localScale.y, Is.EqualTo(1.8f).Within(0.00001f));
+                    Assert.That(player.Hitbox, Is.EqualTo(hitbox));
+                    if (dino == 0) yield return ForestRunTests.Capture("menu-walk-frame-" + frame);
+                }
+            }
+            Assert.That(game.State, Is.EqualTo(ForestRunnerGame.RunState.Ready));
+            Assert.That(game.Score, Is.Zero);
+            Assert.That(game.EggsCollected, Is.Zero);
+            Assert.That(typeof(ForestRunnerGame).GetField("elapsed", Private).GetValue(game), Is.EqualTo(0f));
+            for (int i = 0; i < 3; i++) Assert.That(game.DailyMissions.Progress(i), Is.EqualTo(missionProgress[i]));
+            Assert.That(game.Shop.Balance, Is.EqualTo(balance));
+            Assert.That(game.transform.Find("Obstacle pool").GetComponentsInChildren<SpriteRenderer>(), Is.Empty);
+            Assert.That(game.transform.Find("Forest effects/Trail dust pool").GetComponentsInChildren<SpriteRenderer>(), Is.Empty);
+            game.StartRun(); game.ReturnToMenu();
+            update.Invoke(game, null);
+            Assert.That(renderer.sprite.name, Does.Match(" dino frame [4-9]$"), "Returning to the title must resume walking.");
+        }
+
+        [UnityTest]
         public IEnumerator SelectionSurvivesSceneReloadAndUnknownSavedIdsFallBackToBlue()
         {
             Click("Shop");

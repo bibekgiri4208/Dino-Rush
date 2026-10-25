@@ -9,6 +9,8 @@ namespace DinoRush
     {
         public enum RunState { Ready, Running, Paused, GameOver, AwaitingStart }
         private const string HighScoreKey = "DinoRush.Forest.HighScore";
+        private const float MenuWalkSpeed = 1.4f;
+        private const float MenuDinoScale = 0.9f;
 
         [Header("Player and original forest artwork")]
         [SerializeField] private Texture2D dinoSheet;
@@ -238,6 +240,9 @@ namespace DinoRush
             SetSoil(0);
             UpdateViewport();
             initialized = true;
+            var menuAmbience = GetComponent<ForestMenuAmbience>();
+            if (menuAmbience == null) menuAmbience = gameObject.AddComponent<ForestMenuAmbience>();
+            menuAmbience.Initialize(this, gameCamera, spriteMaterial);
         }
 
         private void CreateSceneObjects()
@@ -640,17 +645,22 @@ namespace DinoRush
             }
             else if (State == RunState.Ready)
             {
-                Scroll(dt * 1.4f);
+                Scroll(dt * MenuWalkSpeed);
             }
             else if (State == RunState.GameOver)
             {
                 timeSinceCrash += dt;
             }
 
-            player.Render(dt, State == RunState.Running, State == RunState.GameOver, RunnerRules.Speed(elapsed) / 6.8f);
+            bool menuWalking = State == RunState.Ready;
+            // Use locomotion, not idle poses, while the title's ground moves. The smaller
+            // menu dino has a shorter stride, so match cadence to both travel and scale.
+            float animationSpeed = menuWalking ? MenuWalkSpeed / MenuDinoScale : RunnerRules.Speed(elapsed);
+            player.Render(dt, menuWalking || State == RunState.Running, State == RunState.GameOver,
+                animationSpeed / RunnerRules.Speed(0));
             playerTrail.Tick(dt, player.Feet, player.IsDucking, RunnerRules.Speed(elapsed), State == RunState.Running);
             SetSkyFraming(State == RunState.Ready);
-            if (State == RunState.Ready) dinoRenderer.transform.localScale *= 0.9f;
+            if (menuWalking) dinoRenderer.transform.localScale *= MenuDinoScale;
             UpdateParticles(dt);
             shake = Mathf.MoveTowards(shake, 0f, dt * 0.75f);
             gameCamera.transform.position = new Vector3(Mathf.Sin(Time.unscaledTime * 81f) * shake,

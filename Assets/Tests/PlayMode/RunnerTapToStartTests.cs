@@ -88,6 +88,8 @@ namespace DinoRush.Tests
                 Assert.That(Get("elapsed"), Is.EqualTo(0f));
                 Assert.That(game.Lives, Is.EqualTo(RunnerHealth.MaximumLives));
                 Assert.That(player.Grounded, Is.True);
+                Assert.That(game.transform.Find("Player/Blue dino player").GetComponent<SpriteRenderer>().sprite.name,
+                    Does.Match(" dino frame [0-3]$"), "The stationary Tap to Start screen must keep its idle animation.");
                 Assert.That(game.SelectedMapIndex, Is.EqualTo(map));
                 Assert.That(game.SelectedDinoIndex, Is.EqualTo(2));
                 Assert.That(root.Find("Tap to start/Start title").GetComponent<Text>().text, Is.EqualTo("TAP TO START"));
