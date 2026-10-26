@@ -175,7 +175,7 @@ namespace DinoRush.Tests
                 Transform root = game.GetComponentInChildren<RunnerSlashHud>(true).transform;
                 var button = (RectTransform)root.Find("Slash attack button");
                 Assert.That(button.gameObject.activeSelf, Is.True);
-                foreach (var size in new[] { new Vector2Int(1280, 720), new Vector2Int(2340, 1080), new Vector2Int(800, 480), new Vector2Int(360, 800) })
+                foreach (var size in new[] { new Vector2Int(1280, 720), new Vector2Int(2340, 1080), new Vector2Int(800, 480), new Vector2Int(568, 320), new Vector2Int(360, 800) })
                 {
                     Rect safe = new Rect(24, 12, size.x - 64, size.y - 28);
                     RunnerScreenLayout layout = RunnerScreenLayout.Calculate(size.x, size.y, safe);

@@ -61,6 +61,79 @@ namespace DinoRush.Tests
         }
 
         [UnityTest]
+        public IEnumerator LandscapePhonesTabletsAndFoldablesKeepMenusAndGameplayInsideSafeAreas()
+        {
+            var resolutions = new[] {
+                new Vector2Int(568, 320), new Vector2Int(640, 360), new Vector2Int(800, 480),
+                new Vector2Int(1280, 800), new Vector2Int(1024, 768), new Vector2Int(2208, 1840),
+                new Vector2Int(2400, 1080), new Vector2Int(2400, 1080),
+                new Vector2Int(3840, 2160), new Vector2Int(5120, 1440)
+            };
+            var safeAreas = new[] {
+                new Rect(24, 12, 520, 300), new Rect(0, 16, 640, 344), new Rect(0, 0, 800, 480),
+                new Rect(0, 0, 1280, 800), new Rect(0, 20, 1024, 748), new Rect(0, 48, 2208, 1768),
+                new Rect(120, 24, 2280, 1032), new Rect(0, 24, 2280, 1032),
+                new Rect(0, 0, 3840, 2160), new Rect(0, 0, 5120, 1440)
+            };
+            const string dialog = "Forest Main Menu/Menu dialog/Moss framed dialog/";
+            ForestMainMenu menu = root.Find("Forest Main Menu").GetComponent<ForestMainMenu>();
+            for (int i = 0; i < resolutions.Length; i++)
+            {
+                Vector2Int size = resolutions[i];
+                game.ReturnToMenu();
+                RunnerScreenLayout layout = Apply(size.x, size.y, safeAreas[i]);
+                Assert.That(layout.Portrait, Is.False);
+                yield return new WaitForSecondsRealtime(0.35f);
+                AssertVisibleUi(layout);
+                foreach (string page in new[] { "Options", "Missions", "Shop" })
+                {
+                    Click(root.Find("Forest Main Menu/Main menu buttons/" + page).GetComponent<Button>());
+                    yield return new WaitForSecondsRealtime(0.3f);
+                    AssertVisibleUi(layout);
+                    if (page == "Shop")
+                    {
+                        menu.TrailShop.ShowTrails(true); yield return null;
+                        AssertVisibleUi(layout);
+                        menu.TrailShop.ShowSlashes(); yield return null;
+                        AssertVisibleUi(layout);
+                        menu.TrailShop.ShowTrails(false);
+                    }
+                    Click(root.Find(dialog + "Back to main menu").GetComponent<Button>());
+                    yield return null;
+                }
+                Click(root.Find("Forest Main Menu/Main menu buttons/Play").GetComponent<Button>());
+                yield return new WaitForSecondsRealtime(0.3f);
+                AssertVisibleUi(layout);
+                Click(root.Find(dialog + "Mode selection page/Endless mode").GetComponent<Button>());
+                yield return new WaitForSecondsRealtime(0.3f);
+                AssertVisibleUi(layout);
+                Click(root.Find("Forest Main Menu/Map selector/Map selection panel/Start selected map").GetComponent<Button>());
+                yield return new WaitForSecondsRealtime(0.3f);
+                AssertVisibleUi(layout);
+                game.PrimaryAction();
+                yield return new WaitForSecondsRealtime(0.3f);
+                AssertVisibleUi(layout);
+                Rect slash = Pixels((RectTransform)root.Find("Slash attack button"));
+                Assert.That(slash.width, Is.GreaterThanOrEqualTo(48f - 0.1f), "Small screens still need a usable slash hit area.");
+                Assert.That(slash.height, Is.GreaterThanOrEqualTo(48f - 0.1f));
+                float ground = layout.WorldPixels.yMin + (0.5f + RunnerRules.GroundY / (layout.OrthographicSize * 2f)) * layout.WorldPixels.height;
+                Assert.That(slash.yMax, Is.LessThan(ground), "Slash control must stay below the incoming obstacle lane.");
+                if (i == 0 || i == 5 || i == 6)
+                {
+                    yield return RunnerDisplayCapture.Capture("landscape-fit-" + size.x + "x" + size.y, size.x, size.y, safeAreas[i]);
+                    layout = Apply(size.x, size.y, safeAreas[i]);
+                }
+                game.TogglePause();
+                yield return new WaitForSecondsRealtime(0.3f);
+                AssertVisibleUi(layout);
+                game.TogglePause();
+                typeof(ForestRunnerGame).GetMethod("EndRun", Private).Invoke(game, null);
+                yield return new WaitForSecondsRealtime(0.3f);
+                AssertVisibleUi(layout);
+            }
+        }
+
+        [UnityTest]
         public IEnumerator PortraitPhonesReflowMenusMapCardsHudAndTouchControlsIntoTheSafeArea()
         {
             var cases = new[] {

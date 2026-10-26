@@ -143,12 +143,17 @@ namespace DinoRush
             if (touchButton != null)
             {
                 float width = portrait ? 128 : 144;
+                Canvas canvas = GetComponentInParent<Canvas>();
+                float minimumTapSize = 48f / Mathf.Max(0.01f, canvas != null ? canvas.scaleFactor : 1f);
+                float hitWidth = Mathf.Max(width, minimumTapSize);
+                float hitHeight = Mathf.Max(portrait ? 120 : 104, minimumTapSize);
                 var touchRect = (RectTransform)touchButton.transform;
                 touchRect.anchorMin = touchRect.anchorMax = new Vector2(1, 0);
                 touchRect.pivot = Vector2.one * 0.5f;
                 // Keep only a slim strip visible; its padded hit area remains comfortable on phones.
-                touchRect.sizeDelta = new Vector2(width, portrait ? 120 : 104);
-                touchRect.anchoredPosition = new Vector2(-width * 0.5f - (portrait ? 24 : 32), portrait ? 116 : 66);
+                touchRect.sizeDelta = new Vector2(hitWidth, hitHeight);
+                touchRect.anchoredPosition = new Vector2(-hitWidth * 0.5f - (portrait ? 24 : 32),
+                    portrait ? 116 : 14 + hitHeight * 0.5f);
                 Position(touchFrame.transform, 0, 0, width, 64);
                 Position(touchIcon.transform, -width * 0.5f + 28, 0, portrait ? 36 : 40, portrait ? 36 : 40);
                 touchIcon.transform.localScale = new Vector3(-1, 1, 1);

@@ -1,10 +1,30 @@
 using NUnit.Framework;
+using UnityEditor;
 using UnityEngine;
 
 namespace DinoRush.Tests
 {
     public sealed class RunnerScreenLayoutTests
     {
+        [Test]
+        public void MobileLaunchAllowsOnlyLandscapeInEitherDirection()
+        {
+            Assert.That(PlayerSettings.defaultInterfaceOrientation, Is.EqualTo(UIOrientation.AutoRotation));
+            Assert.That(PlayerSettings.allowedAutorotateToPortrait, Is.False);
+            Assert.That(PlayerSettings.allowedAutorotateToPortraitUpsideDown, Is.False);
+            Assert.That(PlayerSettings.allowedAutorotateToLandscapeLeft, Is.True);
+            Assert.That(PlayerSettings.allowedAutorotateToLandscapeRight, Is.True);
+        }
+
+        [TestCase(568, 320)]
+        [TestCase(640, 360)]
+        [TestCase(800, 480)]
+        [TestCase(960, 540)]
+        [TestCase(2160, 1080)]
+        [TestCase(2340, 1080)]
+        [TestCase(2400, 1080)]
+        [TestCase(2208, 1840)]
+        [TestCase(2048, 1536)]
         [TestCase(320, 568)]
         [TestCase(360, 800)]
         [TestCase(1080, 2400)]
@@ -24,6 +44,10 @@ namespace DinoRush.Tests
         [TestCase(2400, 1080, 100, 40, 2250, 1040)]
         [TestCase(1080, 2400, 0, 100, 1080, 2180)]
         [TestCase(2400, 1080, 0, 40, 2250, 1040)]
+        [TestCase(568, 320, 24, 12, 520, 300)]
+        [TestCase(2400, 1080, 120, 24, 2280, 1032)]
+        [TestCase(2400, 1080, 0, 24, 2280, 1032)]
+        [TestCase(2208, 1840, 0, 48, 2208, 1768)]
         public void NotchesAndHomeIndicatorsStayOutsideBothLayouts(int width, int height, int x, int y, int w, int h)
         {
             var safe = new Rect(x, y, w, h);

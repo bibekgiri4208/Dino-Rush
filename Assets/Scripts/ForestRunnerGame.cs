@@ -188,6 +188,19 @@ namespace DinoRush
         }
 #endif
 
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSplashScreen)]
+        private static void ConfigureMobileOrientation()
+        {
+            if (!Application.isMobilePlatform) return;
+            // Match the native launch settings before any scene UI is created.
+            // Both landscape directions remain available when the phone is turned around.
+            Screen.autorotateToPortrait = false;
+            Screen.autorotateToPortraitUpsideDown = false;
+            Screen.autorotateToLandscapeLeft = true;
+            Screen.autorotateToLandscapeRight = true;
+            Screen.orientation = ScreenOrientation.AutoRotation;
+        }
+
         private void Awake()
         {
             SlashAttack = GetComponent<RunnerSlashAttack>();
