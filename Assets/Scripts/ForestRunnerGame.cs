@@ -98,6 +98,11 @@ namespace DinoRush
         [SerializeField, Range(8, 48)] private int landingDirtCount = 36;
         private RunnerPlayer player;
         private RunnerPlayerTrail playerTrail;
+        private RunnerDoubleJumpBurst doubleJumpBurst;
+        private RunnerGamepadUi gamepadUi;
+        private bool gamepadDuckBlocked;
+        public bool UsingGamepad => gamepadUi != null && gamepadUi.Active;
+        internal void ToggleGamepadSound() => ToggleMute();
         private readonly RunnerHealth health = new RunnerHealth();
         private RunnerAudio audioCues;
         private RunnerEggCollectibles eggs;
@@ -201,6 +206,7 @@ namespace DinoRush
             trailObject.transform.SetParent(transform, false);
             playerTrail = trailObject.AddComponent<RunnerPlayerTrail>();
             playerTrail.Initialize(dinoRenderer);
+            doubleJumpBurst = new RunnerDoubleJumpBurst(transform, dinoRenderer);
             Shop = new RunnerShopProgress(dinoRoster);
             DailyMissions = new RunnerDailyMissions();
             if (dinoRoster != null && dinoRoster.Count > 0)
@@ -245,6 +251,7 @@ namespace DinoRush
             SetSoil(0);
             UpdateViewport();
             initialized = true;
+            gamepadUi = new RunnerGamepadUi(this, hud, audioCues);
             var menuAmbience = GetComponent<ForestMenuAmbience>();
             if (menuAmbience == null) menuAmbience = gameObject.AddComponent<ForestMenuAmbience>();
             menuAmbience.Initialize(this, gameCamera, spriteMaterial);
@@ -709,10 +716,12 @@ namespace DinoRush
             if (missionSaveTimer >= 5f) { DailyMissions?.Flush(); missionSaveTimer = 0; }
             bool wasGrounded = player.Grounded;
             player.Step(dt, out bool jumped, out bool landed);
+            doubleJumpBurst.Tick(dt, player.Feet);
             if (jumped)
             {
                 audioCues.Jump();
                 if (wasGrounded) EmitDirt(player.Feet, 8, DirtEmission.Takeoff);
+                else doubleJumpBurst.Emit(player.Feet);
             }
             if (landed)
             {
@@ -949,18 +958,27 @@ namespace DinoRush
             if (State == RunState.AwaitingStart && Time.frameCount <= preparedInputFrame) return;
             bool waitingForStart = State == RunState.AwaitingStart;
             Keyboard keyboard = Keyboard.current;
+            Gamepad pad = Gamepad.current;
+            bool padDuck = pad != null && (pad.buttonEast.isPressed || pad.dpad.down.isPressed || pad.leftStick.y.ReadValue() < -0.55f);
+            if (!padDuck) gamepadDuckBlocked = false;
+            bool duckKey = State == RunState.Running && ((keyboard != null &&
+                (keyboard.downArrowKey.isPressed || keyboard.sKey.isPressed)) || (padDuck && !gamepadDuckBlocked));
+            if (keyboardDuckHeld != duckKey)
+            {
+                keyboardDuckHeld = duckKey;
+                ApplyDuckInput();
+            }
+            if (gamepadUi != null && gamepadUi.Read(pad))
+            {
+                // A Back/Confirm press that resumes or starts a run must not also fast-drop it.
+                if (State == RunState.Running && padDuck) gamepadDuckBlocked = true;
+                return;
+            }
             // Gift-code typing belongs to the InputField, not to gameplay/menu hotkeys (M/P/W/Space).
             if (State == RunState.Ready && hud.RedeemDialogOpen)
             {
                 if (keyboard != null && keyboard.escapeKey.wasPressedThisFrame) hud.CloseMainMenuDialog();
                 return;
-            }
-            bool duckKey = State == RunState.Running && keyboard != null &&
-                (keyboard.downArrowKey.isPressed || keyboard.sKey.isPressed);
-            if (keyboardDuckHeld != duckKey)
-            {
-                keyboardDuckHeld = duckKey;
-                ApplyDuckInput();
             }
             if (keyboard != null)
             {
@@ -1138,6 +1156,7 @@ namespace DinoRush
             }
             player.Reset();
             playerTrail?.Clear();
+            doubleJumpBurst?.Clear();
             SlashAttack?.Clear();
             health.Reset();
             hud.UpdateLives(Lives);
@@ -1265,6 +1284,7 @@ namespace DinoRush
         private void EndRun()
         {
             audioCues.StopSlashSounds();
+            doubleJumpBurst?.Clear();
             SlashAttack?.Clear();
             bool record = Score > bestAtRunStart;
             State = RunState.GameOver;
@@ -1307,6 +1327,8 @@ namespace DinoRush
             if (initialized) SaveBest();
             audioCues?.Dispose();
             eggs?.Dispose();
+            doubleJumpBurst?.Dispose();
+            gamepadUi?.Dispose();
             // Saved subassets belong to the project, not to this play session.
             foreach (Sprite sprite in generatedSprites)
                 if (sprite != null && !IsSavedAsset(sprite)) Destroy(sprite);

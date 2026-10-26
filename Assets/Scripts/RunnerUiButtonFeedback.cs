@@ -25,12 +25,14 @@ namespace DinoRush
         private float lift, hover, clickTime;
         private bool initialized;
         private bool held;
+        private bool focused;
         private RunnerAudio audioCues;
 
         public void SetAudio(RunnerAudio audio) => audioCues = audio;
 
         public bool IsPressed => held || pressing.Count > 0;
-        public bool IsHovered => hovering.Count > 0;
+        public bool IsHovered => hovering.Count > 0 || focused;
+        public void SetFocused(bool value) => focused = value;
 
         protected override void OnEnable()
         {
@@ -183,6 +185,7 @@ namespace DinoRush
 
         private void Restore()
         {
+            focused = false;
             hovering.Clear();
             pressing.Clear();
             held = false;

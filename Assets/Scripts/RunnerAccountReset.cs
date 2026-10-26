@@ -18,6 +18,7 @@ namespace DinoRush
         private ForestRunnerGame game;
         private bool bound;
         public bool IsShowing => overlay != null && overlay.activeSelf;
+        public Transform NavigationRoot => overlay != null ? overlay.transform : null;
 
         public void Initialize(ForestMainMenu owner, ForestRunnerGame runner)
         {

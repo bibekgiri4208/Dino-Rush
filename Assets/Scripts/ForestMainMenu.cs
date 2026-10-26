@@ -78,6 +78,27 @@ namespace DinoRush
         public RunnerTrailShop TrailShop => trailShop;
         public RunnerDailyMissionsPanel MissionsPage => missionsPage;
         public RunnerAccountReset AccountReset => accountReset;
+        public bool PreferSafeNavigation => (accountReset != null && accountReset.IsShowing) ||
+            (quitPage != null && quitPage.activeInHierarchy);
+        public Transform NavigationRoot => accountReset != null && accountReset.IsShowing ? accountReset.NavigationRoot :
+            redeemPresentation != null && redeemPresentation.IsShowing ? redeemPresentation.NavigationRoot :
+            shopPresentation != null && shopPresentation.IsShowing ? shopPresentation.NavigationRoot :
+            mapPage != null && mapPage.activeInHierarchy ? mapPage.transform :
+            dialog != null && dialog.activeInHierarchy ? dialog.transform : transform;
+        public Selectable NavigationDefault => accountReset != null && accountReset.IsShowing ?
+            accountReset.NavigationRoot.GetComponentInChildren<Button>() :
+            redeemPresentation != null && redeemPresentation.IsShowing && !redeemPresentation.ShowingGift ? redeemPresentation.CodeInput :
+            mapPage != null && mapPage.activeInHierarchy ? startMap :
+            modePage != null && modePage.activeInHierarchy ? endlessMode :
+            quitPage != null && quitPage.activeInHierarchy ? back :
+            optionsPage != null && optionsPage.activeInHierarchy ? optionsSound :
+            customizePage != null && customizePage.activeInHierarchy ? buyMysteryEgg : play;
+
+        public void GamepadBack()
+        {
+            if (mapPage != null && mapPage.activeInHierarchy) mapBack.onClick.Invoke();
+            else CloseDialog();
+        }
         public bool CanResetAccount => dialog != null && dialog.activeInHierarchy && optionsPage.activeInHierarchy &&
             (redeemPresentation == null || !redeemPresentation.IsShowing) && (shopPresentation == null || !shopPresentation.IsShowing);
 

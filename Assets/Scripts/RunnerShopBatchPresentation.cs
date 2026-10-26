@@ -45,6 +45,7 @@ namespace DinoRush
         private float elapsed;
         private int lastRevealed;
         public bool IsShowing => overlay != null && overlay.activeSelf;
+        public Transform NavigationRoot => overlay != null ? overlay.transform : null;
         public bool Complete => IsShowing && elapsed >= Duration;
         public int RevealedCount => !IsShowing || elapsed < RevealTime ? 0 :
             Mathf.Clamp(Mathf.FloorToInt((elapsed - RevealTime) / RevealSpacing) + 1, 0, cards.Length);

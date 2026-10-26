@@ -13,11 +13,28 @@ Open **Assets/Scenes/ForestRun.unity** (or **Dino Rush → Open Forest Run**) an
 | Cancel before starting | Esc or P returns to the main menu, keeping the chosen map/dino |
 | Retry | Space, Enter, click/tap the playfield, or Run Again |
 | Jump | Space, Up, W, or click/tap the playfield |
-| Double jump | Press a jump key or click/tap again while airborne; landing restores both jumps |
+| Double jump | Press a jump key or click/tap again while airborne; a wind burst marks the boost; landing restores both jumps |
 | Duck / fast drop | Hold Down or S; on touch, swipe downward on the playfield and keep holding, then release to stand; a brief duck in midair drops quickly |
 | Pause / resume | Esc, P, or the pause button |
 | Restart / leave run | Pause menu: Restart or Quit to Menu |
 | Mute sound cues | M or SFX |
+
+### Gamepad
+
+Controllers supported by Unity's Input System can operate the entire game without a mouse. Labels use Xbox-style names; PlayStation equivalents are the same physical positions (A/Cross, B/Circle, X/Square, Y/Triangle).
+
+| Action | Gamepad |
+| --- | --- |
+| Navigate menus, cards, and dialogs | D-pad or left stick; LB/RB cycles every available control |
+| Confirm / start / retry | A |
+| Back / cancel / resume pause | B |
+| Jump / double jump | A, with a fresh press for each jump |
+| Duck / fast drop | Hold B, D-pad Down, or left stick Down |
+| Slash | X or RB |
+| Pause / resume | Start / Menu / Options |
+| Toggle SFX during a run | Y |
+
+A gold focus frame and controller hints follow the active screen, including portrait layouts. Focus stays inside the topmost dialog, skips unavailable controls, and returns to the opener when going back. Reset/quit dialogs default to the safe action. Shop tabs, paging, purchases, hatch reveals, mission claims, options, maps, pause, and results all accept controller input. Selecting the gift-code field opens an on-screen keyboard: A types, X deletes, Y adds a space, and B closes it; Done returns to the form without redeeming automatically. Keyboard, mouse, and touch remain supported, with automatic prompt switching. Controller reconnection restores navigation; disconnecting releases held duck input.
 
 Jump over rocks, stumps, and crates, but **duck beneath low thorn branches**. Each run starts with **three hearts**, shown in the top-left corner instead of the former map/level panel. An obstacle hit removes one heart; the run ends only when all three are gone. A **0.55-second grace period** (previously 1.2 seconds) protects against overlapping pieces without skipping as much of the next sequence, and the same obstacle cannot damage you twice. Hits flash the selected dino's supplied white silhouette and crying pose, with a floating **−1 + heart** above it. Hit obstacles do not count as cleared. Pause freezes damage feedback and grace time; Retry/Restart restores all three hearts and clears the effects. Your distance is your score; speed gradually increases to a cap. Each dino can **double jump**: a fresh press/tap in midair gives one more upward boost, with no third airborne jump. Landing or restarting restores both jumps; holding a key does not automatically use the second jump. The small pre-landing input buffer is retained. Duck/fast-drop blocks jumping until landing, and air jumps do not emit ground dirt. Ground obstacles remain clearable with a single jump. Ducking is the safe route beneath a low branch, while a sufficiently high, well-timed jump can also pass above its visible body; there is no invisible wall above it. Switching away from the game automatically pauses it.
 
@@ -49,6 +66,8 @@ Your best score, sound preference, chosen dino, and last map are saved locally w
 UI buttons play a short, soft **click** on accepted activation, including Shop, map selection, Options, confirmations, and pause/results controls. Hover, cancelled presses, disabled buttons, and right-clicks are silent. The shared `RunnerUiButtonFeedback` binding avoids duplicate audio when UI effects are installed again, and its game-owned audio source lets closing-button clicks finish after the panel hides.
 
 Slashes use dedicated, sample-based **Fire** (weighty flame ignition), **Lightning** (a sharp 0.75-second electric zap that carries through the slash, with a natural decay and no spell buildup), and **Water** (liquid splash/tail) effects instead of the earlier pitched-tone approximations. The short mono PCM files are in `Assets/Resources/Audio/Slashes`, where they can be auditioned in the Inspector; `SOURCES.txt` documents the CC0 sources, credits, and edits. `RunnerActionAudio.cs` loads them once per audio owner through Unity's shared asset cache; only UI clicks are synthesized there. A successful attack plays its equipped element once; blocked attacks never play a slash sound or spend an extra charge. Unlocking/equipping a different Shop style previews its sound once, while looping artwork stays silent. Slash sounds pause/resume with gameplay and stop on restart, results, or returning to the title. All sounds respect SFX mute and use separate UI/element sources so they do not interrupt egg pulls. Generated clips and sources are cleaned up with `RunnerAudio`; imported slash assets are retained for scene reloads and other owners. Neither loading nor playback consumes gameplay randomness.
+
+Double jumps create a compact, animated **wind shockwave** close to the dino's feet. Two staggered white/cyan crests expand quickly, curl through eight breakup frames, then dissolve in 0.36 seconds. Six independently timed wisps spiral outward, stretch, and shrink away before the final ring. The burst carries some upward momentum but drifts slightly behind the feet instead of looking glued to them. It renders behind the dino and works with every dino/map without requiring a Shop trail. Only an accepted air jump triggers it; ground jumps and rejected third presses do not. Its bounded pool uses no gameplay randomness, freezes on pause, clears on restart/results/menu transitions, and disposes all generated pixel art on scene exit. Jump physics and ground dust are unchanged.
 
 ### Collectible dinosaur eggs
 

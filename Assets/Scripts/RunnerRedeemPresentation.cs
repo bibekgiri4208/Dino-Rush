@@ -29,6 +29,7 @@ namespace DinoRush
         public bool ShowingGift => IsShowing && celebration.activeSelf;
         public int DisplayedEggs { get; private set; }
         public InputField CodeInput => input;
+        public Transform NavigationRoot => overlay != null ? overlay.transform : null;
 
         public void Initialize(RunnerShopProgress progress, RunnerAudio cues, Action onWalletChanged)
         {
@@ -55,8 +56,12 @@ namespace DinoRush
             overlay.SetActive(true);
             overlay.transform.SetAsLastSibling();
             ShowForm();
-            input.Select();
-            input.ActivateInputField();
+            // Controller focus uses the game's code keyboard, not the platform's touch keyboard.
+            if (GetComponentInParent<ForestRunnerGame>()?.UsingGamepad != true)
+            {
+                input.Select();
+                input.ActivateInputField();
+            }
         }
 
         private void Submit()

@@ -49,6 +49,8 @@ namespace DinoRush
         private bool SingleShowing => revealRoot != null && revealRoot.activeSelf;
         public bool IsShowing => SingleShowing || (batch != null && batch.IsShowing);
         public RunnerShopBatchPresentation Batch => batch;
+        public Transform NavigationRoot => batch != null && batch.IsShowing ? batch.NavigationRoot :
+            revealRoot != null ? revealRoot.transform : null;
         public int DisplayedFragments { get; private set; }
         public HatchStage Stage => batch != null && batch.IsShowing ? HatchStage.Batch : !SingleShowing ? HatchStage.Idle : elapsed < CrackTime ? HatchStage.Wobble :
             elapsed < HatchTime ? HatchStage.Crack : elapsed < RewardTime ? HatchStage.Hatch : HatchStage.Reward;

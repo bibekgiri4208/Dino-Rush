@@ -26,6 +26,7 @@ namespace DinoRush
             bool running = game != null && game.State == ForestRunnerGame.RunState.Running;
             button.gameObject.SetActive(running);
             if (!running) return;
+            ((RectTransform)button.transform).anchoredPosition = new Vector2(0, portrait && game.UsingGamepad ? 80 : 26);
             RunnerSlashKind kind = RunnerSlashProgress.Equipped;
             int remaining = game.SlashesRemainingThisRound, charges = RunnerSlashProgress.Charges;
             bool equipped = kind != RunnerSlashKind.None;
@@ -35,7 +36,7 @@ namespace DinoRush
             label.color = accent;
             stock.text = charges.ToString("N0") + " IN STOCK";
             hint.text = !equipped ? "EQUIP A SLASH IN SHOP" : remaining == 0 ? "ROUND LIMIT REACHED" :
-                charges == 0 ? "BUY CHARGES IN SHOP" : game.SlashAttack.Active ? "SLASHING..." : portrait ? "TAP TO SLASH" : "ENTER / TAP TO SLASH";
+                charges == 0 ? "BUY CHARGES IN SHOP" : game.SlashAttack.Active ? "SLASHING..." : game.UsingGamepad ? "X / RB TO SLASH" : portrait ? "TAP TO SLASH" : "ENTER / TAP TO SLASH";
             for (int i = 0; i < pips.Length; i++)
                 pips[i].color = equipped && i < Mathf.Min(remaining, charges) ? accent : new Color32(64, 77, 79, 255);
             button.interactable = equipped && remaining > 0 && charges > 0 && !game.SlashAttack.Active;

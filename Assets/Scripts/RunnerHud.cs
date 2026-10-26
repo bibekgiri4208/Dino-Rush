@@ -88,6 +88,25 @@ namespace DinoRush
         public bool RedeemDialogOpen => mainMenu != null && mainMenu.RedeemPresentation != null && mainMenu.RedeemPresentation.IsShowing;
         public bool HasMapSelector => mainMenu != null && mainMenu.HasMapSelector;
         public bool HasModeSelector => mainMenu != null && mainMenu.HasModeSelector;
+        internal RectTransform Root => root;
+        internal bool PreferSafeNavigation => mainMenu != null && mainMenu.PreferSafeNavigation;
+        public Transform NavigationRoot(ForestRunnerGame.RunState state) => state == ForestRunnerGame.RunState.Ready ?
+            (mainMenu != null ? mainMenu.NavigationRoot : panel.transform) :
+            state == ForestRunnerGame.RunState.Paused ? (pausePanel != null ? pausePanel.transform : panel.transform) :
+            state == ForestRunnerGame.RunState.GameOver ? panel.transform : null;
+        public Selectable NavigationDefault(ForestRunnerGame.RunState state) => state == ForestRunnerGame.RunState.Ready ?
+            (mainMenu != null ? mainMenu.NavigationDefault : primaryControl) :
+            state == ForestRunnerGame.RunState.Paused && resumeControl != null ? resumeControl : primaryControl;
+        public void GamepadBack() => mainMenu?.GamepadBack();
+        internal void SetGamepadPresentation(bool active)
+        {
+            Text startTitle = startPrompt != null ? startPrompt.transform.Find("Start title")?.GetComponent<Text>() : null;
+            Text startHint = startPrompt != null ? startPrompt.transform.Find("Start hint")?.GetComponent<Text>() : null;
+            Text pauseHint = pausePanel != null ? pausePanel.transform.Find("Pause shortcut")?.GetComponent<Text>() : null;
+            if (startTitle != null) startTitle.text = active ? "PRESS A TO START" : "TAP TO START";
+            if (startHint != null) startHint.text = active ? "B TO RETURN TO THE MENU" : "TAP ANYWHERE / OR PRESS SPACE";
+            if (pauseHint != null) pauseHint.text = active ? "START / B TO RESUME" : "ESC / P TO RESUME";
+        }
 
         public void SetMainMenu(ForestMainMenu menu) => mainMenu = menu;
 
@@ -243,6 +262,7 @@ namespace DinoRush
             // Keyboard shortcuts belong to the game, not a previously selected button.
             input.submit = null;
             input.cancel = null;
+            input.move = null; // Controller focus is scoped to the visible page/modal by RunnerGamepadUi.
         }
 
         private static void Bind(Button button, Action action)
