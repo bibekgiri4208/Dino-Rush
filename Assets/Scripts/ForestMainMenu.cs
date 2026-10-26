@@ -68,6 +68,20 @@ namespace DinoRush
         private bool bound;
         private bool dialogPortrait;
         private Vector2 dialogAvailable = new Vector2(1280, 720);
+        private Slider optionsMusic;
+
+        public void InitializeMusic(float volume, Action<float> change)
+        {
+            if (optionsMusic == null)
+            {
+                optionsMusic = RunnerMusicUi.EnsureSlider(optionsPage.transform, optionsSound);
+                optionsMusic.onValueChanged.AddListener(value => change(value / 100f));
+            }
+            SetMusicVolume(volume);
+            ApplyDialogLayout(dialogPortrait, dialogAvailable);
+        }
+
+        public void SetMusicVolume(float volume) => RunnerMusicUi.SetVolume(optionsMusic, volume);
 
         public bool DialogOpen => (dialog != null && dialog.activeInHierarchy) || (mapPage != null && mapPage.activeInHierarchy);
         public bool HasMapSelector => mapPage != null;

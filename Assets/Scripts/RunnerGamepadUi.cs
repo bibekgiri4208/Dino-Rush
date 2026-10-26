@@ -105,7 +105,9 @@ namespace DinoRush
                 bool first = direction != heldDirection;
                 heldDirection = direction;
                 repeatAt = Time.unscaledTime + (first ? 0.32f : 0.13f);
-                Move(direction);
+                if (focused is Slider slider && direction.x != 0f)
+                    slider.value += direction.x * (slider.maxValue - slider.minValue) * 0.05f;
+                else Move(direction);
             }
             // Shoulder cycling also reaches isolated corner controls and irregular card layouts.
             if (pad.leftShoulder.wasPressedThisFrame) Cycle(-1);
@@ -146,7 +148,8 @@ namespace DinoRush
                 editing.Select();
                 editing.ActivateInputField();
             }
-            else if (EventSystem.current != null && focused != null && EventSystem.current.currentSelectedGameObject == focused.gameObject)
+            else if (EventSystem.current != null && focused != null && !(focused is Slider) &&
+                EventSystem.current.currentSelectedGameObject == focused.gameObject)
                 EventSystem.current.SetSelectedGameObject(null);
             focused = null;
             scope = null;
@@ -195,7 +198,8 @@ namespace DinoRush
             hint.rectTransform.sizeDelta = new Vector2(-24, portrait ? 54 : 26);
             hint.resizeTextMinSize = portrait ? 16 : 9;
             hint.resizeTextMaxSize = portrait ? 20 : 13;
-            hint.text = keyboard.IsOpen ? (portrait ? "A: TYPE   X: DELETE\nY: SPACE   B: CLOSE" : "A: TYPE   X: DELETE   Y: SPACE   B: CLOSE") :
+            hint.text = focused is Slider ? (portrait ? "LEFT / RIGHT: VOLUME\nUP / DOWN: MOVE   B: BACK" : "LEFT / RIGHT: VOLUME   UP / DOWN: MOVE   LB / RB: CYCLE   B: BACK") :
+                keyboard.IsOpen ? (portrait ? "A: TYPE   X: DELETE\nY: SPACE   B: CLOSE" : "A: TYPE   X: DELETE   Y: SPACE   B: CLOSE") :
                 game.State == ForestRunnerGame.RunState.Running ? (portrait ? "A: JUMP   B / DOWN: DUCK\nX / RB: SLASH   START: PAUSE   Y: SFX" : "A: JUMP / DOUBLE JUMP   B / DOWN: DUCK   X / RB: SLASH   START: PAUSE   Y: SFX") :
                 game.State == ForestRunnerGame.RunState.AwaitingStart ? "A: START RUN   B: BACK" :
                 portrait ? "D-PAD / STICK: MOVE   A: CONFIRM\nB: BACK   LB / RB: CYCLE" : "D-PAD / STICK: MOVE   A: CONFIRM   B: BACK   LB / RB: CYCLE";

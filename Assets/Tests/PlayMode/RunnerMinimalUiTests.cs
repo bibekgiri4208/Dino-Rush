@@ -66,7 +66,8 @@ namespace DinoRush.Tests
             Assert.That(card.Find("Paused score").GetComponent<Text>().text, Is.EqualTo(1234.ToString("N0")));
             Assert.That(card.Find("Paused best").GetComponent<Text>().text, Is.EqualTo(5678.ToString("N0")));
             Assert.That(card.GetComponentsInChildren<Button>().Length, Is.EqualTo(3));
-            Assert.That(card.GetComponentsInChildren<Text>().Length, Is.EqualTo(9));
+            Assert.That(card.GetComponentInChildren<Slider>(), Is.Not.Null);
+            Assert.That(card.GetComponentsInChildren<Text>().Length, Is.EqualTo(10));
             AssertFocusedModal(card);
             int score = game.Score;
             yield return new WaitForSecondsRealtime(0.1f);
@@ -161,7 +162,7 @@ namespace DinoRush.Tests
                 Click("Forest Main Menu/Main menu buttons/Options");
                 game.ApplyScreenLayout(layout);
                 yield return new WaitForSecondsRealtime(0.3f);
-                Assert.That(((RectTransform)dialog).sizeDelta, Is.EqualTo(portrait ? new Vector2(560, 568) : new Vector2(480, 432)));
+                Assert.That(((RectTransform)dialog).sizeDelta, Is.EqualTo(portrait ? new Vector2(560, 680) : new Vector2(480, 496)));
                 var sfx = (RectTransform)dialog.Find("Options page/Toggle sound effects");
                 var redeem = (RectTransform)dialog.Find("Options page/Redeem gift");
                 var optionsBack = (RectTransform)dialog.Find("Back to main menu");
@@ -222,7 +223,7 @@ namespace DinoRush.Tests
                 bool portrait = size.x < size.y;
                 game.ApplyScreenLayout(RunnerScreenLayout.Calculate(size.x, size.y, new Rect(0, 0, size.x, size.y)));
                 yield return new WaitForSecondsRealtime(0.3f);
-                Assert.That(((RectTransform)pause).sizeDelta, Is.EqualTo(portrait ? new Vector2(520, 448) : new Vector2(420, 336)));
+                Assert.That(((RectTransform)pause).sizeDelta, Is.EqualTo(portrait ? new Vector2(520, 556) : new Vector2(420, 400)));
                 foreach (Button button in pause.GetComponentsInChildren<Button>())
                     Assert.That(((RectTransform)button.transform).rect.height, Is.GreaterThanOrEqualTo(portrait ? 100 : 48));
                 AssertCompactContents(pause);

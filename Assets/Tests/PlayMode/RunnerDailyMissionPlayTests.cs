@@ -204,7 +204,7 @@ namespace DinoRush.Tests
             yield return ForestRunTests.Capture("daily-missions-portrait", 720, 1280);
             menu.CloseDialog(); yield return null; Click("Options");
             Assert.That(menu.MissionsPage.gameObject.activeSelf, Is.False);
-            Assert.That(((RectTransform)panel).sizeDelta, Is.EqualTo(new Vector2(480, 432)));
+            Assert.That(((RectTransform)panel).sizeDelta, Is.EqualTo(new Vector2(480, 496)));
             menu.CloseDialog(); yield return null; Click("Shop");
             Assert.That(((RectTransform)panel).sizeDelta, Is.EqualTo(new Vector2(960, 744)));
             menu.CloseDialog(); Begin(); Assert.That(menu.MissionsPage.gameObject.activeInHierarchy, Is.False);

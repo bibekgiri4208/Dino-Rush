@@ -105,6 +105,11 @@ namespace DinoRush
         internal void ToggleGamepadSound() => ToggleMute();
         private readonly RunnerHealth health = new RunnerHealth();
         private RunnerAudio audioCues;
+        [Header("Gameplay music")]
+        [SerializeField] private AudioClip gameplayMusic;
+        private RunnerGameplayMusic music;
+        public bool MusicEnabled => music != null && music.Enabled;
+        public float MusicVolume => music != null ? music.Volume : 0f;
         private RunnerEggCollectibles eggs;
         private RunnerEncounterDirector encounterDirector;
         private Sprite canopySprite;
@@ -231,6 +236,7 @@ namespace DinoRush
                 particle.renderer.gameObject.SetActive(false);
             }
             audioCues = new RunnerAudio(gameObject);
+            music = new RunnerGameplayMusic(gameObject, gameplayMusic);
             eggs = new RunnerEggCollectibles(transform, spriteMaterial, position =>
             {
                 Shop.CollectEgg();
@@ -240,6 +246,7 @@ namespace DinoRush
             });
             hud.InitializeShop(Shop, audioCues);
             hud.Initialize(PrimaryAction, TogglePause, Jump, ToggleMute, RestartRun, ReturnToMenu, SetDuckHeld, eggs.EggSprite);
+            hud.InitializeMusic(music.Volume, SetMusicVolume);
             GetComponentInChildren<ForestMainMenu>(true)?.InitializeDailyMissions(DailyMissions);
             hud.UpdateLives(Lives);
             hud.InitializeDinos(dinoRoster, SelectedDinoIndex, SelectDino);
@@ -461,7 +468,6 @@ namespace DinoRush
             gameCamera.orthographicSize = layout.OrthographicSize;
             FitSceneryToViewport();
             hud?.ApplyScreenLayout(layout);
-            GetComponentInChildren<RunnerSlashHud>(true)?.ApplyLayout(layout.Portrait);
         }
 
         private void FitSceneryToViewport()
@@ -1109,6 +1115,7 @@ namespace DinoRush
 
         private void BeginRun()
         {
+            music.BeginRun();
             SlashesUsed = 0;
             State = RunState.Running;
             eggs.SpawnIntro();
@@ -1122,6 +1129,7 @@ namespace DinoRush
 
         private void ResetRun()
         {
+            music?.Stop();
             audioCues?.StopSlashSounds();
             DailyMissions?.Flush();
             missionSaveTimer = 0;
@@ -1250,6 +1258,7 @@ namespace DinoRush
             if (State == RunState.Running)
             {
                 State = RunState.Paused;
+                music.SetPaused(true);
                 audioCues.PauseSlashSounds(true);
                 ReleaseDuckInput();
                 SaveBest();
@@ -1258,6 +1267,7 @@ namespace DinoRush
             else if (State == RunState.Paused)
             {
                 State = RunState.Running;
+                music.SetPaused(false);
                 audioCues.PauseSlashSounds(false);
                 hud.ShowRunning();
             }
@@ -1267,6 +1277,13 @@ namespace DinoRush
         {
             audioCues.ToggleMute();
             hud.SetSound(audioCues.Muted);
+        }
+
+        public void SetMusicVolume(float volume)
+        {
+            if (music == null) return;
+            music.SetVolume(volume);
+            hud.SetMusicVolume(music.Volume);
         }
 
         private void TakeDamage()
@@ -1283,6 +1300,7 @@ namespace DinoRush
 
         private void EndRun()
         {
+            music.Stop();
             audioCues.StopSlashSounds();
             doubleJumpBurst?.Clear();
             SlashAttack?.Clear();
@@ -1326,6 +1344,7 @@ namespace DinoRush
         {
             if (initialized) SaveBest();
             audioCues?.Dispose();
+            music?.Dispose();
             eggs?.Dispose();
             doubleJumpBurst?.Dispose();
             gamepadUi?.Dispose();

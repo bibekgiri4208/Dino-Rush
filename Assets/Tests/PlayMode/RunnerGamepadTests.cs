@@ -27,11 +27,16 @@ namespace DinoRush.Tests
         private readonly Dictionary<string, int> ints = new Dictionary<string, int>();
         private readonly Dictionary<string, string> strings = new Dictionary<string, string>();
         private readonly HashSet<string> existed = new HashSet<string>();
+        private bool hadVolume;
+        private float oldVolume;
 
         [UnitySetUp]
         public IEnumerator Load()
         {
-            var keys = new List<string>(RunnerAccountProgress.Keys(null)) { "DinoRush.Muted" };
+            hadVolume = PlayerPrefs.HasKey(RunnerGameplayMusic.VolumeKey);
+            oldVolume = PlayerPrefs.GetFloat(RunnerGameplayMusic.VolumeKey);
+            PlayerPrefs.DeleteKey(RunnerGameplayMusic.VolumeKey);
+            var keys = new List<string>(RunnerAccountProgress.Keys(null)) { "DinoRush.Muted", RunnerGameplayMusic.EnabledKey };
             foreach (string id in new[] { "blue", "red", "yellow", "green", "cole", "kira", "kuro", "loki", "mono", "sena" })
                 keys.Add(RunnerShopProgress.FragmentKey(id));
             ints.Clear(); strings.Clear(); existed.Clear();
@@ -80,7 +85,34 @@ namespace DinoRush.Tests
                 if (existed.Contains(pair.Key)) PlayerPrefs.SetInt(pair.Key, pair.Value); else PlayerPrefs.DeleteKey(pair.Key);
             foreach (var pair in strings)
                 if (existed.Contains(pair.Key)) PlayerPrefs.SetString(pair.Key, pair.Value); else PlayerPrefs.DeleteKey(pair.Key);
+            if (hadVolume) PlayerPrefs.SetFloat(RunnerGameplayMusic.VolumeKey, oldVolume);
+            else PlayerPrefs.DeleteKey(RunnerGameplayMusic.VolumeKey);
             PlayerPrefs.Save();
+        }
+
+        [UnityTest]
+        public IEnumerator ControllerCanAdjustMusicInOptionsAndPauseWithoutMovingFocusOrResumingTheRun()
+        {
+            float original = game.MusicVolume;
+            Click("Options"); Focus("Music volume");
+            Press(GamepadButton.DpadRight);
+            Assert.That(ui.Focused.name, Is.EqualTo("Music volume"));
+            Assert.That(game.MusicVolume, Is.EqualTo(original + 0.05f).Within(0.001f));
+            Set(new GamepadState { leftStick = Vector2.right });
+            Assert.That(game.MusicVolume, Is.EqualTo(original + 0.1f).Within(0.001f));
+            Set(default);
+            Press(GamepadButton.DpadDown);
+            Assert.That(ui.Focused.name, Is.Not.EqualTo("Music volume"), "Up/down still leave the slider.");
+            Press(GamepadButton.East);
+            game.StartRun(); Press(GamepadButton.Start);
+            Focus("Music volume");
+            for (int i = 0; i < 30; i++) Press(GamepadButton.DpadLeft);
+            Assert.That(game.MusicVolume, Is.Zero);
+            Press(GamepadButton.DpadRight);
+            Assert.That(game.MusicVolume, Is.EqualTo(0.05f).Within(0.001f));
+            Assert.That(game.State, Is.EqualTo(ForestRunnerGame.RunState.Paused));
+            yield return RunnerDisplayCapture.Capture("music-slider-gamepad", 1280, 720);
+            yield return null;
         }
 
         [UnityTest]

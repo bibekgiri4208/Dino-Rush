@@ -15,17 +15,20 @@ namespace DinoRush
             Transform back = panel.Find("Back to main menu");
             if (kind == DialogKind.Options)
             {
-                Panel(panel, portrait ? new Vector2(560, 568) : new Vector2(480, 432), available);
-                Label(heading, 0, portrait ? 236 : 164, portrait ? 488 : 416, 40, portrait ? 24 : 22);
                 Transform options = panel.Find("Options page");
+                float extra = options.Find("Music volume") != null ? (portrait ? 112 : 64) : 0;
+                Panel(panel, portrait ? new Vector2(560, 568 + extra) : new Vector2(480, 432 + extra), available);
+                Label(heading, 0, (portrait ? 236 : 164) + extra * 0.5f, portrait ? 488 : 416, 40, portrait ? 24 : 22);
                 options.Find("Controls help")?.gameObject.SetActive(false);
-                Control(options.Find("Toggle sound effects"), 0, portrait ? 158 : 104, portrait ? 472 : 328,
+                Control(options.Find("Toggle sound effects"), 0, (portrait ? 158 : 104) + extra * 0.5f, portrait ? 472 : 328,
                     portrait ? 100 : 52, portrait ? 22 : 18, null, true);
-                Control(options.Find("Redeem gift"), 0, portrait ? 46 : 40, portrait ? 472 : 328,
+                MusicSlider(options.Find("Music volume"), 0, portrait ? 102 : 72, portrait ? 472 : 328,
+                    portrait ? 100 : 52, portrait ? 20 : 14);
+                Control(options.Find("Redeem gift"), 0, (portrait ? 46 : 40) - extra * 0.5f, portrait ? 472 : 328,
                     portrait ? 100 : 52, portrait ? 22 : 18, "REDEEM", true);
-                Control(options.Find("Reset account"), 0, portrait ? -66 : -32, portrait ? 472 : 328,
+                Control(options.Find("Reset account"), 0, (portrait ? -66 : -32) - extra * 0.5f, portrait ? 472 : 328,
                     portrait ? 100 : 52, portrait ? 18 : 14, "RESET ACCOUNT");
-                Control(back, 0, portrait ? -210 : -164, portrait ? 472 : 328, portrait ? 100 : 52, 18, "BACK");
+                Control(back, 0, (portrait ? -210 : -164) - extra * 0.5f, portrait ? 472 : 328, portrait ? 100 : 52, 18, "BACK");
             }
             else if (kind == DialogKind.Quit)
             {
@@ -81,19 +84,29 @@ namespace DinoRush
         public static void ApplyPause(Transform panel, bool portrait, Vector2 available)
         {
             if (panel == null) return;
-            Panel(panel, portrait ? new Vector2(520, 448) : new Vector2(420, 336), available);
+            float extra = panel.Find("Music volume") != null ? (portrait ? 108 : 64) : 0;
+            float lift = extra * 0.5f;
+            Panel(panel, portrait ? new Vector2(520, 448 + extra) : new Vector2(420, 336 + extra), available);
             float width = portrait ? 432 : 344;
-            Label(panel.Find("Pause eyebrow"), 0, portrait ? 184 : 134, width, 22, portrait ? 11 : 10);
-            Label(panel.Find("Pause title"), 0, portrait ? 144 : 96, width, portrait ? 44 : 40, portrait ? 26 : 24);
+            Label(panel.Find("Pause eyebrow"), 0, (portrait ? 184 : 134) + lift, width, 22, portrait ? 11 : 10);
+            Label(panel.Find("Pause title"), 0, (portrait ? 144 : 96) + lift, width, portrait ? 44 : 40, portrait ? 26 : 24);
             float x = portrait ? 112 : 90;
-            Label(panel.Find("Score caption"), -x, portrait ? 94 : 54, portrait ? 192 : 164, 22, 11);
-            Label(panel.Find("Best caption"), x, portrait ? 94 : 54, portrait ? 192 : 164, 22, 11);
-            Stat(panel.Find("Paused score"), -x, portrait ? 60 : 20, portrait ? 192 : 164, portrait ? 26 : 24);
-            Stat(panel.Find("Paused best"), x, portrait ? 60 : 20, portrait ? 192 : 164, portrait ? 26 : 24);
-            Position(panel.Find("Section divider"), 0, portrait ? 26 : -18, width, 2);
-            Control(panel.Find("Resume run"), 0, portrait ? -40 : -58, width, portrait ? 100 : 52, portrait ? 20 : 16);
-            Control(panel.Find("Restart run"), -x, portrait ? -148 : -116, portrait ? 208 : 164, portrait ? 100 : 48, portrait ? 16 : 12);
-            Control(panel.Find("Quit run"), x, portrait ? -148 : -116, portrait ? 208 : 164, portrait ? 100 : 48, portrait ? 16 : 12);
+            Label(panel.Find("Score caption"), -x, (portrait ? 94 : 54) + lift, portrait ? 192 : 164, 22, 11);
+            Label(panel.Find("Best caption"), x, (portrait ? 94 : 54) + lift, portrait ? 192 : 164, 22, 11);
+            Stat(panel.Find("Paused score"), -x, (portrait ? 60 : 20) + lift, portrait ? 192 : 164, portrait ? 26 : 24);
+            Stat(panel.Find("Paused best"), x, (portrait ? 60 : 20) + lift, portrait ? 192 : 164, portrait ? 26 : 24);
+            Position(panel.Find("Section divider"), 0, (portrait ? 26 : -18) + lift, width, 2);
+            Control(panel.Find("Resume run"), 0, (portrait ? -40 : -58) + lift, width, portrait ? 100 : 52, portrait ? 20 : 16);
+            MusicSlider(panel.Find("Music volume"), 0, portrait ? -94 : -86, width, portrait ? 100 : 48, portrait ? 20 : 14);
+            Control(panel.Find("Restart run"), -x, (portrait ? -148 : -116) - lift, portrait ? 208 : 164, portrait ? 100 : 48, portrait ? 16 : 12);
+            Control(panel.Find("Quit run"), x, (portrait ? -148 : -116) - lift, portrait ? 208 : 164, portrait ? 100 : 48, portrait ? 16 : 12);
+        }
+
+        private static void MusicSlider(Transform node, float x, float y, float width, float height, int size)
+        {
+            if (node == null) return;
+            Position(node, x, y, width, height);
+            RunnerMusicUi.Layout(node.GetComponent<Slider>(), width, height, size);
         }
 
         private static void Stat(Transform node, float x, float y, float width, int size)

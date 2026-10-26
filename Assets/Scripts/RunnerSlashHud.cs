@@ -11,6 +11,7 @@ namespace DinoRush
         [SerializeField] private Button button;
         private ForestRunnerGame game;
         private bool portrait;
+        private Image compactFrame;
 
         private void Start()
         {
@@ -26,15 +27,15 @@ namespace DinoRush
             bool running = game != null && game.State == ForestRunnerGame.RunState.Running;
             button.gameObject.SetActive(running);
             if (!running) return;
-            ((RectTransform)button.transform).anchoredPosition = new Vector2(0, portrait && game.UsingGamepad ? 80 : 26);
             RunnerSlashKind kind = RunnerSlashProgress.Equipped;
             int remaining = game.SlashesRemainingThisRound, charges = RunnerSlashProgress.Charges;
             bool equipped = kind != RunnerSlashKind.None;
             Color accent = kind == RunnerSlashKind.Fire ? new Color32(255, 181, 108, 255) :
                 kind == RunnerSlashKind.Lightning ? new Color32(255, 231, 126, 255) : new Color32(140, 224, 255, 255);
-            label.text = (equipped ? kind.ToString().ToUpperInvariant() : "SLASH") + " / ROUND " + remaining + "/" + RunnerSlashProgress.MaxUsesPerRound;
+            string name = kind == RunnerSlashKind.Lightning ? "VOLT" : equipped ? kind.ToString().ToUpperInvariant() : "SLASH";
+            label.text = name + " " + remaining + "/" + RunnerSlashProgress.MaxUsesPerRound;
             label.color = accent;
-            stock.text = charges.ToString("N0") + " IN STOCK";
+            stock.text = "x" + CompactCount(charges);
             hint.text = !equipped ? "EQUIP A SLASH IN SHOP" : remaining == 0 ? "ROUND LIMIT REACHED" :
                 charges == 0 ? "BUY CHARGES IN SHOP" : game.SlashAttack.Active ? "SLASHING..." : game.UsingGamepad ? "X / RB TO SLASH" : portrait ? "TAP TO SLASH" : "ENTER / TAP TO SLASH";
             for (int i = 0; i < pips.Length; i++)
@@ -50,7 +51,7 @@ namespace DinoRush
             Image image = Art(node, sprite, Color.white, true); image.raycastTarget = true;
             button = node.GetComponent<Button>(); if (button == null) button = node.gameObject.AddComponent<Button>();
             button.targetGraphic = image; button.navigation = new Navigation { mode = Navigation.Mode.None };
-            label = Label("Slash charges", node, "SLASH / ROUND 3/3", font, 12, 0, 34, 240, 24, Color.white);
+            label = Label("Slash charges", node, "SLASH 3/3", font, 12, 0, 0, 128, 24, Color.white);
             EnsureDetails(font);
             ApplyLayout(false);
             node.gameObject.SetActive(false);
@@ -71,16 +72,38 @@ namespace DinoRush
             if (button == null) return;
             if (stock == null) EnsureDetails(label.font);
             var rect = (RectTransform)button.transform;
-            rect.sizeDelta = portrait ? new Vector2(440, 164) : new Vector2(280, 110);
-            Position(label.transform, 0, portrait ? 52 : 34, rect.sizeDelta.x - 20, portrait ? 32 : 24);
-            label.fontSize = portrait ? 18 : 12;
-            Position(stock.transform, 0, portrait ? -19 : -13, rect.sizeDelta.x - 20, portrait ? 30 : 22);
-            stock.fontSize = portrait ? 18 : 12;
-            Position(hint.transform, 0, portrait ? -53 : -36, rect.sizeDelta.x - 20, portrait ? 28 : 20);
-            hint.fontSize = portrait ? 14 : 10;
+            rect.anchorMin = rect.anchorMax = new Vector2(0.5f, 0);
+            rect.pivot = Vector2.one * 0.5f;
+            // The visible strip matches Pace; the larger invisible portrait hit area stays tappable.
+            rect.sizeDelta = portrait ? new Vector2(340, 100) : new Vector2(300, 44);
+            var pace = transform.Find("Trail stats frame") as RectTransform;
+            float y = pace != null ? pace.anchoredPosition.y + ((RectTransform)transform).rect.height * 0.5f : 66;
+            rect.anchoredPosition = portrait ? new Vector2(0, 116) :
+                new Vector2(pace != null ? pace.anchoredPosition.x + pace.rect.width * 0.5f + 166 : -94, y);
+            if (compactFrame == null)
+            {
+                Image original = button.GetComponent<Image>();
+                Image paceArt = pace != null ? pace.GetComponent<Image>() : null;
+                compactFrame = Art(Node("Compact frame", button.transform), paceArt != null ? paceArt.sprite : original.sprite, Color.white, true);
+                compactFrame.transform.SetAsFirstSibling();
+                original.color = Color.clear;
+                original.raycastTarget = true;
+                button.targetGraphic = compactFrame;
+            }
+            Position(compactFrame.transform, 0, 0, rect.sizeDelta.x, portrait ? 48 : 42);
+            Position(label.transform, portrait ? -92 : -82, 0, portrait ? 144 : 128, 28);
+            label.fontSize = portrait ? 16 : 12;
+            Position(stock.transform, portrait ? 116 : 104, 0, portrait ? 84 : 76, 28);
+            stock.fontSize = portrait ? 16 : 12;
+            // Retain status text for state checks, without another line of permanent HUD instructions.
+            hint.gameObject.SetActive(false);
             for (int i = 0; i < pips.Length; i++)
-                Position(pips[i].transform, (i - 1) * (portrait ? 126 : 80), portrait ? 14 : 9, portrait ? 112 : 70, portrait ? 10 : 7);
+                Position(pips[i].transform, i * (portrait ? 26 : 24), 0, portrait ? 20 : 18, portrait ? 10 : 8);
             button.GetComponent<RunnerUiButtonFeedback>()?.RefreshContentLayout();
         }
+
+        private static string CompactCount(int count) => count >= 1000000000 ? (count / 1000000000f).ToString("0.#") + "B" :
+            count >= 1000000 ? (count / 1000000f).ToString(count >= 100000000 ? "0" : "0.#") + "M" :
+            count >= 1000 ? (count / 1000f).ToString(count >= 100000 ? "0" : "0.#") + "K" : count.ToString();
     }
 }

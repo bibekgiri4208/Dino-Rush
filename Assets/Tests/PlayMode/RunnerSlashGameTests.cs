@@ -150,8 +150,8 @@ namespace DinoRush.Tests
             Assert.That(RunnerSlashProgress.Charges, Is.EqualTo(9));
             yield return null;
             var indicator = game.GetComponentInChildren<RunnerSlashHud>(true).transform.Find("Slash indicator");
-            Assert.That(indicator.Find("Slash charges").GetComponent<Text>().text, Does.Contain("ROUND 0/3"));
-            Assert.That(indicator.Find("Slash stock").GetComponent<Text>().text, Is.EqualTo("9 IN STOCK"));
+            Assert.That(indicator.Find("Slash charges").GetComponent<Text>().text, Does.Contain("0/3"));
+            Assert.That(indicator.Find("Slash stock").GetComponent<Text>().text, Is.EqualTo("x9"));
             Assert.That(indicator.Find("Slash hint").GetComponent<Text>().text, Is.EqualTo("ROUND LIMIT REACHED"));
             Assert.That(indicator.GetComponent<Button>().interactable, Is.False);
             yield return RunnerDisplayCapture.Capture("slash-stock-round-limit", 1280, 720);
@@ -177,12 +177,13 @@ namespace DinoRush.Tests
             var label = indicator.Find("Slash charges").GetComponent<Text>();
             var stock = indicator.Find("Slash stock").GetComponent<Text>();
             var hint = indicator.Find("Slash hint").GetComponent<Text>();
-            Assert.That(label.text, Does.Contain("FIRE / ROUND 3/3"));
-            Assert.That(stock.text, Is.EqualTo("27 IN STOCK"));
+            Assert.That(label.text, Is.EqualTo("FIRE 3/3"));
+            Assert.That(stock.text, Is.EqualTo("x27"));
             Assert.That(button.interactable, Is.True);
             button.onClick.Invoke(); yield return null;
-            Assert.That(label.text, Does.Contain("ROUND 2/3"));
-            Assert.That(stock.text, Is.EqualTo("26 IN STOCK"));
+            Assert.That(label.text, Does.Contain("2/3"));
+            Assert.That(stock.text, Is.EqualTo("x26"));
+            Assert.That(hint.gameObject.activeSelf, Is.False, "The compact strip must not have a permanent instruction row.");
             Assert.That(hint.text, Is.EqualTo("SLASHING..."));
             Assert.That(button.interactable, Is.False);
             Assert.That(indicator.Find("Round use 1").GetComponent<Image>().color,
@@ -191,8 +192,8 @@ namespace DinoRush.Tests
             yield return RunnerDisplayCapture.Capture("slash-stock-hud-phone", 360, 800);
             Step(80);
             PlayerPrefs.SetInt(RunnerSlashProgress.ChargesKey, 1); yield return null;
-            Assert.That(label.text, Does.Contain("ROUND 2/3"), "Round allowance must not be confused with stock.");
-            Assert.That(stock.text, Is.EqualTo("1 IN STOCK"));
+            Assert.That(label.text, Does.Contain("2/3"), "Round allowance must not be confused with stock.");
+            Assert.That(stock.text, Is.EqualTo("x1"));
             Assert.That(indicator.Find("Round use 1").GetComponent<Image>().color,
                 Is.Not.EqualTo(indicator.Find("Round use 2").GetComponent<Image>().color));
             PlayerPrefs.SetInt(RunnerSlashProgress.ChargesKey, 0); yield return null;
@@ -204,6 +205,7 @@ namespace DinoRush.Tests
             {
                 PlayerPrefs.SetInt(RunnerSlashProgress.OwnershipKey((RunnerSlashKind)kind), 1);
                 RunnerSlashProgress.Equip((RunnerSlashKind)kind); yield return null;
+                Assert.That(stock.text, Is.EqualTo("x2.1B"));
                 foreach (var size in new[] { new Vector2Int(1280, 720), new Vector2Int(320, 568), new Vector2Int(360, 800) })
                 {
                     game.ApplyScreenLayout(RunnerScreenLayout.Calculate(size.x, size.y, new Rect(0, 24, size.x, size.y - 48)));
@@ -213,6 +215,14 @@ namespace DinoRush.Tests
                         Assert.That(text.preferredWidth, Is.LessThanOrEqualTo(text.rectTransform.rect.width + 1), text.name);
                         Assert.That(text.preferredHeight, Is.LessThanOrEqualTo(text.rectTransform.rect.height + 1), text.name);
                     }
+                    var frame = (RectTransform)indicator.Find("Compact frame");
+                    Assert.That(frame.rect.height, Is.LessThanOrEqualTo(size.x < size.y ? 48 : 42));
+                    var pace = indicator.parent.Find("Trail stats frame");
+                    Assert.That(frame.GetComponent<Image>().sprite, Is.EqualTo(pace.GetComponent<Image>().sprite));
+                    Bounds slashBounds = RectTransformUtility.CalculateRelativeRectTransformBounds(indicator.parent, frame);
+                    Bounds paceBounds = RectTransformUtility.CalculateRelativeRectTransformBounds(indicator.parent, pace);
+                    Assert.That(new Rect(slashBounds.min, slashBounds.size).Overlaps(new Rect(paceBounds.min, paceBounds.size)), Is.False,
+                        "The two compact status strips should not overlap.");
                 }
             }
             game.TogglePause(); yield return null; Assert.That(indicator.gameObject.activeSelf, Is.False);
@@ -239,8 +249,8 @@ namespace DinoRush.Tests
                 InputSystem.QueueStateEvent(keyboard, new KeyboardState()); InputSystem.Update();
                 yield return null;
                 var label = game.GetComponentInChildren<RunnerSlashHud>().transform.Find("Slash indicator/Slash charges").GetComponent<Text>();
-                Assert.That(label.text, Does.Contain("ROUND 2/3"));
-                Assert.That(label.transform.parent.Find("Slash stock").GetComponent<Text>().text, Is.EqualTo("2 IN STOCK"));
+                Assert.That(label.text, Does.Contain("2/3"));
+                Assert.That(label.transform.parent.Find("Slash stock").GetComponent<Text>().text, Is.EqualTo("x2"));
                 Step(80); yield return null;
                 Assert.That(label.transform.parent.Find("Slash hint").GetComponent<Text>().text, Does.Contain("ENTER"));
                 yield return ForestRunTests.Capture("slash-game-indicator");

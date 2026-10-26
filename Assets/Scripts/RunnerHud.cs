@@ -82,6 +82,31 @@ namespace DinoRush
         private RectTransform eggIcon;
         private RunnerEggFlights eggFlights;
         private int movementLevel;
+        private Slider musicControl;
+
+        public void InitializeMusic(float volume, Action<float> change)
+        {
+            if (musicControl == null)
+            {
+                musicControl = RunnerMusicUi.EnsureSlider(pausePanel != null ? pausePanel.transform : panel.transform,
+                    resumeControl != null ? resumeControl : primaryControl);
+                musicControl.onValueChanged.AddListener(value => change(value / 100f));
+                if (pausePanel == null)
+                {
+                    RunnerShopPresentation.Position(musicControl.transform, 112, -111, 208, 58);
+                    RunnerMusicUi.Layout(musicControl, 208, 58, 10);
+                }
+            }
+            mainMenu?.InitializeMusic(volume, change);
+            SetMusicVolume(volume);
+            musicControl.gameObject.SetActive(false);
+        }
+
+        public void SetMusicVolume(float volume)
+        {
+            RunnerMusicUi.SetVolume(musicControl, volume);
+            mainMenu?.SetMusicVolume(volume);
+        }
 
         public bool IsBuilt => root != null;
         public bool MainMenuDialogOpen => mainMenu != null && mainMenu.DialogOpen;
@@ -361,6 +386,7 @@ namespace DinoRush
         public void ShowPaused()
         {
             Menu(true);
+            if (musicControl != null) musicControl.gameObject.SetActive(true);
             if (damagePopup != null) damagePopup.gameObject.SetActive(false);
             if (pausePanel != null)
             {
@@ -373,6 +399,7 @@ namespace DinoRush
             title.text = "PAUSED";
             description.text = "The forest can wait.\nYour run is right where you left it.";
             result.text = "ESC / P  TO RESUME";
+            if (musicControl != null) RunnerShopPresentation.Position(primaryControl.transform, -112, -111, 208, 58);
             actionLabel.text = "KEEP RUNNING  →";
         }
 
@@ -400,6 +427,11 @@ namespace DinoRush
 
         private void Menu(bool visible)
         {
+            if (musicControl != null)
+            {
+                musicControl.gameObject.SetActive(false);
+                if (pausePanel == null) RunnerShopPresentation.Position(primaryControl.transform, 0, -111, 320, 58);
+            }
             if (startPrompt != null) startPrompt.SetActive(false);
             if (mainMenu != null) mainMenu.Hide();
             if (pausePanel != null) pausePanel.SetActive(false);
@@ -617,6 +649,7 @@ namespace DinoRush
         public void ApplyScreenLayout(RunnerScreenLayout layout)
         {
             responsiveUi?.Apply(layout);
+            root.GetComponent<RunnerSlashHud>()?.ApplyLayout(layout.Portrait);
             if (stageFill != null) UpdateProgress(progressElapsed);
             if (eggFlights != null)
             {

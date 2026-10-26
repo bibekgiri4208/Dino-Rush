@@ -195,6 +195,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e39cc4a471b64b1097c8320cc7f42fd8, type: 3}
   m_Name:
   m_EditorClassIdentifier: DinoRush::DinoRush.ForestRunnerGame
+  gameplayMusic: {fileID: 8300000, guid: ac7f7129b4f6d3f45be40ec5cab6b8a2, type: 3}
   dinoSheet: {fileID: 2800000, guid: 099ea73f3b37a7a4cac3a72fbe4de529, type: 3}
   dinoRoster: {fileID: 11400000, guid: bec65adc26f82fb478c6c0c35d7ec85b, type: 2}
   mapCatalog: {fileID: 11400000, guid: af2754827159d64449268d1a2876b424, type: 2}
