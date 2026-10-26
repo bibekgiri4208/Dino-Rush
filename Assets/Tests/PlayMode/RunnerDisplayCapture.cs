@@ -10,7 +10,7 @@ namespace DinoRush.Tests
 {
     internal static class RunnerDisplayCapture
     {
-        internal static IEnumerator Capture(string name, int width, int height, Rect? safeArea = null)
+        internal static IEnumerator Capture(string name, int width, int height, Rect? safeArea = null, bool fullBleedLandscape = false)
         {
             string directory = System.Environment.GetEnvironmentVariable("DINO_RUSH_CAPTURE_DIR");
             if (string.IsNullOrEmpty(directory)) yield break;
@@ -53,7 +53,7 @@ namespace DinoRush.Tests
             bool scalerEnabled = scaler.enabled;
             try
             {
-                RunnerScreenLayout layout = RunnerScreenLayout.Calculate(width, height, safeArea ?? new Rect(0, 0, width, height));
+                RunnerScreenLayout layout = RunnerScreenLayout.Calculate(width, height, safeArea ?? new Rect(0, 0, width, height), fullBleedLandscape);
                 camera.targetTexture = worldTarget;
                 game.ApplyScreenLayout(layout);
                 canvas.renderMode = RenderMode.ScreenSpaceCamera;
@@ -86,7 +86,7 @@ namespace DinoRush.Tests
                 canvas.worldCamera = previousUiCamera;
                 canvas.planeDistance = previousDistance;
                 scaler.enabled = scalerEnabled;
-                game.ApplyScreenLayout(RunnerScreenLayout.Calculate(Screen.width, Screen.height, Screen.safeArea));
+                game.ApplyScreenLayout(RunnerScreenLayout.Calculate(Screen.width, Screen.height, Screen.safeArea, Application.isMobilePlatform));
                 camera.targetTexture = previousTarget;
                 camera.rect = previousRect;
                 camera.orthographicSize = previousSize;

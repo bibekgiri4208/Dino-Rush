@@ -81,8 +81,11 @@ namespace DinoRush.Tests
             {
                 Vector2Int size = resolutions[i];
                 game.ReturnToMenu();
-                RunnerScreenLayout layout = Apply(size.x, size.y, safeAreas[i]);
+                RunnerScreenLayout layout = Apply(size.x, size.y, safeAreas[i], true);
                 Assert.That(layout.Portrait, Is.False);
+                Assert.That(world.rect, Is.EqualTo(new Rect(0, 0, 1, 1)), "Android must not pillarbox a wide phone.");
+                foreach (Transform border in canvas.transform.Find("Viewport borders"))
+                    Assert.That(border.gameObject.activeSelf, Is.False);
                 yield return new WaitForSecondsRealtime(0.35f);
                 AssertVisibleUi(layout);
                 foreach (string page in new[] { "Options", "Missions", "Shop" })
@@ -120,8 +123,8 @@ namespace DinoRush.Tests
                 Assert.That(slash.yMax, Is.LessThan(ground), "Slash control must stay below the incoming obstacle lane.");
                 if (i == 0 || i == 5 || i == 6)
                 {
-                    yield return RunnerDisplayCapture.Capture("landscape-fit-" + size.x + "x" + size.y, size.x, size.y, safeAreas[i]);
-                    layout = Apply(size.x, size.y, safeAreas[i]);
+                    yield return RunnerDisplayCapture.Capture("mobile-fullscreen-" + size.x + "x" + size.y, size.x, size.y, safeAreas[i], true);
+                    layout = Apply(size.x, size.y, safeAreas[i], true);
                 }
                 game.TogglePause();
                 yield return new WaitForSecondsRealtime(0.3f);
@@ -130,6 +133,69 @@ namespace DinoRush.Tests
                 typeof(ForestRunnerGame).GetMethod("EndRun", Private).Invoke(game, null);
                 yield return new WaitForSecondsRealtime(0.3f);
                 AssertVisibleUi(layout);
+            }
+        }
+
+        [UnityTest]
+        public IEnumerator MobileWideViewsRepeatEveryMapWithoutGapsAndSpawnBeyondTheScreenEdge()
+        {
+            bool hadMap = PlayerPrefs.HasKey(RunnerMapCatalog.SelectionKey);
+            string previousMap = PlayerPrefs.GetString(RunnerMapCatalog.SelectionKey);
+            try
+            {
+                for (int map = 0; map < game.MapCatalog.Count; map++)
+                {
+                    game.ReturnToMenu(); game.SelectMap(map); game.StartRun();
+                    Apply(2400, 1080, new Rect(120, 24, 2280, 1032), true);
+                    float halfWidth = world.orthographicSize * world.aspect;
+                    var layers = (IList)Get("layers");
+                    foreach (object layer in layers)
+                    {
+                        System.Type type = layer.GetType();
+                        if ((bool)type.GetField("stationary").GetValue(layer)) continue;
+                        float stride = (float)type.GetField("width").GetValue(layer);
+                        var tiles = (Transform[])type.GetField("tiles").GetValue(layer);
+                        foreach (float phase in new[] { 0f, 0.49f, 0.99f })
+                        {
+                            type.GetField("offset").SetValue(layer, stride * phase);
+                            typeof(ForestRunnerGame).GetMethod("Scroll", Private).Invoke(game, new object[] { 0f });
+                            float right = float.NegativeInfinity;
+                            foreach (Transform tile in tiles)
+                            {
+                                Bounds bounds = tile.GetComponent<SpriteRenderer>().bounds;
+                                if (float.IsNegativeInfinity(right))
+                                    Assert.That(bounds.min.x, Is.LessThanOrEqualTo(-halfWidth), game.SelectedMapName + " left edge");
+                                else Assert.That(bounds.min.x, Is.LessThanOrEqualTo(right + 0.001f), game.SelectedMapName + " tile seam");
+                                right = bounds.max.x;
+                            }
+                            Assert.That(right, Is.GreaterThanOrEqualTo(halfWidth), game.SelectedMapName + " right edge");
+                        }
+                    }
+                    int repeats = game.transform.Find("Forest environment").GetComponentsInChildren<SpriteRenderer>(true).Length;
+                    Apply(2400, 1080, new Rect(0, 24, 2280, 1032), true);
+                    Assert.That(game.transform.Find("Forest environment").GetComponentsInChildren<SpriteRenderer>(true).Length,
+                        Is.EqualTo(repeats), "Reapplying a viewport must reuse its scenery repeats.");
+                    typeof(ForestRunnerGame).GetMethod("SpawnEncounter", Private).Invoke(game, null);
+                    var obstacles = (IList)Get("obstacles");
+                    int active = 0;
+                    foreach (object obstacle in obstacles)
+                    {
+                        System.Type type = obstacle.GetType();
+                        if (!(bool)type.GetField("active").GetValue(obstacle)) continue;
+                        var renderer = (SpriteRenderer)type.GetField("renderer").GetValue(obstacle);
+                        Assert.That(renderer.bounds.min.x, Is.GreaterThan(halfWidth), "Obstacles must not appear in the middle of a wide display.");
+                        active++;
+                    }
+                    Assert.That(active, Is.GreaterThan(0));
+                    yield return new WaitForSecondsRealtime(0.3f);
+                    yield return RunnerDisplayCapture.Capture("mobile-wide-map-" + map, 2400, 1080, new Rect(120, 24, 2280, 1032), true);
+                }
+            }
+            finally
+            {
+                if (hadMap) PlayerPrefs.SetString(RunnerMapCatalog.SelectionKey, previousMap);
+                else PlayerPrefs.DeleteKey(RunnerMapCatalog.SelectionKey);
+                PlayerPrefs.Save();
             }
         }
 
@@ -263,7 +329,7 @@ namespace DinoRush.Tests
             yield return RunnerDisplayCapture.Capture("responsive-16-by-10-running", 1280, 800);
         }
 
-        private RunnerScreenLayout Apply(int width, int height, Rect safe)
+        private RunnerScreenLayout Apply(int width, int height, Rect safe, bool fullBleedLandscape = false)
         {
             world.targetTexture = null;
             uiCamera.targetTexture = null;
@@ -271,7 +337,7 @@ namespace DinoRush.Tests
             target = new RenderTexture(width, height, 24);
             target.Create();
             world.targetTexture = uiCamera.targetTexture = target;
-            RunnerScreenLayout layout = RunnerScreenLayout.Calculate(width, height, safe);
+            RunnerScreenLayout layout = RunnerScreenLayout.Calculate(width, height, safe, fullBleedLandscape);
             game.ApplyScreenLayout(layout);
             Canvas.ForceUpdateCanvases();
             return layout;

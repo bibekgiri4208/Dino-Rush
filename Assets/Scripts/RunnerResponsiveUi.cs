@@ -112,6 +112,19 @@ namespace DinoRush
                     ShiftVertical(path, extra);
                 foreach (string path in new[] { "Jump", "Duck", "Trail stats frame", "Gameplay bottom fade", "Controls", "Keyboard controls" })
                     ShiftVertical(path, -extra);
+                float extraWidth = (layout.UiSize.x - 1280f) * 0.5f;
+                foreach (string path in new[] { "Life hearts", "Egg counter", "Trail stats frame" })
+                    ShiftHorizontal(path, -extraWidth);
+                foreach (string path in new[] { "Scoreboard", "Sound", "Pause", "Forest Main Menu/SFX toggle" })
+                    ShiftHorizontal(path, extraWidth);
+                if (placements.TryGetValue("Gameplay bottom fade", out Placement fade))
+                {
+                    fade.rect.sizeDelta = new Vector2(layout.FullBleedLandscape ? layout.ScreenSize.x / layout.UiScale : layout.UiSize.x,
+                        fade.rect.sizeDelta.y);
+                    if (layout.FullBleedLandscape)
+                        fade.SetPosition(new Vector2((layout.ScreenSize.x * 0.5f - layout.UiPixels.center.x) / layout.UiScale,
+                            -layout.UiSize.y * 0.5f - layout.UiPixels.yMin / layout.UiScale + fade.rect.sizeDelta.y * 0.5f));
+                }
             }
             MirrorMenuCorners();
             Fit("Forest Main Menu/Hatch reveal/Hatch reward panel", layout.UiSize);
@@ -137,6 +150,12 @@ namespace DinoRush
         {
             if (placements.TryGetValue(path, out Placement placement))
                 placement.SetPosition(placement.position + Vector2.up * offset);
+        }
+
+        private void ShiftHorizontal(string path, float offset)
+        {
+            if (placements.TryGetValue(path, out Placement placement))
+                placement.SetPosition(placement.rect.anchoredPosition + Vector2.right * offset);
         }
         private void MirrorMenuCorners()
         {

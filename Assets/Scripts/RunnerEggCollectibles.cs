@@ -38,6 +38,7 @@ namespace DinoRush
         public Sprite EggSprite { get; }
         public int Collected { get; private set; }
         public int ActiveCount { get; private set; }
+        public float DespawnX { get; set; } = -12f;
 
         public RunnerEggCollectibles(Transform owner, Material material, Action<Vector3> pickup)
         {
@@ -129,7 +130,7 @@ namespace DinoRush
                     Burst(visible);
                     pickup?.Invoke(visible);
                 }
-                else if (egg.position.x < -12f) Deactivate(egg);
+                else if (egg.position.x < DespawnX) Deactivate(egg);
             }
         }
 

@@ -12,23 +12,27 @@ namespace DinoRush
         public readonly Vector2 UiSize;
         public readonly float UiScale;
         public readonly bool Portrait;
-        public float OrthographicSize => 10f * WorldPixels.height / WorldPixels.width;
+        public readonly bool FullBleedLandscape;
+        public float OrthographicSize => FullBleedLandscape ? Mathf.Max(5.625f, 10f * WorldPixels.height / WorldPixels.width) :
+            10f * WorldPixels.height / WorldPixels.width;
 
         public Rect CameraRect => new Rect(WorldPixels.x / ScreenSize.x, WorldPixels.y / ScreenSize.y,
             WorldPixels.width / ScreenSize.x, WorldPixels.height / ScreenSize.y);
 
-        private RunnerScreenLayout(Vector2 screen, Rect safe, Rect world, bool portrait)
+        private RunnerScreenLayout(Vector2 screen, Rect safe, Rect world, bool portrait, bool fullBleedLandscape = false)
         {
             ScreenSize = screen;
             SafeArea = safe;
             WorldPixels = world;
             Portrait = portrait;
-            UiPixels = portrait ? safe : world;
-            UiScale = UiPixels.width / (portrait ? 720f : 1280f);
+            FullBleedLandscape = fullBleedLandscape;
+            UiPixels = portrait || fullBleedLandscape ? safe : world;
+            UiScale = fullBleedLandscape ? Mathf.Min(safe.width / 1280f, safe.height / 720f) :
+                UiPixels.width / (portrait ? 720f : 1280f);
             UiSize = UiPixels.size / UiScale;
         }
 
-        public static RunnerScreenLayout Calculate(int width, int height, Rect safeArea)
+        public static RunnerScreenLayout Calculate(int width, int height, Rect safeArea, bool fullBleedLandscape = false)
         {
             var screen = new Vector2(Mathf.Max(1, width), Mathf.Max(1, height));
             float left = Mathf.Clamp(safeArea.xMin, 0f, screen.x);
@@ -40,6 +44,10 @@ namespace DinoRush
 
             // Taller landscape displays show extra sky/soil, rather than forcing 16:9 bars.
             bool portrait = safe.height > safe.width;
+            // Mobile scenery fills the physical display; only interactive UI is inset for cutouts.
+            // Widen the view rather than cropping the course or stretching the artwork.
+            if (fullBleedLandscape && !portrait)
+                return new RunnerScreenLayout(screen, safe, new Rect(Vector2.zero, screen), false, true);
             if (!portrait && safe.width / safe.height <= 16f / 9f)
                 return new RunnerScreenLayout(screen, safe, safe, false);
 

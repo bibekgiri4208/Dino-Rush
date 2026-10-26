@@ -57,6 +57,49 @@ namespace DinoRush.Tests
         }
 
         [Test]
+        public void MobileFullBleedFillsTheDisplayButKeepsUiInTheSafeArea()
+        {
+            foreach (Vector2Int size in new[] { new Vector2Int(568, 320), new Vector2Int(1024, 768),
+                new Vector2Int(2208, 1840), new Vector2Int(2400, 1080), new Vector2Int(5120, 1440) })
+            foreach (bool rightNotch in new[] { false, true })
+            {
+                Rect safe = new Rect(rightNotch ? 0 : 24, 12, size.x - 24, size.y - 24);
+                RunnerScreenLayout layout = RunnerScreenLayout.Calculate(size.x, size.y, safe, true);
+                Assert.That(layout.FullBleedLandscape, Is.True);
+                Assert.That(layout.CameraRect, Is.EqualTo(new Rect(0, 0, 1, 1)));
+                Assert.That(layout.UiPixels, Is.EqualTo(safe));
+                Assert.That(layout.UiSize.x, Is.GreaterThanOrEqualTo(1280f - 0.01f));
+                Assert.That(layout.UiSize.y, Is.GreaterThanOrEqualTo(720f - 0.01f));
+                Assert.That(layout.OrthographicSize, Is.GreaterThanOrEqualTo(5.625f));
+                Assert.That(layout.OrthographicSize * 2f * size.x / size.y, Is.GreaterThanOrEqualTo(20f - 0.001f));
+            }
+            Assert.That(RunnerScreenLayout.Calculate(360, 800, new Rect(0, 0, 360, 800), true).FullBleedLandscape,
+                Is.False, "Portrait Editor previews retain their supported fallback.");
+        }
+
+        [TestCase(0, 60)]
+        [TestCase(-1, 60)]
+        [TestCase(double.NaN, 60)]
+        [TestCase(double.PositiveInfinity, 60)]
+        [TestCase(24, 24)]
+        [TestCase(30, 30)]
+        [TestCase(48, 48)]
+        [TestCase(59.94, 60)]
+        [TestCase(60, 60)]
+        [TestCase(75, 75)]
+        [TestCase(90, 90)]
+        [TestCase(119.88, 120)]
+        [TestCase(120, 120)]
+        [TestCase(144, 144)]
+        [TestCase(165, 165)]
+        [TestCase(240, 240)]
+        [TestCase(360, 360)]
+        public void MobileFrameRateMatchesTheFullDeviceRefreshWithoutAnArtificialCap(double refresh, int expected)
+        {
+            Assert.That(ForestRunnerGame.MobileFrameRate(refresh), Is.EqualTo(expected));
+        }
+
+        [Test]
         public void MinimizedWindowsAndInvalidSafeAreasHaveFiniteFallbacks()
         {
             foreach (Rect safe in new[] { Rect.zero, new Rect(-100, -50, 5000, 3000) })

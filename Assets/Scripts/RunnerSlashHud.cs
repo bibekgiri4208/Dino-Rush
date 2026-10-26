@@ -19,6 +19,9 @@ namespace DinoRush
         private Button touchButton;
         private Image touchIcon;
         private Image touchFrame;
+        private bool detailsDirty = true, lastSlashing, lastGamepad;
+        private RunnerSlashKind lastKind;
+        private int lastRemaining, lastCharges;
 
         public void InitializeTouchControl(ForestRunnerGame owner, RunnerHud hud, RunnerAudio audio)
         {
@@ -62,6 +65,13 @@ namespace DinoRush
             if (!running) return;
             RunnerSlashKind kind = RunnerSlashProgress.Equipped;
             int remaining = game.SlashesRemainingThisRound, charges = RunnerSlashProgress.Charges;
+            bool slashing = game.SlashAttack.Active, gamepad = game.UsingGamepad;
+            // Do not allocate strings or dirty the Canvas on every rendered frame.
+            if (!detailsDirty && lastKind == kind && lastRemaining == remaining && lastCharges == charges &&
+                lastSlashing == slashing && lastGamepad == gamepad) return;
+            detailsDirty = false;
+            lastKind = kind; lastRemaining = remaining; lastCharges = charges;
+            lastSlashing = slashing; lastGamepad = gamepad;
             bool equipped = kind != RunnerSlashKind.None;
             Color accent = kind == RunnerSlashKind.Fire ? new Color32(255, 181, 108, 255) :
                 kind == RunnerSlashKind.Lightning ? new Color32(255, 231, 126, 255) : new Color32(140, 224, 255, 255);
@@ -70,10 +80,10 @@ namespace DinoRush
             label.color = accent;
             stock.text = "x" + CompactCount(charges);
             hint.text = !equipped ? "EQUIP A SLASH IN SHOP" : remaining == 0 ? "ROUND LIMIT REACHED" :
-                charges == 0 ? "BUY CHARGES IN SHOP" : game.SlashAttack.Active ? "SLASHING..." : game.UsingGamepad ? "X / RB TO SLASH" : portrait ? "TAP TO SLASH" : "ENTER / TAP TO SLASH";
+                charges == 0 ? "BUY CHARGES IN SHOP" : slashing ? "SLASHING..." : gamepad ? "X / RB TO SLASH" : portrait ? "TAP TO SLASH" : "ENTER / TAP TO SLASH";
             for (int i = 0; i < pips.Length; i++)
                 pips[i].color = equipped && i < Mathf.Min(remaining, charges) ? accent : new Color32(64, 77, 79, 255);
-            button.interactable = equipped && remaining > 0 && charges > 0 && !game.SlashAttack.Active;
+            button.interactable = equipped && remaining > 0 && charges > 0 && !slashing;
             if (touchButton != null)
             {
                 touchButton.interactable = button.interactable;
@@ -108,6 +118,7 @@ namespace DinoRush
 
         public void ApplyLayout(bool isPortrait)
         {
+            detailsDirty = true;
             portrait = isPortrait;
             if (button == null) return;
             if (stock == null) EnsureDetails(label.font);

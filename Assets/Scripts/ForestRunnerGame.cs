@@ -76,6 +76,16 @@ namespace DinoRush
         private Transform trailSoil;
         private readonly Dictionary<int, Sprite> soilSpriteCache = new Dictionary<int, Sprite>();
         private float soilOffset;
+        private float viewportHalfWidth = 10f;
+        private float nextRefreshRateCheck;
+
+        public static int MobileFrameRate(double refreshRate)
+        {
+            if (double.IsNaN(refreshRate) || double.IsInfinity(refreshRate) || refreshRate < 1) return 60;
+            // On mobile, -1 means Unity's default 30 FPS, not uncapped rendering.
+            // Round up fractional refresh rates so Unity does not choose a half-rate divisor.
+            return Mathf.CeilToInt((float)refreshRate);
+        }
         private List<Layer> forestLayers;
         private int activeMapIndex;
         private Color mapDustTint = Color.white;
@@ -199,6 +209,8 @@ namespace DinoRush
             Screen.autorotateToLandscapeLeft = true;
             Screen.autorotateToLandscapeRight = true;
             Screen.orientation = ScreenOrientation.AutoRotation;
+            Screen.fullScreen = true;
+            Application.targetFrameRate = MobileFrameRate(Screen.currentResolution.refreshRateRatio.value);
         }
 
         private void Awake()
@@ -472,7 +484,7 @@ namespace DinoRush
             screenWidth = Screen.width;
             screenHeight = Screen.height;
             screenSafeArea = Screen.safeArea;
-            RunnerScreenLayout layout = RunnerScreenLayout.Calculate(screenWidth, screenHeight, screenSafeArea);
+            RunnerScreenLayout layout = RunnerScreenLayout.Calculate(screenWidth, screenHeight, screenSafeArea, Application.isMobilePlatform);
             ApplyScreenLayout(layout);
         }
 
@@ -480,6 +492,8 @@ namespace DinoRush
         {
             gameCamera.rect = layout.CameraRect;
             gameCamera.orthographicSize = layout.OrthographicSize;
+            viewportHalfWidth = layout.OrthographicSize * layout.WorldPixels.width / layout.WorldPixels.height;
+            if (eggs != null) eggs.DespawnX = -Mathf.Max(12f, viewportHalfWidth + 2f);
             FitSceneryToViewport();
             hud?.ApplyScreenLayout(layout);
         }
@@ -494,6 +508,24 @@ namespace DinoRush
                     skyBaseScales[tile] = original = tile.localScale;
                 float spriteHeight = tile.GetComponent<SpriteRenderer>().sprite.bounds.size.y;
                 tile.localScale = new Vector3(original.x, original.y + extraSky / spriteHeight, original.z);
+            }
+            if (viewportHalfWidth > 10.001f)
+            {
+                // Grow only on viewport/map changes, never while rendering or scrolling.
+                foreach (Layer layer in layers)
+                {
+                    if (layer.stationary) continue;
+                    int count = Mathf.Max(3, Mathf.CeilToInt(viewportHalfWidth * 2f / layer.width) + 2);
+                    int previous = layer.tiles.Length;
+                    if (count <= previous) continue;
+                    System.Array.Resize(ref layer.tiles, count);
+                    for (int i = previous; i < count; i++)
+                    {
+                        layer.tiles[i] = Instantiate(layer.tiles[0], layer.tiles[0].parent);
+                        layer.tiles[i].name = layer.tiles[0].name + " wide repeat " + i;
+                    }
+                }
+                Scroll(0f);
             }
             FitSoil();
         }
@@ -530,7 +562,7 @@ namespace DinoRush
             var renderer = trailSoil.GetComponent<SpriteRenderer>();
             float width = renderer.sprite.bounds.size.x;
             // Extend the canvas, not the pixels. Overscan keeps both edges covered while scrolling/shaking.
-            renderer.size = new Vector2(24f + width * 2f,
+            renderer.size = new Vector2(Mathf.Max(24f, viewportHalfWidth * 2f + 4f) + width * 2f,
                 Mathf.Max(6f, RunnerSoilArt.Top + gameCamera.orthographicSize + 1f));
             trailSoil.localPosition = new Vector3(-soilOffset, RunnerSoilArt.Top, 0f);
         }
@@ -655,6 +687,7 @@ namespace DinoRush
         private void Update()
         {
             if (!initialized) return;
+            RefreshMobileFrameRate();
             if (Screen.width != screenWidth || Screen.height != screenHeight || Screen.safeArea != screenSafeArea) UpdateViewport();
             ReadInput();
             float dt = Mathf.Min(Time.deltaTime, 0.1f);
@@ -698,6 +731,14 @@ namespace DinoRush
             gameCamera.transform.position = new Vector3(Mathf.Sin(Time.unscaledTime * 81f) * shake,
                 (State == RunState.Ready ? 1.4f : 0f) + Mathf.Cos(Time.unscaledTime * 67f) * shake * 0.55f, -10);
             hud.TickDamage(dt, gameCamera);
+        }
+
+        private void RefreshMobileFrameRate()
+        {
+            if (!Application.isMobilePlatform || Time.unscaledTime < nextRefreshRateCheck) return;
+            nextRefreshRateCheck = Time.unscaledTime + 1f;
+            int target = MobileFrameRate(Screen.currentResolution.refreshRateRatio.value);
+            if (Application.targetFrameRate != target) Application.targetFrameRate = target;
         }
 
         private void Step(float dt)
@@ -786,7 +827,7 @@ namespace DinoRush
                     obstacle.passed = true;
                     if (!obstacle.hitPlayer) RecordObstacleClear();
                 }
-                if (x < -12f)
+                if (x < -Mathf.Max(12f, viewportHalfWidth + 2f))
                 {
                     obstacle.active = false;
                     obstacle.renderer.gameObject.SetActive(false);
@@ -825,6 +866,7 @@ namespace DinoRush
             // Never partially emit a combination if a custom scene has a small pool.
             if (available < 3) return;
             RunnerEncounter encounter = encounterDirector.Next(elapsed);
+            float spawnX = Mathf.Max(11.7f, viewportHalfWidth + 1.7f);
             int index = 0;
             foreach (Obstacle obstacle in obstacles)
             {
@@ -835,7 +877,7 @@ namespace DinoRush
                 obstacle.renderer.transform.localScale = item.Overhead ?
                     new Vector3(item.Width / sprite.bounds.size.x, 1f, 1f) :
                     new Vector3(item.Height, item.Height, 1);
-                obstacle.renderer.transform.position = new Vector3(11.7f + item.Offset,
+                obstacle.renderer.transform.position = new Vector3(spawnX + item.Offset,
                     RunnerRules.GroundY + (item.Overhead ? RunnerRules.CanopyBottom : 0f), 0);
                 obstacle.renderer.gameObject.SetActive(true);
                 obstacle.width = item.Width;
@@ -847,7 +889,7 @@ namespace DinoRush
                 if (index == encounter.Obstacles.Length) break;
             }
             nextEncounterDistance = distance + encounter.Spacing;
-            eggs.SpawnEncounter(encounter, 11.7f, RunnerRules.Speed(elapsed + 6f));
+            eggs.SpawnEncounter(encounter, spawnX, RunnerRules.Speed(elapsed + 6f));
         }
 
         private void Scroll(float travel)
@@ -865,7 +907,7 @@ namespace DinoRush
                 for (int i = 0; i < layer.tiles.Length; i++)
                 {
                     Vector3 position = layer.tiles[i].position;
-                    position.x = (i - 1) * layer.width - layer.offset;
+                    position.x = (i - (layer.tiles.Length - 1) / 2) * layer.width - layer.offset;
                     layer.tiles[i].position = position;
                 }
             }
@@ -1339,12 +1381,14 @@ namespace DinoRush
 
         private void OnApplicationFocus(bool hasFocus)
         {
+            if (hasFocus) nextRefreshRateCheck = 0f;
             if (!hasFocus) DailyMissions?.Flush();
             if (!hasFocus && initialized && State == RunState.Running) TogglePause();
         }
 
         private void OnApplicationPause(bool paused)
         {
+            if (!paused) nextRefreshRateCheck = 0f;
             if (paused) DailyMissions?.Flush();
             if (paused && initialized && State == RunState.Running) TogglePause();
         }
