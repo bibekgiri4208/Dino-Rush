@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.LowLevel;
 using UnityEngine.SceneManagement;
@@ -45,6 +46,177 @@ namespace DinoRush.Tests
         private void Step(int frames) { for (int i = 0; i < frames; i++) Invoke("Step", RunnerRules.SimulationStep); }
         private void Invoke(string method, params object[] args) => typeof(ForestRunnerGame).GetMethod(method, Private).Invoke(game, args);
         private void Set(string field, object value) => typeof(ForestRunnerGame).GetField(field, Private).SetValue(game, value);
+
+        [UnityTest]
+        public IEnumerator EditorPreviewShowsClickableSlashButtonWithoutATouchscreen()
+        {
+            if (!Application.isEditor || Application.isMobilePlatform || Touchscreen.current != null)
+                Assert.Ignore("This regression checks the mouse-only Editor preview.");
+            LoadCharges(); game.StartRun(); Set("spawnTimer", float.MaxValue);
+            yield return new WaitForSecondsRealtime(0.3f);
+            RunnerSlashHud hud = game.GetComponentInChildren<RunnerSlashHud>(true);
+            Button control = hud.transform.Find("Slash attack button").GetComponent<Button>();
+            Assert.That(control.gameObject.activeInHierarchy, Is.True, "Editor Play mode must preview mobile controls by default.");
+            Assert.That(control.interactable, Is.True);
+            var preview = typeof(RunnerSlashHud).GetField("previewTouchControlsInEditor", Private);
+            preview.SetValue(hud, false); yield return null;
+            Assert.That(control.gameObject.activeSelf, Is.False, "Disabling preview restores the desktop layout.");
+            preview.SetValue(hud, true); yield return new WaitForSecondsRealtime(0.1f);
+            Assert.That(control.gameObject.activeSelf, Is.True);
+            Canvas.ForceUpdateCanvases();
+            Vector2 point = RectTransformUtility.WorldToScreenPoint(null, control.transform.position);
+            var pointer = new PointerEventData(EventSystem.current) { position = point, button = PointerEventData.InputButton.Left };
+            var hits = new List<RaycastResult>();
+            EventSystem.current.RaycastAll(pointer, hits);
+            Assert.That(hits.Count, Is.GreaterThan(0));
+            Assert.That(hits[0].gameObject, Is.EqualTo(control.gameObject));
+            Invoke("PointerAction", point);
+            ExecuteEvents.Execute(control.gameObject, pointer, ExecuteEvents.pointerClickHandler);
+            Step(1);
+            Assert.That(game.SlashesUsed, Is.EqualTo(1));
+            Assert.That(RunnerSlashProgress.Charges, Is.EqualTo(2));
+            var player = (RunnerPlayer)typeof(ForestRunnerGame).GetField("player", Private).GetValue(game);
+            Assert.That(player.Grounded, Is.True, "Preview clicks must slash without also jumping.");
+            yield return RunnerDisplayCapture.Capture("slash-button-editor-preview", 1280, 720);
+            game.TogglePause(); yield return null;
+            Assert.That(control.gameObject.activeSelf, Is.False);
+            game.ReturnToMenu(); yield return null;
+            Assert.That(control.gameObject.activeSelf, Is.False);
+        }
+
+        [UnityTest]
+        public IEnumerator DedicatedTouchButtonAttacksWithoutJumpingOrDuckingAndRespectsAllLimits()
+        {
+            var original = Touchscreen.current;
+            var background = InputSystem.settings.backgroundBehavior;
+            var editor = InputSystem.settings.editorInputBehaviorInPlayMode;
+            InputSystem.settings.backgroundBehavior = InputSettings.BackgroundBehavior.IgnoreFocus;
+            InputSystem.settings.editorInputBehaviorInPlayMode = InputSettings.EditorInputBehaviorInPlayMode.AllDeviceInputAlwaysGoesToGameView;
+            var screen = InputSystem.AddDevice<Touchscreen>(); InputSystem.EnableDevice(screen); screen.MakeCurrent();
+            var modules = EventSystem.current.GetComponents<BaseInputModule>();
+            foreach (var module in modules) module.enabled = false;
+            try
+            {
+                LoadCharges(); PlayerPrefs.SetInt(RunnerSlashProgress.ChargesKey, 10);
+                game.StartRun(); Set("spawnTimer", float.MaxValue);
+                yield return new WaitForSecondsRealtime(0.3f);
+                Transform root = game.GetComponentInChildren<RunnerSlashHud>(true).transform;
+                Button control = root.Find("Slash attack button").GetComponent<Button>();
+                var player = (RunnerPlayer)typeof(ForestRunnerGame).GetField("player", Private).GetValue(game);
+                Assert.That(control.gameObject.activeInHierarchy, Is.True);
+                Assert.That(control.interactable, Is.True);
+                Canvas.ForceUpdateCanvases();
+                Vector2 point = RectTransformUtility.WorldToScreenPoint(null, control.transform.position);
+                var hits = new List<RaycastResult>();
+                EventSystem.current.RaycastAll(new PointerEventData(EventSystem.current) { position = point }, hits);
+                Assert.That(hits.Count, Is.GreaterThan(0), "The visible slash button must have a real raycastable hit area.");
+                Assert.That(hits[0].gameObject, Is.EqualTo(control.gameObject));
+                Touch(UnityEngine.InputSystem.TouchPhase.Began);
+                Assert.That((bool)typeof(ForestRunnerGame).GetField("touchGestureActive", Private).GetValue(game), Is.False);
+                Touch(UnityEngine.InputSystem.TouchPhase.Ended);
+                Tap(); Step(1); yield return null;
+                Assert.That(game.SlashesUsed, Is.EqualTo(1));
+                Assert.That(RunnerSlashProgress.Charges, Is.EqualTo(9));
+                Assert.That(player.Grounded && !player.IsDucking, Is.True, "Slash taps must not also become jump or swipe input.");
+                Assert.That(control.interactable, Is.False, "A second attack waits until the current slash finishes.");
+                Tap(); Assert.That(game.SlashesUsed, Is.EqualTo(1));
+                for (int i = 0; i < 2; i++)
+                {
+                    Step(80); yield return null; Tap(); yield return null;
+                }
+                Assert.That(game.SlashesUsed, Is.EqualTo(3));
+                Assert.That(RunnerSlashProgress.Charges, Is.EqualTo(7));
+                Step(80); yield return null;
+                Assert.That(control.interactable, Is.False);
+                Touch(UnityEngine.InputSystem.TouchPhase.Began); Touch(UnityEngine.InputSystem.TouchPhase.Ended); Tap(); Step(1);
+                Assert.That(player.Grounded && !player.IsDucking, Is.True, "A disabled slash button must still block jump taps.");
+                Assert.That(RunnerSlashProgress.Charges, Is.EqualTo(7));
+                game.TogglePause(); yield return null;
+                Assert.That(control.gameObject.activeSelf, Is.False);
+                game.TogglePause(); yield return null;
+                Assert.That(control.gameObject.activeSelf, Is.True);
+                game.RestartRun(); yield return null;
+                Assert.That(control.interactable, Is.True);
+                PlayerPrefs.SetInt(RunnerSlashProgress.ChargesKey, 0); yield return null;
+                Assert.That(control.interactable, Is.False);
+                PlayerPrefs.SetInt(RunnerSlashProgress.ChargesKey, 5);
+                PlayerPrefs.SetInt(RunnerSlashProgress.SelectionKey, 0); yield return null;
+                Assert.That(control.interactable, Is.False);
+                game.ReturnToMenu(); yield return null;
+                Assert.That(control.gameObject.activeSelf, Is.False);
+
+                void Touch(UnityEngine.InputSystem.TouchPhase phase)
+                {
+                    InputSystem.QueueStateEvent(screen, new TouchState { touchId = 1, phase = phase, position = point });
+                    InputSystem.Update(); Invoke("ReadInput");
+                }
+                void Tap() => ExecuteEvents.Execute(control.gameObject, new PointerEventData(EventSystem.current)
+                    { position = point, button = PointerEventData.InputButton.Left }, ExecuteEvents.pointerClickHandler);
+            }
+            finally
+            {
+                foreach (var module in modules) if (module != null) module.enabled = true;
+                InputSystem.RemoveDevice(screen);
+                if (original != null && original.added) original.MakeCurrent();
+                InputSystem.settings.backgroundBehavior = background;
+                InputSystem.settings.editorInputBehaviorInPlayMode = editor;
+            }
+        }
+
+        [UnityTest]
+        public IEnumerator DedicatedTouchButtonFitsLandscapeSafeAreasAndKeepsTheCompactIndicatorSeparate()
+        {
+            var original = Touchscreen.current;
+            var screen = InputSystem.AddDevice<Touchscreen>(); screen.MakeCurrent();
+            try
+            {
+                LoadCharges(); game.StartRun(); Set("spawnTimer", float.MaxValue);
+                yield return new WaitForSecondsRealtime(0.3f);
+                Transform root = game.GetComponentInChildren<RunnerSlashHud>(true).transform;
+                var button = (RectTransform)root.Find("Slash attack button");
+                Assert.That(button.gameObject.activeSelf, Is.True);
+                foreach (var size in new[] { new Vector2Int(1280, 720), new Vector2Int(2340, 1080), new Vector2Int(800, 480), new Vector2Int(360, 800) })
+                {
+                    Rect safe = new Rect(24, 12, size.x - 64, size.y - 28);
+                    RunnerScreenLayout layout = RunnerScreenLayout.Calculate(size.x, size.y, safe);
+                    game.ApplyScreenLayout(layout); Canvas.ForceUpdateCanvases();
+                    Bounds bounds = RectTransformUtility.CalculateRelativeRectTransformBounds(root, button);
+                    Rect rootRect = ((RectTransform)root).rect;
+                    Assert.That(rootRect.Contains(bounds.min) && rootRect.Contains(bounds.max), Is.True);
+                    Assert.That(button.rect.width * layout.UiScale, Is.GreaterThanOrEqualTo(48));
+                    Assert.That(button.rect.height * layout.UiScale, Is.GreaterThanOrEqualTo(48));
+                    var frame = (RectTransform)button.Find("Button frame");
+                    Assert.That(frame.rect.height, Is.EqualTo(64), "The button should be a low-profile strip, not a large square.");
+                    Assert.That(frame.rect.width, Is.LessThanOrEqualTo(144));
+                    Assert.That(button.GetComponent<Image>().color.a, Is.Zero, "The extra tap padding must not obscure obstacles.");
+                    if (!layout.Portrait)
+                    {
+                        float buttonTop = layout.UiPixels.yMin + (bounds.max.y - rootRect.yMin) * layout.UiScale;
+                        float ground = layout.WorldPixels.yMin + (0.5f + RunnerRules.GroundY / (layout.OrthographicSize * 2f)) * layout.WorldPixels.height;
+                        Assert.That(buttonTop, Is.LessThan(ground - 8), "Even the hit area must stay below incoming ground obstacles.");
+                    }
+                    foreach (string name in new[] { "Trail stats frame", "Slash indicator", "Pause" })
+                    {
+                        Bounds other = RectTransformUtility.CalculateRelativeRectTransformBounds(root, root.Find(name));
+                        Assert.That(new Rect(bounds.min, bounds.size).Overlaps(new Rect(other.min, other.size)), Is.False, name);
+                    }
+                    foreach (Text text in button.GetComponentsInChildren<Text>())
+                    {
+                        Assert.That(text.preferredWidth, Is.LessThanOrEqualTo(text.rectTransform.rect.width + 1));
+                        Assert.That(text.preferredHeight, Is.LessThanOrEqualTo(text.rectTransform.rect.height + 1));
+                    }
+                    yield return RunnerDisplayCapture.Capture("mobile-slash-button-" + size.x, size.x, size.y, safe);
+                }
+                game.StartRun(); Invoke("EndRun"); yield return null;
+                Assert.That(button.gameObject.activeSelf, Is.False);
+            }
+            finally
+            {
+                InputSystem.RemoveDevice(screen);
+                if (original != null && original.added) original.MakeCurrent();
+            }
+        }
+
         [UnityTest] public IEnumerator ThreePaidAttacksNoFreeRetryAndBlockedStatesNeverConsume()
         {
             LoadCharges(); Assert.That(game.Attack(), Is.False);

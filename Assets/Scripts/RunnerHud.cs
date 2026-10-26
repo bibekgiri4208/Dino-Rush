@@ -702,6 +702,11 @@ namespace DinoRush
             if (damagePopup != null) damagePopup.gameObject.SetActive(false);
         }
 
+        public void RegisterButton(Button button)
+        {
+            if (button != null && !buttons.Contains(button)) buttons.Add(button);
+        }
+
         public bool IsOverButton(Vector2 screenPoint)
         {
             foreach (Button button in buttons)

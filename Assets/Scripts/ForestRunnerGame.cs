@@ -247,6 +247,7 @@ namespace DinoRush
             hud.InitializeShop(Shop, audioCues);
             hud.Initialize(PrimaryAction, TogglePause, Jump, ToggleMute, RestartRun, ReturnToMenu, SetDuckHeld, eggs.EggSprite);
             hud.InitializeMusic(music.Volume, SetMusicVolume);
+            GetComponentInChildren<RunnerSlashHud>(true)?.InitializeTouchControl(this, hud, audioCues);
             GetComponentInChildren<ForestMainMenu>(true)?.InitializeDailyMissions(DailyMissions);
             hud.UpdateLives(Lives);
             hud.InitializeDinos(dinoRoster, SelectedDinoIndex, SelectDino);

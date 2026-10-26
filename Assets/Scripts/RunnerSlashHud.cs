@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
 using static DinoRush.RunnerShopPresentation;
 
@@ -9,9 +10,38 @@ namespace DinoRush
         [SerializeField] private Text label, stock, hint;
         [SerializeField] private Image[] pips = new Image[RunnerSlashProgress.MaxUsesPerRound];
         [SerializeField] private Button button;
+        [Header("Touch controls")]
+        [SerializeField, Tooltip("Show the mobile slash button during Editor Play mode, even without a touchscreen. Does not affect desktop builds.")]
+        private bool previewTouchControlsInEditor = true;
         private ForestRunnerGame game;
         private bool portrait;
         private Image compactFrame;
+        private Button touchButton;
+        private Image touchIcon;
+        private Image touchFrame;
+
+        public void InitializeTouchControl(ForestRunnerGame owner, RunnerHud hud, RunnerAudio audio)
+        {
+            game = owner;
+            if (touchButton != null) return;
+            Transform node = Node("Slash attack button", transform);
+            Image hitArea = Art(node, null, Color.clear, false);
+            hitArea.raycastTarget = true;
+            touchFrame = Art(Node("Button frame", node), button.GetComponent<Image>().sprite, Color.white, true);
+            touchButton = node.gameObject.AddComponent<Button>();
+            touchButton.targetGraphic = touchFrame;
+            touchButton.colors = button.colors;
+            touchButton.navigation = new Navigation { mode = Navigation.Mode.None };
+            touchIcon = Art(Node("Slash icon", node), null, Color.white, false);
+            touchIcon.preserveAspect = true;
+            Label("Label", node, "SLASH", label.font, 18, 0, -44, 136, 28, new Color32(240, 242, 207, 255)).lineSpacing = 1f;
+            touchButton.onClick.AddListener(() => game.Attack());
+            // Even unavailable attacks must block the playfield tap/duck gesture underneath.
+            hud.RegisterButton(touchButton);
+            ApplyLayout(portrait);
+            RunnerUiEffects.Install((RectTransform)node, audio);
+            node.gameObject.SetActive(false);
+        }
 
         private void Start()
         {
@@ -26,6 +56,9 @@ namespace DinoRush
         {
             bool running = game != null && game.State == ForestRunnerGame.RunState.Running;
             button.gameObject.SetActive(running);
+            if (touchButton != null)
+                touchButton.gameObject.SetActive(running && (Application.isMobilePlatform || Touchscreen.current != null ||
+                    (Application.isEditor && previewTouchControlsInEditor)));
             if (!running) return;
             RunnerSlashKind kind = RunnerSlashProgress.Equipped;
             int remaining = game.SlashesRemainingThisRound, charges = RunnerSlashProgress.Charges;
@@ -41,6 +74,13 @@ namespace DinoRush
             for (int i = 0; i < pips.Length; i++)
                 pips[i].color = equipped && i < Mathf.Min(remaining, charges) ? accent : new Color32(64, 77, 79, 255);
             button.interactable = equipped && remaining > 0 && charges > 0 && !game.SlashAttack.Active;
+            if (touchButton != null)
+            {
+                touchButton.interactable = button.interactable;
+                touchIcon.sprite = game.SlashAttack.Catalog != null ?
+                    game.SlashAttack.Catalog.Frame(equipped ? kind : RunnerSlashKind.Fire, 0.18f) : null;
+                touchIcon.color = button.interactable ? Color.white : new Color(0.55f, 0.55f, 0.55f, 0.65f);
+            }
         }
 
         public void EnsureUi(Font font, Sprite sprite)
@@ -100,6 +140,23 @@ namespace DinoRush
             for (int i = 0; i < pips.Length; i++)
                 Position(pips[i].transform, i * (portrait ? 26 : 24), 0, portrait ? 20 : 18, portrait ? 10 : 8);
             button.GetComponent<RunnerUiButtonFeedback>()?.RefreshContentLayout();
+            if (touchButton != null)
+            {
+                float width = portrait ? 128 : 144;
+                var touchRect = (RectTransform)touchButton.transform;
+                touchRect.anchorMin = touchRect.anchorMax = new Vector2(1, 0);
+                touchRect.pivot = Vector2.one * 0.5f;
+                // Keep only a slim strip visible; its padded hit area remains comfortable on phones.
+                touchRect.sizeDelta = new Vector2(width, portrait ? 120 : 104);
+                touchRect.anchoredPosition = new Vector2(-width * 0.5f - (portrait ? 24 : 32), portrait ? 116 : 66);
+                Position(touchFrame.transform, 0, 0, width, 64);
+                Position(touchIcon.transform, -width * 0.5f + 28, 0, portrait ? 36 : 40, portrait ? 36 : 40);
+                touchIcon.transform.localScale = new Vector3(-1, 1, 1);
+                Transform caption = touchButton.transform.Find("Label");
+                Position(caption, portrait ? 20 : 22, 0, portrait ? 64 : 80, 24);
+                caption.GetComponent<Text>().fontSize = portrait ? 12 : 14;
+                touchButton.GetComponent<RunnerUiButtonFeedback>()?.RefreshContentLayout();
+            }
         }
 
         private static string CompactCount(int count) => count >= 1000000000 ? (count / 1000000000f).ToString("0.#") + "B" :

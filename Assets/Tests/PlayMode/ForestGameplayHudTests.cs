@@ -100,8 +100,8 @@ namespace DinoRush.Tests
             Assert.That(root.Find("Sound/Sound icon").GetComponent<Image>().sprite.name,
                 Is.EqualTo(muted == 0 ? "HudMuted" : "HudSpeaker"));
             float ground = game.transform.Find("Player/Blue dino player").position.y;
-            var formerJump = (RectTransform)root.Find("Jump");
-            Vector2 tap = RectTransformUtility.WorldToScreenPoint(null, formerJump.TransformPoint(formerJump.rect.center));
+            // Jump from the playfield, away from the mobile slash button preview at bottom-right.
+            Vector2 tap = RectTransformUtility.WorldToScreenPoint(null, root.TransformPoint(new Vector3(-180, -200, 0)));
             typeof(ForestRunnerGame).GetMethod("PointerAction", BindingFlags.NonPublic | BindingFlags.Instance)
                 .Invoke(game, new object[] { tap });
             yield return new WaitForSeconds(0.1f);
