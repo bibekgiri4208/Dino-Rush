@@ -15,6 +15,8 @@ namespace DinoRush
             yield return RunnerMapCatalog.SelectionKey;
             yield return HighScoreKey;
             yield return RunnerDailyMissions.SaveKey;
+            yield return RunnerStoryProgress.SaveKey;
+            yield return RunnerStoryProgress.TransactionKey;
             if (roster != null)
                 for (int i = 0; i < roster.Count; i++) yield return RunnerShopProgress.FragmentKey(roster[i].Id);
             yield return RunnerTrailProgress.SelectionKey;

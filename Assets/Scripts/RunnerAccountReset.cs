@@ -10,6 +10,7 @@ namespace DinoRush
     {
         private static readonly Color Cream = new Color32(240, 242, 207, 255);
         private static readonly Color Warning = new Color32(255, 169, 141, 255);
+        private const string ResetDetails = "ALL DINO FRAGMENTS + UNLOCKS\nALL TRAILS + SLASH STYLES\nSLASH CHARGES + EGGS\nRECORDS + DAILY MISSIONS\nSTORY LEVELS + STARS";
         [SerializeField] private GameObject overlay;
         [SerializeField] private RectTransform panel;
         [SerializeField] private Button open, cancel, confirm;
@@ -23,6 +24,7 @@ namespace DinoRush
         public void Initialize(ForestMainMenu owner, ForestRunnerGame runner)
         {
             menu = owner; game = runner;
+            if (details != null) details.text = ResetDetails;
             if (!bound)
             {
                 bound = true;
@@ -90,7 +92,7 @@ namespace DinoRush
             heading = Label("Reset account heading", panel, "RESET ACCOUNT?", font, 22, 0, 0, 496, 44, Warning);
             warning = Label("Reset account warning", panel, "THIS CANNOT BE UNDONE", font, 12, 0, 0, 496, 32, Warning);
             details = Label("Reset account details", panel,
-                "ALL DINO FRAGMENTS + UNLOCKS\nALL TRAILS + SLASH STYLES\nSLASH CHARGES + EGGS\nRECORDS + DAILY MISSIONS", font, 12, 0, 0, 496, 152, Cream);
+                ResetDetails, font, 12, 0, 0, 496, 152, Cream);
             note = Label("Reset account note", panel, "BLUE STAYS AVAILABLE.\nSOUND SETTINGS ARE KEPT.", font, 11, 0, 0, 496, 52, Cream);
             cancel = Control("Cancel account reset", panel, "CANCEL", font, buttonSprite, Cream);
             confirm = Control("Confirm account reset", panel, "RESET", font, buttonSprite, Warning);

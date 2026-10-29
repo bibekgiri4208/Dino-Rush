@@ -48,7 +48,7 @@ namespace DinoRush.Editor
             {
                 Transform card = page.Find(story ? "Story mode" : "Endless mode");
                 Button button = card.GetComponent<Button>();
-                button.interactable = !story;
+                button.interactable = true;
                 Image frame = card.GetComponent<Image>();
                 frame.sprite = PixelMenuArt.Load("DialogFrame");
                 frame.type = Image.Type.Sliced;
@@ -60,17 +60,17 @@ namespace DinoRush.Editor
                 Image illustration = Picture("Mode illustration", card);
                 illustration.sprite = PixelMenuArt.Load(story ? "ModeStory" : "ModeEndless");
                 illustration.preserveAspect = !story;
-                illustration.color = story ? new Color(0.8f, 0.86f, 0.82f, 1) : Color.white;
+                illustration.color = Color.white;
                 Image runner = Picture("Trail dino", illustration.transform);
                 runner.sprite = dino;
                 runner.preserveAspect = true;
                 runner.color = illustration.color;
                 runner.gameObject.SetActive(story); // The montage stays unobstructed; Story keeps its journey dino.
                 Text title = card.Find("Label").GetComponent<Text>();
-                title.color = story ? PixelMenuArt.Hex(0xb6c8b5) : PixelMenuArt.Hex(0xffd275);
+                title.color = PixelMenuArt.Hex(0xffd275);
                 title.text = story ? "STORY MODE" : "ENDLESS MODE";
-                Caption("Mode description", card, font, story ? "A JOURNEY HOME" : "RUN. DODGE. REPEAT.", PixelMenuArt.Hex(0xaecb98));
-                Caption("Mode status", card, font, story ? "COMING SOON" : "CHOOSE A MAP  >", story ? PixelMenuArt.Hex(0xd9bd83) : PixelMenuArt.Hex(0xf0f2cf));
+                Caption("Mode description", card, font, story ? "THE GREAT MIGRATION" : "RUN. DODGE. REPEAT.", PixelMenuArt.Hex(0xaecb98));
+                Caption("Mode status", card, font, story ? "BEGIN JOURNEY >" : "CHOOSE A MAP  >", PixelMenuArt.Hex(0xf0f2cf));
             }
             // Author both layouts' resting content while preserving the clean Options editor preview.
             RunnerCompactMenus.ApplyDialog(panel, RunnerCompactMenus.DialogKind.Mode, false, new Vector2(1280, 720));

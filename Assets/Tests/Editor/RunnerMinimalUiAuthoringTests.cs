@@ -98,7 +98,7 @@ namespace DinoRush.Tests
                     Assert.That(art.raycastTarget, Is.False);
                     Assert.That(art.transform.Find("Trail dino").gameObject.activeSelf, Is.EqualTo(name == "Story mode"));
                     Assert.That(card.Find("Mode status").GetComponent<Text>().text,
-                        Is.EqualTo(name == "Story mode" ? "COMING SOON" : "CHOOSE A MAP  >"));
+                        Is.EqualTo(name == "Story mode" ? "BEGIN JOURNEY >" : "CHOOSE A MAP  >"));
                 }
                 foreach (string path in new[] { "Keyboard controls", "Controls", "Duck/Drop hint", "Menu card/Description", "Menu card/Result",
                     "Menu card/Shortcut", "Forest Pause Menu/Pause description", "Forest Pause Menu/Pause shortcut" })

@@ -92,7 +92,8 @@ namespace DinoRush
             }
             if (pad.buttonEast.wasPressedThisFrame)
             {
-                if (keyboard.IsOpen) keyboard.Close();
+                if (game.Story != null && game.Story.IsModal) game.Story.HandleBack();
+                else if (keyboard.IsOpen) keyboard.Close();
                 else if (game.State == ForestRunnerGame.RunState.Paused) game.TogglePause();
                 else if (game.State == ForestRunnerGame.RunState.GameOver) game.ReturnToMenu();
                 else hud.GamepadBack();
@@ -177,6 +178,7 @@ namespace DinoRush
                 Selectable preferred = null;
                 if (scope != null && !(changed && hud.PreferSafeNavigation)) remembered.TryGetValue(scope, out preferred);
                 if (!controls.Contains(preferred)) preferred = hud.NavigationDefault(game.State);
+                if (changed && game.State == ForestRunnerGame.RunState.StoryScene) preferred = hud.NavigationDefault(game.State);
                 SetFocus(controls.Contains(preferred) ? preferred : controls.Count > 0 ? controls[0] : null);
             }
             else SetFocus(focused); // Existing button listeners may clear EventSystem selection after activation.
@@ -200,6 +202,7 @@ namespace DinoRush
             hint.resizeTextMaxSize = portrait ? 20 : 13;
             hint.text = focused is Slider ? (portrait ? "LEFT / RIGHT: VOLUME\nUP / DOWN: MOVE   B: BACK" : "LEFT / RIGHT: VOLUME   UP / DOWN: MOVE   LB / RB: CYCLE   B: BACK") :
                 keyboard.IsOpen ? (portrait ? "A: TYPE   X: DELETE\nY: SPACE   B: CLOSE" : "A: TYPE   X: DELETE   Y: SPACE   B: CLOSE") :
+                game.State == ForestRunnerGame.RunState.StoryScene ? "A: CONFIRM / REVEAL   B: SKIP SCENE   D-PAD: CHOOSE" :
                 game.State == ForestRunnerGame.RunState.Running ? (portrait ? "A: JUMP   B / DOWN: DUCK\nX / RB: SLASH   START: PAUSE   Y: SFX" : "A: JUMP / DOUBLE JUMP   B / DOWN: DUCK   X / RB: SLASH   START: PAUSE   Y: SFX") :
                 game.State == ForestRunnerGame.RunState.AwaitingStart ? "A: START RUN   B: BACK" :
                 portrait ? "D-PAD / STICK: MOVE   A: CONFIRM\nB: BACK   LB / RB: CYCLE" : "D-PAD / STICK: MOVE   A: CONFIRM   B: BACK   LB / RB: CYCLE";

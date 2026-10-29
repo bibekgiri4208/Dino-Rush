@@ -43,7 +43,8 @@ namespace DinoRush.Tests
             foreach (string key in keys)
             {
                 if (PlayerPrefs.HasKey(key)) existed.Add(key);
-                if (key == RunnerDinoRoster.SelectionKey || key == RunnerMapCatalog.SelectionKey || key == RunnerDailyMissions.SaveKey)
+                if (key == RunnerDinoRoster.SelectionKey || key == RunnerMapCatalog.SelectionKey || key == RunnerDailyMissions.SaveKey ||
+                    key == RunnerStoryProgress.SaveKey || key == RunnerStoryProgress.TransactionKey)
                     strings[key] = PlayerPrefs.GetString(key);
                 else ints[key] = PlayerPrefs.GetInt(key);
                 PlayerPrefs.DeleteKey(key);

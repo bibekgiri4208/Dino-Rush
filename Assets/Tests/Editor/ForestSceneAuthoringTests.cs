@@ -99,7 +99,7 @@ namespace DinoRush.Tests
                 var modes = (GameObject)menuData.FindProperty("modePage").objectReferenceValue;
                 Assert.That(modes, Is.Not.Null);
                 Assert.That(modes.activeSelf, Is.False);
-                Assert.That(modes.transform.Find("Story mode").GetComponent<UnityEngine.UI.Button>().interactable, Is.False);
+                Assert.That(modes.transform.Find("Story mode").GetComponent<UnityEngine.UI.Button>().interactable, Is.True);
                 Assert.That(menuData.FindProperty("endlessMode").objectReferenceValue,
                     Is.EqualTo(modes.transform.Find("Endless mode").GetComponent<UnityEngine.UI.Button>()));
                 Assert.That(game.GetComponentInChildren<Canvas>(true).pixelPerfect, Is.True);

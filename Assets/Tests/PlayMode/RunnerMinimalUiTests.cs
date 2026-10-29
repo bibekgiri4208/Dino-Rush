@@ -264,9 +264,9 @@ namespace DinoRush.Tests
             Transform modes = panel.Find("Mode selection page");
             Button story = modes.Find("Story mode").GetComponent<Button>();
             Button endless = modes.Find("Endless mode").GetComponent<Button>();
-            Assert.That(story.interactable, Is.False);
+            Assert.That(story.interactable, Is.True);
             Assert.That(endless.interactable, Is.True);
-            Assert.That(story.transform.Find("Mode status").GetComponent<Text>().text, Is.EqualTo("COMING SOON"));
+            Assert.That(story.transform.Find("Mode status").GetComponent<Text>().text, Is.EqualTo("BEGIN JOURNEY >"));
             foreach (Vector2Int size in new[] { new Vector2Int(1280, 720), new Vector2Int(320, 568), new Vector2Int(1280, 720) })
             {
                 bool portrait = size.x < size.y;

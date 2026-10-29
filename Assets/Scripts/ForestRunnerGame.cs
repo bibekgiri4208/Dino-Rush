@@ -7,7 +7,7 @@ namespace DinoRush
     [DisallowMultipleComponent]
     public sealed class ForestRunnerGame : MonoBehaviour
     {
-        public enum RunState { Ready, Running, Paused, GameOver, AwaitingStart }
+        public enum RunState { Ready, Running, Paused, GameOver, AwaitingStart, StorySelect, StoryScene, StoryResults }
         private const string HighScoreKey = RunnerAccountProgress.HighScoreKey;
         private const float MenuWalkSpeed = 1.4f;
         private const float MenuDinoScale = 0.9f;
@@ -150,6 +150,7 @@ namespace DinoRush
         private Rect screenSafeArea;
         private bool initialized;
         private int preparedInputFrame;
+        private bool storySession;
         private bool keyboardDuckHeld;
         private bool pointerDuckHeld;
         private bool touchGestureActive, touchGestureDucking;
@@ -173,10 +174,27 @@ namespace DinoRush
         public RunnerDailyMissions DailyMissions { get; private set; }
         public int Lives => health.Lives;
         public bool IsInvulnerable => health.IsInvulnerable;
-        public int Level => RunnerRules.Level(elapsed);
-        public float CurrentSpeed => RunnerRules.Speed(elapsed);
+        public RunnerStoryMode Story { get; private set; }
+        public bool IsStoryRun => Story != null && Story.IsStoryRun;
+        private float CourseTime => IsStoryRun ? Story.ActiveLevel.CourseTime(elapsed) : elapsed;
+        public int Level => RunnerRules.Level(CourseTime);
+        public float CurrentSpeed => RunnerRules.Speed(CourseTime);
+        internal AudioClip StoryMusicClip => gameplayMusic;
+        internal Sprite[] StoryDinoFrames(int index) => DinoFrames(index);
+        internal Sprite StoryObstacleSprite(int index) => obstacleSprites[index % obstacleSprites.Count];
+        private Sprite storyRock, storyTallRock;
+        internal Sprite StoryRockSprite(bool tall = false)
+        {
+            Sprite cached = tall ? storyTallRock : storyRock;
+            if (cached != null) return cached;
+            string textureName = tall ? "5" : "2";
+            foreach (Sprite sprite in obstacleSprites)
+                if (sprite.texture.name == textureName) { if (tall) storyTallRock = sprite; else storyRock = sprite; return sprite; }
+            return StoryObstacleSprite(1);
+        }
         public RunnerDinoRoster DinoRoster => dinoRoster;
         public RunnerMapCatalog MapCatalog => mapCatalog;
+        public int ActiveMapIndex => activeMapIndex;
         public int SelectedMapIndex { get; private set; }
         public string SelectedMapName => mapCatalog != null && mapCatalog.Count > 0
             ? mapCatalog[SelectedMapIndex].displayName : "Forest";
@@ -288,6 +306,9 @@ namespace DinoRush
             var menuAmbience = GetComponent<ForestMenuAmbience>();
             if (menuAmbience == null) menuAmbience = gameObject.AddComponent<ForestMenuAmbience>();
             menuAmbience.Initialize(this, gameCamera, spriteMaterial);
+            Story = GetComponent<RunnerStoryMode>();
+            if (Story == null) Story = gameObject.AddComponent<RunnerStoryMode>();
+            Story.Initialize(this, hud, audioCues, spriteMaterial);
         }
 
         private void CreateSceneObjects()
@@ -691,7 +712,9 @@ namespace DinoRush
             if (Screen.width != screenWidth || Screen.height != screenHeight || Screen.safeArea != screenSafeArea) UpdateViewport();
             ReadInput();
             float dt = Mathf.Min(Time.deltaTime, 0.1f);
+            Story?.Tick(dt);
             hud.Tick(dt);
+            if (Story != null && Story.IsModal) return;
             if (State == RunState.Paused) return;
 
             if (State == RunState.Running)
@@ -705,7 +728,7 @@ namespace DinoRush
                 if (Score != lastHudScore)
                 {
                     lastHudScore = Score;
-                    hud.UpdateScore(Score, best, cleared, RunnerRules.Speed(elapsed));
+                    hud.UpdateScore(Score, best, cleared, CurrentSpeed);
                 }
             }
             else if (State == RunState.Ready)
@@ -720,10 +743,10 @@ namespace DinoRush
             bool menuWalking = State == RunState.Ready;
             // Use locomotion, not idle poses, while the title's ground moves. The smaller
             // menu dino has a shorter stride, so match cadence to both travel and scale.
-            float animationSpeed = menuWalking ? MenuWalkSpeed / MenuDinoScale : RunnerRules.Speed(elapsed);
+            float animationSpeed = menuWalking ? MenuWalkSpeed / MenuDinoScale : CurrentSpeed;
             player.Render(dt, menuWalking || State == RunState.Running, State == RunState.GameOver,
                 animationSpeed / RunnerRules.Speed(0));
-            playerTrail.Tick(dt, player.Feet, player.IsDucking, RunnerRules.Speed(elapsed), State == RunState.Running);
+            playerTrail.Tick(dt, player.Feet, player.IsDucking, CurrentSpeed, State == RunState.Running);
             SetSkyFraming(State == RunState.Ready);
             if (menuWalking) dinoRenderer.transform.localScale *= MenuDinoScale;
             UpdateParticles(dt);
@@ -748,7 +771,7 @@ namespace DinoRush
             elapsed += dt;
             hud.UpdateProgress(elapsed);
             stageBannerTime = Mathf.Max(0f, stageBannerTime - dt);
-            bool levelChanged = Level > announcedLevel;
+            bool levelChanged = !IsStoryRun && Level > announcedLevel;
             if (levelChanged)
             {
                 announcedLevel = Level;
@@ -758,7 +781,7 @@ namespace DinoRush
                 stageBannerTime = 3f;
                 audioCues.Milestone();
             }
-            int lap = RunnerRules.EndlessLap(elapsed);
+            int lap = IsStoryRun ? 0 : RunnerRules.EndlessLap(elapsed);
             if (lap > announcedLap)
             {
                 announcedLap = lap;
@@ -769,7 +792,7 @@ namespace DinoRush
                     audioCues.Milestone();
                 }
             }
-            float speed = RunnerRules.Speed(elapsed);
+            float speed = CurrentSpeed;
             float travel = speed * dt;
             distance += travel;
             DailyMissions?.RecordDistance(travel);
@@ -842,7 +865,7 @@ namespace DinoRush
                 dustTimer = runningDirtInterval / Mathf.Sqrt(speed / RunnerRules.Speed(0));
             }
 
-            int nextMilestone = Score / 100;
+            int nextMilestone = IsStoryRun ? milestone : Score / 100;
             if (nextMilestone > milestone)
             {
                 milestone = nextMilestone;
@@ -850,6 +873,7 @@ namespace DinoRush
                 if (stageBannerTime <= 0f) hud.Toast($"{milestone * 100} METRES  /  KEEP GOING!");
                 SaveBest();
             }
+            Story?.StepRun(dt, elapsed, distance, playerBox);
         }
 
         private void RecordObstacleClear()
@@ -865,8 +889,10 @@ namespace DinoRush
             foreach (Obstacle obstacle in obstacles) if (!obstacle.active) available++;
             // Never partially emit a combination if a custom scene has a small pool.
             if (available < 3) return;
-            RunnerEncounter encounter = encounterDirector.Next(elapsed);
+            RunnerEncounter encounter = encounterDirector.Next(CourseTime);
             float spawnX = Mathf.Max(11.7f, viewportHalfWidth + 1.7f);
+            nextEncounterDistance = distance + encounter.Spacing;
+            if (Story != null && !Story.AllowsEncounter(encounter, distance, spawnX, CurrentSpeed)) return;
             int index = 0;
             foreach (Obstacle obstacle in obstacles)
             {
@@ -888,8 +914,7 @@ namespace DinoRush
                 obstacle.hitPlayer = false;
                 if (index == encounter.Obstacles.Length) break;
             }
-            nextEncounterDistance = distance + encounter.Spacing;
-            eggs.SpawnEncounter(encounter, spawnX, RunnerRules.Speed(elapsed + 6f));
+            eggs.SpawnEncounter(encounter, spawnX, RunnerRules.Speed(CourseTime + 6f));
         }
 
         private void Scroll(float travel)
@@ -920,7 +945,7 @@ namespace DinoRush
         {
             if (dust.Count == 0) return;
             bool impact = emission == DirtEmission.Landing || emission == DirtEmission.Crash;
-            float drift = RunnerRules.Speed(elapsed) * (impact ? 0.18f : 0.38f);
+            float drift = CurrentSpeed * (impact ? 0.18f : 0.38f);
             float strength = emission == DirtEmission.Landing ? LandingDirtStrength : 1f;
             for (int i = 0; i < count; i++)
             {
@@ -1016,8 +1041,13 @@ namespace DinoRush
 
         private void ReadInput()
         {
+            if (Story != null && Story.IsModal)
+            {
+                if (gamepadUi == null || !gamepadUi.Read(Gamepad.current)) Story.ReadKeyboard();
+                return;
+            }
             // A map-confirmation click must never also dismiss the newly opened start prompt.
-            if (State == RunState.AwaitingStart && Time.frameCount <= preparedInputFrame) return;
+            if ((State == RunState.AwaitingStart || State == RunState.Running) && Time.frameCount <= preparedInputFrame) return;
             bool waitingForStart = State == RunState.AwaitingStart;
             Keyboard keyboard = Keyboard.current;
             Gamepad pad = Gamepad.current;
@@ -1162,6 +1192,7 @@ namespace DinoRush
         public void StartRun()
         {
             if (!initialized) return;
+            if (IsStoryRun) { Story.RetryLevel(); return; }
             ApplyMap(SelectedMapIndex);
             ResetRun();
             SetSkyFraming(false);
@@ -1176,11 +1207,39 @@ namespace DinoRush
             State = RunState.Running;
             eggs.SpawnIntro();
             hud.ShowRunning();
-            hud.SetMapName(SelectedMapName);
+            hud.SetMapName(IsStoryRun ? Story.ActiveLevel.Number + " / " + Story.ActiveLevel.Title : SelectedMapName);
             hud.UpdateLevel(Level);
-            hud.UpdateScore(0, best, 0, RunnerRules.Speed(0));
-            hud.Toast($"LEVEL 01 / {RunnerRules.LevelHint(1)}");
+            hud.UpdateScore(0, best, 0, CurrentSpeed);
+            hud.Toast(IsStoryRun ? Story.ActiveLevel.Number + " / " + Story.ActiveLevel.Title.ToUpperInvariant() : $"LEVEL 01 / {RunnerRules.LevelHint(1)}");
             stageBannerTime = 3f;
+        }
+
+        internal void PrepareStoryRun(RunnerStoryLevel level)
+        {
+            storySession = true;
+            ApplyMap(mapCatalog != null ? mapCatalog.Find(level.MapId) : 0);
+            ResetRun();
+            SetSkyFraming(false);
+            gameCamera.transform.position = new Vector3(0, 0, -10);
+        }
+
+        internal void BeginPreparedStoryRun()
+        {
+            preparedInputFrame = Time.frameCount;
+            // A held dialogue-navigation direction is not a request to fast-drop the runner.
+            gamepadDuckBlocked = true;
+            BeginRun();
+        }
+
+        internal void SuspendForStory(RunState state)
+        {
+            State = state;
+            music?.Stop(); audioCues?.StopSlashSounds(); audioCues?.StopEggSounds();
+            DailyMissions?.Flush(); ReleaseDuckInput();
+            SlashAttack?.Clear(); doubleJumpBurst?.Clear(); playerTrail?.Clear();
+            foreach (Obstacle obstacle in obstacles)
+            { obstacle.active = false; obstacle.renderer.gameObject.SetActive(false); }
+            hud.ShowStoryScreen();
         }
 
         private void ResetRun()
@@ -1198,7 +1257,7 @@ namespace DinoRush
             stageBannerTime = 0f;
             var aspects = new float[obstacleSprites.Count];
             for (int i = 0; i < aspects.Length; i++) aspects[i] = obstacleSprites[i].bounds.size.x / obstacleSprites[i].bounds.size.y;
-            int seed = Random.Range(1, int.MaxValue);
+            int seed = IsStoryRun ? Story.ActiveLevel.Seed : Random.Range(1, int.MaxValue);
             encounterDirector = new RunnerEncounterDirector(seed, aspects);
             eggs.Reset(seed ^ 0x4e6719);
             hud.UpdateEggs(0);
@@ -1225,6 +1284,7 @@ namespace DinoRush
             health.Reset();
             hud.UpdateLives(Lives);
             hud.ClearDamage();
+            hud.UpdateStoryTokens(0);
             hud.UpdateProgress(0f);
         }
 
@@ -1239,7 +1299,9 @@ namespace DinoRush
         {
             if (!initialized) return;
             SaveBest();
+            Story?.Leave();
             ResetRun();
+            storySession = false;
             State = RunState.Ready;
             ApplyMap(0);
             SetSkyFraming(true);
@@ -1258,6 +1320,7 @@ namespace DinoRush
             SlashesUsed = 0;
             audioCues.StopEggSounds();
             RunnerAccountProgress.Reset(dinoRoster);
+            Story?.ReloadProgress();
             DailyMissions.ResetProgress();
             SelectDino(0);
             SelectMap(mapCatalog != null ? mapCatalog.Find("forest") : 0);
@@ -1366,13 +1429,15 @@ namespace DinoRush
             timeSinceCrash = 0f;
             shake = 0.14f;
             SaveBest();
-            hud.UpdateScore(Score, best, cleared, RunnerRules.Speed(elapsed));
+            hud.UpdateScore(Score, best, cleared, CurrentSpeed);
+            if (IsStoryRun) { Story.FailLevel(); return; }
             hud.ShowGameOver(Score, best, record);
         }
 
         private void SaveBest()
         {
             DailyMissions?.Flush();
+            if (storySession || State == RunState.StorySelect || State == RunState.StoryScene || State == RunState.StoryResults) return;
             if (Score <= best) return;
             best = Score;
             PlayerPrefs.SetInt(HighScoreKey, best);

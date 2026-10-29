@@ -46,19 +46,23 @@ namespace DinoRush.Tests
         }
 
         [UnityTest]
-        public IEnumerator PlayOpensModesAndOnlyEndlessOpensMapsWithoutStarting()
+        public IEnumerator PlayOpensModesStoryOpensChaptersAndEndlessOpensMapsWithoutStarting()
         {
             Click("Play");
             Assert.That(game.State, Is.EqualTo(ForestRunnerGame.RunState.Ready));
             ForestMainMenu menu = game.GetComponentInChildren<ForestMainMenu>();
             Assert.That(menu.DialogOpen, Is.True);
             Assert.That(GameObject.Find("Map selection panel"), Is.Null);
-            Assert.That(GameObject.Find("Story mode").GetComponent<Button>().interactable, Is.False);
+            Assert.That(GameObject.Find("Story mode").GetComponent<Button>().interactable, Is.True);
             yield return null;
             Click("Story mode");
             game.PrimaryAction();
-            Assert.That(GameObject.Find("Endless mode"), Is.Not.Null, "Story and Space must leave the mode submenu open.");
+            Assert.That(GameObject.Find("Chapter select"), Is.Not.Null);
             Assert.That(GameObject.Find("Map selection panel"), Is.Null);
+            Assert.That(game.State, Is.EqualTo(ForestRunnerGame.RunState.StorySelect));
+            yield return null;
+            Click("Back to modes");
+            Assert.That(GameObject.Find("Endless mode"), Is.Not.Null);
             Assert.That(game.State, Is.EqualTo(ForestRunnerGame.RunState.Ready));
             yield return new WaitForSecondsRealtime(0.3f);
             yield return ForestRunTests.Capture("mode-selector");

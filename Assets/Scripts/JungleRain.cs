@@ -47,8 +47,8 @@ namespace DinoRush
         private void Start() => Simulate(0f);
         private void LateUpdate() => Simulate(Time.deltaTime);
 
-        private bool IsJungle => game.State != ForestRunnerGame.RunState.Ready &&
-            game.MapCatalog != null && game.MapCatalog.Count > 0 && game.MapCatalog[game.SelectedMapIndex].id == "jungle";
+        private bool IsJungle => game.State != ForestRunnerGame.RunState.Ready && (game.Story == null || !game.Story.IsModal) &&
+            game.MapCatalog != null && game.MapCatalog.Count > 0 && game.MapCatalog[game.ActiveMapIndex].id == "jungle";
 
         private Rect FlightArea()
         {

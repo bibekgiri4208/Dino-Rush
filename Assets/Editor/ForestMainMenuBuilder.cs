@@ -151,8 +151,8 @@ namespace DinoRush.Editor
                 page = Rect("Mode selection page", card, Vector2.zero, new Vector2(480, 220));
                 Button story = MenuButton("Story mode", page, new Vector2(0, 58), "STORY MODE", null,
                     false, new Vector2(400, 64));
-                story.interactable = false; // Reserved for a future story campaign; no action is bound.
-                Label("Story availability", page, "COMING SOON", new Vector2(0, 9), new Vector2(400, 24), 11, Sage);
+                story.interactable = true; // Runtime campaign binding is installed by RunnerStoryMode.
+                Label("Story availability", page, "THE GREAT MIGRATION", new Vector2(0, 9), new Vector2(400, 24), 11, Sage);
                 MenuButton("Endless mode", page, new Vector2(0, -51), "ENDLESS MODE", null,
                     false, new Vector2(400, 64));
                 foreach (Button button in page.GetComponentsInChildren<Button>(true))

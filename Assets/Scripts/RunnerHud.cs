@@ -83,6 +83,9 @@ namespace DinoRush
         private RunnerEggFlights eggFlights;
         private int movementLevel;
         private Slider musicControl;
+        private RunnerStoryLevel storyLevel;
+        private int storyTokens;
+        internal RunnerStoryMode Story { get; set; }
 
         public void InitializeMusic(float volume, Action<float> change)
         {
@@ -115,11 +118,11 @@ namespace DinoRush
         public bool HasModeSelector => mainMenu != null && mainMenu.HasModeSelector;
         internal RectTransform Root => root;
         internal bool PreferSafeNavigation => mainMenu != null && mainMenu.PreferSafeNavigation;
-        public Transform NavigationRoot(ForestRunnerGame.RunState state) => state == ForestRunnerGame.RunState.Ready ?
+        public Transform NavigationRoot(ForestRunnerGame.RunState state) => Story != null && Story.IsModal ? Story.NavigationRoot : state == ForestRunnerGame.RunState.Ready ?
             (mainMenu != null ? mainMenu.NavigationRoot : panel.transform) :
             state == ForestRunnerGame.RunState.Paused ? (pausePanel != null ? pausePanel.transform : panel.transform) :
             state == ForestRunnerGame.RunState.GameOver ? panel.transform : null;
-        public Selectable NavigationDefault(ForestRunnerGame.RunState state) => state == ForestRunnerGame.RunState.Ready ?
+        public Selectable NavigationDefault(ForestRunnerGame.RunState state) => Story != null && Story.IsModal ? Story.DefaultButton : state == ForestRunnerGame.RunState.Ready ?
             (mainMenu != null ? mainMenu.NavigationDefault : primaryControl) :
             state == ForestRunnerGame.RunState.Paused && resumeControl != null ? resumeControl : primaryControl;
         public void GamepadBack() => mainMenu?.GamepadBack();
@@ -314,6 +317,11 @@ namespace DinoRush
             if (pausedScore != null) pausedScore.text = minimalPresentation ? points.ToString("N0")
                 : $"SCORE {points:D6} / BEST {Mathf.Max(points, highScore):D6}";
             if (pausedBest != null) pausedBest.text = Mathf.Max(points, highScore).ToString("N0");
+            if (storyLevel != null)
+            {
+                if (pausedScore != null) pausedScore.text = Mathf.RoundToInt(Mathf.Clamp01(progressElapsed / storyLevel.Duration) * 100) + "%";
+                if (pausedBest != null) pausedBest.text = storyTokens + "/3";
+            }
         }
 
         public void UpdateLevel(int level)
@@ -326,6 +334,18 @@ namespace DinoRush
         public void UpdateProgress(float elapsed)
         {
             progressElapsed = elapsed;
+            if (storyLevel != null)
+            {
+                int phase = elapsed >= storyLevel.Duration - 6 ? 1 : 0;
+                if (progressLevel != phase)
+                {
+                    stageTitle.text = phase == 1 ? "FINAL STRETCH!" : storyLevel.Number + " / " + storyLevel.Title.ToUpperInvariant();
+                    progressLevel = phase;
+                }
+                if (progressSeconds != storyTokens) { stageCountdown.text = storyTokens + "/3"; progressSeconds = storyTokens; }
+                stageFill.sizeDelta = new Vector2(StageProgressWidth * Mathf.Clamp01(elapsed / storyLevel.Duration), 6f);
+                return;
+            }
             int level = RunnerRules.Level(elapsed);
             int seconds = Mathf.CeilToInt(RunnerRules.SecondsToNextStage(elapsed));
             int lap = RunnerRules.EndlessLap(elapsed);
@@ -338,6 +358,37 @@ namespace DinoRush
                 progressLap = lap;
             }
             stageFill.sizeDelta = new Vector2(StageProgressWidth * RunnerRules.LevelProgress(elapsed), 6f);
+        }
+
+        internal void SetStoryLevel(RunnerStoryLevel level)
+        {
+            storyLevel = level; storyTokens = 0;
+            if (stageTitle != null)
+            {
+                stageTitle.resizeTextForBestFit = level != null;
+                stageTitle.resizeTextMinSize = 10; stageTitle.resizeTextMaxSize = 16;
+                stageTitle.horizontalOverflow = level != null ? HorizontalWrapMode.Wrap : HorizontalWrapMode.Overflow;
+                stageTitle.verticalOverflow = level != null ? VerticalWrapMode.Truncate : VerticalWrapMode.Overflow;
+            }
+            if (pausePanel != null)
+            {
+                Text scoreCaption = pausePanel.transform.Find("Score caption")?.GetComponent<Text>();
+                Text bestCaption = pausePanel.transform.Find("Best caption")?.GetComponent<Text>();
+                if (scoreCaption != null) scoreCaption.text = level != null ? "PROGRESS" : "SCORE";
+                if (bestCaption != null) bestCaption.text = level != null ? "TOKENS" : "BEST";
+            }
+            progressLevel = progressSeconds = progressLap = -1;
+            if (stageTitle != null) UpdateProgress(0);
+        }
+        internal void UpdateStoryTokens(int count) { storyTokens = count; if (storyLevel != null) UpdateProgress(progressElapsed); }
+
+        internal void ShowStoryScreen()
+        {
+            eggFlights?.Clear(); Menu(true);
+            panel.SetActive(false); shade.SetActive(false); footer.gameObject.SetActive(false);
+            ClearDamage();
+            root.Find("Scoreboard")?.gameObject.SetActive(false);
+            root.Find("Sound")?.gameObject.SetActive(false);
         }
 
         public void SetSound(bool muted)
@@ -364,6 +415,7 @@ namespace DinoRush
         {
             Menu(false);
             root.Find("Scoreboard")?.gameObject.SetActive(true);
+            if (storyLevel != null) root.Find("Scoreboard")?.gameObject.SetActive(false);
             root.Find("Sound")?.gameObject.SetActive(true);
             if (damagePopup != null) damagePopup.gameObject.SetActive(damageTime > 0f);
             footer.text = "SPACE / UP / W : JUMP    DOWN / S : DUCK / FAST DROP    ESC / P : PAUSE";
@@ -392,7 +444,7 @@ namespace DinoRush
             {
                 panel.SetActive(false);
                 pausePanel.SetActive(true);
-                footer.text = "RUN PAUSED  /  YOUR BEST SCORE IS SAVED";
+                footer.text = storyLevel != null ? "STORY PAUSED / RESTART REPLAYS THIS LEVEL" : "RUN PAUSED  /  YOUR BEST SCORE IS SAVED";
                 return;
             }
             eyebrow.text = "TAKE A BREATHER";
@@ -649,6 +701,7 @@ namespace DinoRush
         public void ApplyScreenLayout(RunnerScreenLayout layout)
         {
             responsiveUi?.Apply(layout);
+            Story?.RefreshLayout();
             root.GetComponent<RunnerSlashHud>()?.ApplyLayout(layout.Portrait);
             if (stageFill != null) UpdateProgress(progressElapsed);
             if (eggFlights != null)

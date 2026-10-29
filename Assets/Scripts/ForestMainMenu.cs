@@ -69,6 +69,26 @@ namespace DinoRush
         private bool dialogPortrait;
         private Vector2 dialogAvailable = new Vector2(1280, 720);
         private Slider optionsMusic;
+        private bool storyBound;
+
+        public void InitializeStory(Action open)
+        {
+            if (modePage == null) return;
+            Transform card = modePage.transform.Find("Story mode");
+            if (card == null) return;
+            Button button = card.GetComponent<Button>(); button.interactable = true;
+            if (!storyBound) { Bind(button, open); storyBound = true; }
+            Transform legacy = modePage.transform.Find("Story availability");
+            if (legacy != null) legacy.gameObject.SetActive(false);
+            Text status = card.Find("Mode status")?.GetComponent<Text>();
+            if (status != null) status.text = "BEGIN JOURNEY >";
+            Text caption = card.Find("Mode description")?.GetComponent<Text>();
+            if (caption != null) caption.text = "THE GREAT MIGRATION";
+            Text title = card.Find("Label")?.GetComponent<Text>();
+            if (title != null) title.color = new Color32(255, 210, 117, 255);
+            Image illustration = card.Find("Mode illustration")?.GetComponent<Image>();
+            if (illustration != null) illustration.color = Color.white;
+        }
 
         public void InitializeMusic(float volume, Action<float> change)
         {
